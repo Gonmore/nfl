@@ -81,26 +81,26 @@ export async function getUserLeagues(token) {
   return data;
 }
 
-export async function createLeague(token, { name, isPublic, inviteCode, description }) {
+export async function createLeague(token, { name, isPublic, description }) {
   const res = await fetch(`${API_URL}/leagues/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ name, isPublic, inviteCode, description })
+    body: JSON.stringify({ name, isPublic, description })
   });
   return await res.json();
 }
 
-export async function joinLeague(token, { leagueId, inviteCode }) {
+export async function joinLeague(token, { inviteCode }) {
   const res = await fetch(`${API_URL}/leagues/join`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ leagueId, inviteCode })
+    body: JSON.stringify({ inviteCode })
   });
   return await res.json();
 }
@@ -143,4 +143,15 @@ export async function getUserPicksDetails(token, leagueId, week, userId) {
   const data = await res.json();
   console.log('getUserPicksDetails response:', data);
   return data;
+}
+
+export async function joinGeneralLeague(token) {
+  const res = await fetch(`${API_URL}/leagues/join-general`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  return await res.json();
 }

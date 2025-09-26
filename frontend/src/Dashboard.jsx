@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PickForm from './PickForm.jsx';
 import LeagueStats from './LeagueStats.jsx';
-import { getGames, getUserLeagues, createLeague, joinLeague, getStandings } from './api';
+import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague } from './api';
 
 export default function Dashboard({ user, token }) {
   const [games, setGames] = useState([]);
@@ -12,6 +12,8 @@ export default function Dashboard({ user, token }) {
   const [week, setWeek] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [showInviteCode, setShowInviteCode] = useState(null);
   const [standings, setStandings] = useState([]);
   const [previousPositions, setPreviousPositions] = useState({});
 
@@ -97,14 +99,17 @@ export default function Dashboard({ user, token }) {
   const handleCreateLeague = async (leagueData) => {
     try {
       const res = await createLeague(token, leagueData);
+      alert(res.message);
       if (res.league) {
-        setLeagues([...leagues, res.league]);
-        setShowCreate(false);
-      } else {
-        alert(res.message);
+        // Recargar ligas para mostrar la nueva
+        const resLeagues = await getUserLeagues(token);
+        setLeagues(resLeagues.leagues || []);
+        // Retornar el código para mostrarlo en el formulario
+        return res.league;
       }
     } catch (err) {
       alert('Error al crear liga');
+      throw err;
     }
   };
 
@@ -116,7 +121,7 @@ export default function Dashboard({ user, token }) {
         // Recargar ligas
         const resLeagues = await getUserLeagues(token);
         setLeagues(resLeagues.leagues || []);
-        setShowJoin(false);
+        setShowJoinModal(false); // Cerrar modal
       }
     } catch (err) {
       alert('Error al unirse a liga');
@@ -125,19 +130,7 @@ export default function Dashboard({ user, token }) {
 
   const handleJoinGeneralLeague = async () => {
     try {
-      // Buscar todas las ligas del usuario para ver si ya está en la general
-      const userLeaguesRes = await getUserLeagues(token);
-      const userLeagues = userLeaguesRes.leagues || [];
-      
-      // Verificar si ya está en la liga general
-      const alreadyInGeneral = userLeagues.some(l => l.name === 'Liga general');
-      if (alreadyInGeneral) {
-        alert('Ya eres miembro de la Liga General.');
-        return;
-      }
-      
-      // Intentar unirse con ID 1 (la liga general se crea primero)
-      const res = await joinLeague(token, { leagueId: 1 });
+      const res = await joinGeneralLeague(token);
       alert(res.message);
       if (res.message.includes('correctamente')) {
         // Recargar ligas
@@ -146,7 +139,7 @@ export default function Dashboard({ user, token }) {
       }
     } catch (err) {
       console.error('Error joining general league:', err);
-      alert('Error al unirse a Liga General. La liga puede no existir aún.');
+      alert('Error al unirse a Liga General.');
     }
   };
 
@@ -180,19 +173,36 @@ export default function Dashboard({ user, token }) {
                   >
                     Seleccionar
                   </button>
+                  {league.isAdmin && (
+                    <button 
+                      onClick={() => setShowInviteCode(league)}
+                      style={{ marginLeft: '5px', padding: '4px 8px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px' }}
+                    >
+                      Invitar
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
           )}
           <div style={{ marginTop: '20px' }}>
             <button onClick={() => setShowCreate(true)}>Crear Liga</button>
-            <button onClick={() => setShowJoin(true)} style={{ marginLeft: '10px' }}>Unirse a Liga</button>
+            <button onClick={() => setShowJoinModal(true)} style={{ marginLeft: '10px' }}>Unirse a Liga</button>
           </div>
           {showCreate && (
             <CreateLeagueForm onCreate={handleCreateLeague} onCancel={() => setShowCreate(false)} />
           )}
-          {showJoin && (
-            <JoinLeagueForm onJoin={handleJoinLeague} onCancel={() => setShowJoin(false)} />
+          {showInviteCode && (
+            <InviteCodeModal 
+              league={showInviteCode} 
+              onClose={() => setShowInviteCode(null)} 
+            />
+          )}
+          {showJoinModal && (
+            <JoinLeagueModal 
+              onJoin={handleJoinLeague} 
+              onClose={() => setShowJoinModal(false)} 
+            />
           )}
         </div>
 
@@ -277,13 +287,33 @@ export default function Dashboard({ user, token }) {
 function CreateLeagueForm({ onCreate, onCancel }) {
   const [name, setName] = useState('');
   const [isPublic, setIsPublic] = useState(false);
-  const [inviteCode, setInviteCode] = useState('');
   const [description, setDescription] = useState('');
+  const [createdCode, setCreatedCode] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onCreate({ name, isPublic, inviteCode: isPublic ? null : inviteCode, description });
+    try {
+      const result = await onCreate({ name, isPublic, description });
+      if (result && result.inviteCode) {
+        setCreatedCode(result.inviteCode);
+      }
+    } catch (error) {
+      console.error('Error creating league:', error);
+    }
   };
+
+  if (createdCode) {
+    return (
+      <div>
+        <h3>¡Liga Creada!</h3>
+        <p>Tu liga "{name}" ha sido creada exitosamente.</p>
+        <p><strong>Código de invitación:</strong> {createdCode}</p>
+        <p>Comparte este código con tus amigos para que se unan a la liga.</p>
+        <button onClick={() => { setCreatedCode(null); setName(''); setDescription(''); }}>Crear Otra Liga</button>
+        <button onClick={onCancel}>Cerrar</button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -293,7 +323,6 @@ function CreateLeagueForm({ onCreate, onCancel }) {
         <input type="checkbox" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} />
         Pública
       </label>
-      {!isPublic && <input placeholder="Código de invitación" value={inviteCode} onChange={e => setInviteCode(e.target.value)} required />}
       <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} />
       <button type="submit">Crear</button>
       <button type="button" onClick={onCancel}>Cancelar</button>
@@ -301,23 +330,223 @@ function CreateLeagueForm({ onCreate, onCancel }) {
   );
 }
 
-// Componente para unirse a liga
-function JoinLeagueForm({ onJoin, onCancel }) {
-  const [leagueId, setLeagueId] = useState('');
+// Componente modal para unirse a liga (responsive para móviles)
+function JoinLeagueModal({ onJoin, onClose }) {
   const [inviteCode, setInviteCode] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onJoin({ leagueId: parseInt(leagueId), inviteCode });
+    onJoin({ inviteCode: inviteCode.toUpperCase() });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>Unirse a Liga</h3>
-      <input placeholder="ID de Liga" value={leagueId} onChange={e => setLeagueId(e.target.value)} required />
-      <input placeholder="Código de invitación (si privada)" value={inviteCode} onChange={e => setInviteCode(e.target.value)} />
-      <button type="submit">Unirse</button>
-      <button type="button" onClick={onCancel}>Cancelar</button>
-    </form>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: '#fff',
+        padding: '24px',
+        borderRadius: '12px',
+        maxWidth: '400px',
+        width: '100%',
+        maxHeight: '90vh',
+        overflow: 'auto',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Unirse a Liga</h3>
+          <button 
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666',
+              padding: '0',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '500',
+              color: '#333'
+            }}>
+              Código de invitación
+            </label>
+            <input
+              type="text"
+              placeholder="Ingresa el código de 8 caracteres"
+              value={inviteCode}
+              onChange={e => setInviteCode(e.target.value.toUpperCase())}
+              required
+              maxLength={8}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #e1e5e9',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontFamily: 'monospace',
+                textTransform: 'uppercase',
+                textAlign: 'center',
+                letterSpacing: '2px',
+                boxSizing: 'border-box'
+              }}
+              autoFocus
+            />
+            <p style={{
+              margin: '8px 0 0 0',
+              fontSize: '12px',
+              color: '#666',
+              textAlign: 'center'
+            }}>
+              El código tiene 8 caracteres alfanuméricos
+            </p>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            flexDirection: window.innerWidth < 480 ? 'column' : 'row'
+          }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: '#6c757d',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: '#0074D9',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Unirse a Liga
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Componente para mostrar código de invitación
+function InviteCodeModal({ league, onClose }) {
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(league.inviteCode);
+    alert('Código copiado al portapapeles!');
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        backgroundColor: '#fff',
+        padding: '20px',
+        borderRadius: '8px',
+        maxWidth: '400px',
+        width: '90%'
+      }}>
+        <h3>Invitar a "{league.name}"</h3>
+        <p>Comparte este código con tus amigos para que se unan a la liga:</p>
+        <div style={{
+          backgroundColor: '#f5f5f5',
+          padding: '10px',
+          borderRadius: '4px',
+          fontFamily: 'monospace',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          margin: '10px 0'
+        }}>
+          {league.inviteCode}
+        </div>
+        <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+          <button 
+            onClick={handleCopyCode}
+            style={{
+              padding: '8px 16px',
+              background: '#0074D9',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Copiar Código
+          </button>
+        </div>
+        <button 
+          onClick={onClose}
+          style={{
+            width: '100%',
+            padding: '8px',
+            background: '#6c757d',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
   );
 }
