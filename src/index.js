@@ -5,7 +5,7 @@ const { sequelize } = require('./models');
 
 const cors = require('cors');
 app.use(cors({
-  origin: ['http://localhost:4001', 'http://localhost:4002'],
+  origin: true,
   credentials: true
 }));
 
