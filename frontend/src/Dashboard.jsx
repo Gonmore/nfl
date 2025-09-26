@@ -3,7 +3,7 @@ import PickForm from './PickForm.jsx';
 import LeagueStats from './LeagueStats.jsx';
 import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague } from './api';
 
-export default function Dashboard({ user, token }) {
+export default function Dashboard({ user, token, onLogout }) {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -201,10 +201,7 @@ export default function Dashboard({ user, token }) {
                 </div>
               </div>
               <button
-                onClick={() => {
-                  localStorage.removeItem('token');
-                  window.location.reload();
-                }}
+                onClick={onLogout}
                 style={{
                   backgroundColor: '#E53E3E',
                   color: '#FFFFFF',

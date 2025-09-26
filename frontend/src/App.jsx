@@ -33,7 +33,7 @@ export default function App() {
         {!token ? (
           <LoginRegister onLogin={handleLogin} />
         ) : (
-          <Dashboard user={user} token={token} />
+          <Dashboard user={user} token={token} onLogout={handleLogout} />
         )}
       </div>
     </div>
