@@ -52,12 +52,26 @@ const cron = require('node-cron');
 const { Op } = require('sequelize');
 
 const League = require('./models/League');
+const User = require('./models/User');
+const bcrypt = require('bcryptjs');
 
 sequelize.sync().then(async () => {
+  // Crear usuario admin si no existe
+  let adminUser = await User.findOne({ where: { email: 'admin@cartelnfl.com' } });
+  if (!adminUser) {
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    adminUser = await User.create({
+      username: 'admin',
+      email: 'admin@cartelnfl.com',
+      password: hashedPassword
+    });
+    console.log('Usuario admin creado.');
+  }
+
   // Crear liga pública "Liga general" si no existe
   const generalLeague = await League.findOne({ where: { name: 'Liga general', isPublic: true } });
   if (!generalLeague) {
-    await League.create({ name: 'Liga general', adminId: 1, isPublic: true, description: 'Liga pública general para todos los usuarios' });
+    await League.create({ name: 'Liga general', adminId: adminUser.id, isPublic: true, description: 'Liga pública general para todos los usuarios' });
     console.log('Liga general creada.');
   } else {
     console.log('Liga general ya existe.');

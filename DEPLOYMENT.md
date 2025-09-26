@@ -29,6 +29,12 @@
    docker-compose ps
    ```
 
+   Si hay problemas de conexión con la base de datos, limpia los volúmenes y reconstruye:
+   ```bash
+   docker-compose down -v
+   docker-compose up -d --build
+   ```
+
 5. **Accede a la aplicación:**
    - Frontend: http://tu-servidor-ip
    - Backend: http://tu-servidor-ip:3000 (si necesitas acceder directamente)
@@ -70,6 +76,9 @@ Para que todo el mundo pueda acceder al frontend:
 - **Detener servicios:** `docker-compose down`
 - **Actualizar:** `docker-compose pull && docker-compose up -d --build`
 
-## Notas
-- Asegúrate de que PostgreSQL esté configurado correctamente en el contenedor.
-- Para producción, considera usar HTTPS con Let's Encrypt.
+## Notas importantes
+
+- El frontend ahora usa `/api` para las llamadas al backend, que nginx redirige a `backend:3000`.
+- Asegúrate de que el archivo `.env` tenga las variables correctas para tu base de datos.
+- Para producción, cambia las credenciales por defecto de PostgreSQL.
+- Se crea automáticamente un usuario admin con email `admin@cartelnfl.com` y password `admin123` al iniciar por primera vez.

@@ -18,7 +18,8 @@ services:
       - ESPN_API_URL=${ESPN_API_URL}
       - ESPN_STANDINGS_URL=${ESPN_STANDINGS_URL}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -45,6 +46,11 @@ services:
       - "${POSTGRES_PORT}:5432"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
