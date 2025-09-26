@@ -22,7 +22,6 @@ export default function Dashboard({ user, token }) {
     async function fetchLeagues() {
       try {
         const res = await getUserLeagues(token);
-        console.log('Ligas obtenidas:', res);
         setLeagues(res.leagues || []);
       } catch (err) {
         console.error('Error al cargar ligas:', err);
@@ -38,13 +37,13 @@ export default function Dashboard({ user, token }) {
       try {
         const res = await getStandings(token);
         const newStandings = res.standings || [];
-        
+
         // Calcular cambios de posición
         const newPositions = {};
         newStandings.forEach((team, index) => {
           newPositions[team.id] = index + 1;
         });
-        
+
         // Comparar con posiciones anteriores
         const standingsWithChanges = newStandings.map((team, index) => {
           const currentPos = index + 1;
@@ -55,19 +54,19 @@ export default function Dashboard({ user, token }) {
           }
           return { ...team, position: currentPos, change };
         });
-        
+
         setStandings(standingsWithChanges);
         setPreviousPositions(newPositions);
       } catch (err) {
         console.error('Error al cargar standings:', err);
       }
     }
-    
+
     fetchStandings();
     // Actualizar cada 10 minutos
     const interval = setInterval(fetchStandings, 10 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [token]); // Removida la dependencia previousPositions para evitar loop infinito
+  }, [token]);
 
   // Obtiene partidos
   useEffect(() => {
@@ -147,151 +146,808 @@ export default function Dashboard({ user, token }) {
 
   if (!selectedLeague) {
     return (
-      <div style={{ display: 'flex', gap: '32px', padding: '20px' }}>
-        {/* Sección de Ligas */}
-        <div style={{ flex: 1 }}>
-          <h2>Bienvenido, {user?.username || user?.email || 'Usuario'}!</h2>
-          <h3>Tus Ligas</h3>
-          {leagues.length === 0 ? (
-            <div style={{ color: '#666', fontStyle: 'italic', marginBottom: '16px' }}>
-              No tienes ligas. Únete a la "Liga general" o crea una nueva.
-              <button 
-                onClick={handleJoinGeneralLeague}
-                style={{ marginLeft: '10px', padding: '4px 8px', background: '#0074D9', color: '#fff', border: 'none', borderRadius: '4px' }}
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0A1929 0%, #1A365D 50%, #2D3748 100%)',
+        padding: '20px'
+      }}>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px'
+        }}>
+          {/* Header principal */}
+          <div style={{
+            gridColumn: '1 / -1',
+            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            borderRadius: '20px',
+            padding: '20px 24px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            border: '3px solid #1A365D',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{
+                  fontSize: '32px',
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+                }}>
+                  🏈
+                </div>
+                <div>
+                  <h1 style={{
+                    color: '#1A365D',
+                    margin: 0,
+                    fontSize: '24px',
+                    fontWeight: '800',
+                    letterSpacing: '-0.5px'
+                  }}>
+                    CartelNFL
+                  </h1>
+                  <p style={{
+                    color: '#4A5568',
+                    margin: '4px 0 0 0',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
+                    Bienvenido, {user?.username || 'Usuario'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  window.location.reload();
+                }}
+                style={{
+                  backgroundColor: '#E53E3E',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '12px 20px',
+                  borderRadius: '16px',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 4px 12px rgba(229, 62, 62, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#C53030';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(229, 62, 62, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#E53E3E';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(229, 62, 62, 0.3)';
+                }}
               >
-                Unirse a Liga General
+                <span style={{ fontSize: '16px' }}>🚪</span>
+                Cerrar Sesión
               </button>
             </div>
-          ) : (
-            <ul>
-              {leagues.map(league => (
-                <li key={league.id} style={{ marginBottom: '8px' }}>
-                  {league.name} ({league.isPublic ? 'Pública' : 'Privada'})
-                  <button 
-                    onClick={() => setSelectedLeague(league)}
-                    style={{ marginLeft: '10px', padding: '4px 8px' }}
-                  >
-                    Seleccionar
-                  </button>
-                  {league.isAdmin && (
-                    <button 
-                      onClick={() => setShowInviteCode(league)}
-                      style={{ marginLeft: '5px', padding: '4px 8px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px' }}
-                    >
-                      Invitar
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-          <div style={{ marginTop: '20px' }}>
-            <button onClick={() => setShowCreate(true)}>Crear Liga</button>
-            <button onClick={() => setShowJoinModal(true)} style={{ marginLeft: '10px' }}>Unirse a Liga</button>
           </div>
-          {showCreate && (
-            <CreateLeagueForm onCreate={handleCreateLeague} onCancel={() => setShowCreate(false)} />
-          )}
-          {showInviteCode && (
-            <InviteCodeModal 
-              league={showInviteCode} 
-              onClose={() => setShowInviteCode(null)} 
-            />
-          )}
-          {showJoinModal && (
-            <JoinLeagueModal 
-              onJoin={handleJoinLeague} 
-              onClose={() => setShowJoinModal(false)} 
-            />
-          )}
-        </div>
 
-        {/* Sección de Standings NFL */}
-        <div style={{ flex: 1 }}>
-          <h3>Standings NFL</h3>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #ccc', borderRadius: '4px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ position: 'sticky', top: 0, backgroundColor: '#f5f5f5' }}>
-                <tr>
-                  <th style={{ borderBottom: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>Pos</th>
-                  <th style={{ borderBottom: '1px solid #ccc', padding: '8px' }}>Equipo</th>
-                  <th style={{ borderBottom: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>Récord</th>
-                </tr>
-              </thead>
-              <tbody>
-                {standings.map((team) => (
-                  <tr key={team.id} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-                      {team.position}
-                      {team.change !== 0 && (
-                        <span style={{ marginLeft: '4px', color: team.change > 0 ? '#28a745' : '#dc3545' }}>
-                          {team.change > 0 ? '↑' : '↓'}
-                        </span>
+          {/* Panel de Ligas - Arriba */}
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            border: '3px solid #1A365D',
+            overflow: 'hidden',
+            backdropFilter: 'blur(10px)',
+            maxWidth: '800px',
+            margin: '0 auto',
+            width: '100%'
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+              color: '#FFFFFF',
+              padding: '24px 20px',
+              borderBottom: '2px solid #4A5568'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <h2 style={{
+                  margin: 0,
+                  fontSize: '20px',
+                  fontWeight: '800',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  letterSpacing: '-0.3px'
+                }}>
+                  <span style={{ fontSize: '24px' }}>🏆</span>
+                  Mis Ligas
+                </h2>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => setShowCreate(true)}
+                    style={{
+                      backgroundColor: '#38A169',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '10px',
+                      borderRadius: '12px',
+                      fontSize: '18px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '44px',
+                      height: '44px',
+                      boxShadow: '0 4px 12px rgba(56, 161, 105, 0.3)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = '#2F855A';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 6px 16px rgba(56, 161, 105, 0.4)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = '#38A169';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(56, 161, 105, 0.3)';
+                    }}
+                    title="Crear Liga"
+                  >
+                    <span style={{ fontSize: '18px' }}>➕</span>
+                  </button>
+                  <button
+                    onClick={() => setShowJoinModal(true)}
+                    style={{
+                      backgroundColor: '#3182CE',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '10px',
+                      borderRadius: '12px',
+                      fontSize: '18px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '44px',
+                      height: '44px',
+                      boxShadow: '0 4px 12px rgba(49, 130, 206, 0.3)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = '#2C5282';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 6px 16px rgba(49, 130, 206, 0.4)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = '#3182CE';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(49, 130, 206, 0.3)';
+                    }}
+                    title="Unirse a Liga"
+                  >
+                    <span style={{ fontSize: '18px' }}>🔗</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div style={{ padding: '20px' }}>
+              {leagues.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '32px 20px',
+                  background: 'linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 100%)',
+                  borderRadius: '16px',
+                  border: '2px solid #E2E8F0'
+                }}>
+                  <div style={{
+                    fontSize: '48px',
+                    marginBottom: '16px',
+                    opacity: 0.7
+                  }}>
+                    ⚽
+                  </div>
+                  <h3 style={{
+                    margin: '0 0 12px 0',
+                    fontSize: '16px',
+                    color: '#2D3748',
+                    fontWeight: '700'
+                  }}>
+                    ¡Comienza tu aventura NFL!
+                  </h3>
+                  <p style={{
+                    margin: '0 0 20px 0',
+                    fontSize: '14px',
+                    color: '#718096',
+                    lineHeight: '1.5'
+                  }}>
+                    Únete a la "Liga General" o crea tu propia liga para competir con amigos.
+                  </p>
+                  <button
+                    onClick={handleJoinGeneralLeague}
+                    style={{
+                      background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '14px 24px',
+                      borderRadius: '16px',
+                      fontSize: '15px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      margin: '0 auto',
+                      boxShadow: '0 4px 16px rgba(26, 54, 93, 0.3)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 6px 20px rgba(26, 54, 93, 0.4)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 16px rgba(26, 54, 93, 0.3)';
+                    }}
+                  >
+                    <span style={{ fontSize: '16px' }}>🚀</span>
+                    Unirse a Liga General
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {leagues.map(league => (
+                    <div
+                      key={league.id}
+                      style={{
+                        background: 'linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%)',
+                        borderRadius: '16px',
+                        border: '2px solid #E2E8F0',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.transform = 'translateY(-4px)';
+                        e.target.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
+                        e.target.style.borderColor = '#1A365D';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.08)';
+                        e.target.style.borderColor = '#E2E8F0';
+                      }}
+                    >
+                      <button
+                        onClick={() => setSelectedLeague(league)}
+                        style={{
+                          width: '100%',
+                          background: 'none',
+                          border: 'none',
+                          padding: '16px',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px'
+                        }}
+                      >
+                        <div style={{
+                          background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+                          color: '#FFFFFF',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '18px',
+                          flexShrink: 0
+                        }}>
+                          🏈
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontSize: '15px',
+                            fontWeight: '700',
+                            color: '#1A365D',
+                            marginBottom: '4px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}>
+                            {league.name}
+                          </div>
+                          <div style={{
+                            fontSize: '12px',
+                            color: '#718096',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <span style={{ fontSize: '14px' }}>
+                              {league.isPublic ? '🌐' : '🔒'}
+                            </span>
+                            {league.isPublic ? 'Pública' : 'Privada'}
+                          </div>
+                        </div>
+                      </button>
+                      {league.isAdmin && (
+                        <div style={{
+                          padding: '0 16px 16px 16px',
+                          borderTop: '1px solid #E2E8F0'
+                        }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowInviteCode(league);
+                            }}
+                            style={{
+                              backgroundColor: '#38A169',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              padding: '8px 16px',
+                              borderRadius: '12px',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              width: '100%',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 8px rgba(56, 161, 105, 0.2)',
+                              transition: 'all 0.3s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.target.style.backgroundColor = '#2F855A';
+                              e.target.style.transform = 'translateY(-1px)';
+                              e.target.style.boxShadow = '0 4px 12px rgba(56, 161, 105, 0.3)';
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.backgroundColor = '#38A169';
+                              e.target.style.transform = 'translateY(0)';
+                              e.target.style.boxShadow = '0 2px 8px rgba(56, 161, 105, 0.2)';
+                            }}
+                            title="Invitar miembros"
+                          >
+                            <span style={{ fontSize: '14px' }}>📤</span>
+                            Invitar
+                          </button>
+                        </div>
                       )}
-                    </td>
-                    <td style={{ padding: '8px', display: 'flex', alignItems: 'center' }}>
-                      <img 
-                        src={team.logo} 
-                        alt={team.abbreviation} 
-                        style={{ 
-                          width: '24px', 
-                          height: '24px', 
-                          borderRadius: '50%', 
-                          marginRight: '8px',
-                          objectFit: 'cover'
-                        }}
-                        onError={(e) => {
-                          // Fallback si la imagen no carga
-                          e.target.src = `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation.toLowerCase()}.png`;
-                        }}
-                      />
-                      <span style={{ fontSize: '14px' }}>{team.abbreviation}</span>
-                    </td>
-                    <td style={{ padding: '8px', textAlign: 'center', fontSize: '14px' }}>
-                      {team.winPercentage}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-            ↑ Subió de posición • ↓ Bajó de posición • Actualización automática cada 10 min
+
+          {/* Panel de Standings NFL - Abajo */}
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            border: '3px solid #1A365D',
+            overflow: 'hidden',
+            backdropFilter: 'blur(10px)',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            width: '100%'
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+              color: '#FFFFFF',
+              padding: '24px 20px',
+              borderBottom: '2px solid #4A5568'
+            }}>
+              <h2 style={{
+                margin: 0,
+                fontSize: '22px',
+                fontWeight: '800',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                letterSpacing: '-0.3px'
+              }}>
+                <span style={{ fontSize: '26px' }}>📊</span>
+                Standings NFL
+              </h2>
+            </div>
+            <div style={{ padding: '20px' }}>
+              <div style={{
+                maxHeight: '400px',
+                overflowY: 'auto',
+                overflowX: 'auto',
+                borderRadius: '16px',
+                border: '2px solid #E2E8F0',
+                backgroundColor: '#FFFFFF'
+              }}>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  margin: 0,
+                  fontSize: '14px',
+                  minWidth: '400px'
+                }}>
+                  <thead>
+                    <tr style={{
+                      background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+                      borderBottom: '3px solid #4A5568',
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 1
+                    }}>
+                      <th style={{
+                        padding: '12px 8px',
+                        textAlign: 'center',
+                        fontWeight: '800',
+                        color: '#FFFFFF',
+                        width: '60px',
+                        fontSize: '13px',
+                        letterSpacing: '0.5px'
+                      }}>
+                        POS
+                      </th>
+                      <th style={{
+                        padding: '12px 12px',
+                        textAlign: 'left',
+                        fontWeight: '800',
+                        color: '#FFFFFF',
+                        fontSize: '13px',
+                        letterSpacing: '0.5px'
+                      }}>
+                        EQUIPO
+                      </th>
+                      <th style={{
+                        padding: '12px 8px',
+                        textAlign: 'center',
+                        fontWeight: '800',
+                        color: '#FFFFFF',
+                        width: '70px',
+                        fontSize: '13px',
+                        letterSpacing: '0.5px'
+                      }}>
+                        W
+                      </th>
+                      <th style={{
+                        padding: '12px 8px',
+                        textAlign: 'center',
+                        fontWeight: '800',
+                        color: '#FFFFFF',
+                        width: '70px',
+                        fontSize: '13px',
+                        letterSpacing: '0.5px'
+                      }}>
+                        L
+                      </th>
+                      <th style={{
+                        padding: '12px 8px',
+                        textAlign: 'center',
+                        fontWeight: '800',
+                        color: '#FFFFFF',
+                        width: '70px',
+                        fontSize: '13px',
+                        letterSpacing: '0.5px'
+                      }}>
+                        T
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {standings.map((team, index) => (
+                      <tr key={team.id} style={{
+                        borderBottom: index < standings.length - 1 ? '1px solid #E2E8F0' : 'none',
+                        transition: 'all 0.2s ease',
+                        backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#F8FAFC'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.closest('tr').style.backgroundColor = '#EDF2F7';
+                        e.target.closest('tr').style.transform = 'scale(1.01)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.closest('tr').style.backgroundColor = index % 2 === 0 ? '#FFFFFF' : '#F8FAFC';
+                        e.target.closest('tr').style.transform = 'scale(1)';
+                      }}
+                      >
+                        <td style={{
+                          padding: '12px 8px',
+                          textAlign: 'center',
+                          fontWeight: '700',
+                          color: '#1A365D',
+                          fontSize: '14px'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '2px'
+                          }}>
+                            <span style={{ fontSize: '16px', fontWeight: '800' }}>
+                              {team.position}
+                            </span>
+                            {team.change !== 0 && (
+                              <span style={{
+                                fontSize: '11px',
+                                color: team.change > 0 ? '#38A169' : '#E53E3E',
+                                fontWeight: '700',
+                                backgroundColor: team.change > 0 ? '#C6F6D5' : '#FED7D7',
+                                padding: '2px 6px',
+                                borderRadius: '8px',
+                                minWidth: '20px',
+                                textAlign: 'center'
+                              }}>
+                                {team.change > 0 ? '↑' : '↓'}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px'
+                          }}>
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              border: '2px solid #E2E8F0',
+                              flexShrink: 0
+                            }}>
+                              <img
+                                src={team.logo}
+                                alt={team.abbreviation}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'contain'
+                                }}
+                                onError={(e) => {
+                                  e.target.src = `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation.toLowerCase()}.png`;
+                                }}
+                              />
+                            </div>
+                            <span style={{
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              color: '#1A365D'
+                            }}>
+                              {team.abbreviation}
+                            </span>
+                          </div>
+                        </td>
+                        <td style={{
+                          padding: '12px 8px',
+                          textAlign: 'center',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          color: '#38A169',
+                          backgroundColor: '#F0FFF4',
+                          borderRadius: '8px',
+                          margin: '0 4px'
+                        }}>
+                          {team.wins}
+                        </td>
+                        <td style={{
+                          padding: '12px 8px',
+                          textAlign: 'center',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          color: '#E53E3E',
+                          backgroundColor: '#FFF5F5',
+                          borderRadius: '8px',
+                          margin: '0 4px'
+                        }}>
+                          {team.losses}
+                        </td>
+                        <td style={{
+                          padding: '12px 8px',
+                          textAlign: 'center',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          color: '#718096',
+                          backgroundColor: '#F7FAFC',
+                          borderRadius: '8px',
+                          margin: '0 4px'
+                        }}>
+                          {team.ties}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{
+                marginTop: '16px',
+                fontSize: '12px',
+                color: '#718096',
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '16px',
+                flexWrap: 'wrap'
+              }}>
+                <span style={{
+                  color: '#38A169',
+                  fontWeight: '700',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: '#C6F6D5',
+                  padding: '4px 8px',
+                  borderRadius: '12px'
+                }}>
+                  <span>↑</span> Subió
+                </span>
+                <span style={{
+                  color: '#E53E3E',
+                  fontWeight: '700',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: '#FED7D7',
+                  padding: '4px 8px',
+                  borderRadius: '12px'
+                }}>
+                  <span>↓</span> Bajó
+                </span>
+                <span style={{
+                  color: '#4A5568',
+                  fontSize: '11px',
+                  backgroundColor: '#EDF2F7',
+                  padding: '4px 8px',
+                  borderRadius: '12px'
+                }}>
+                  🔄 Auto cada 10 min
+                </span>
+              </div>
+            </div>
           </div>
+
+          {/* Modales */}
+          {showCreate && (
+            <CreateLeagueModal
+              onCreate={handleCreateLeague}
+              onClose={() => setShowCreate(false)}
+            />
+          )}
+
+          {showInviteCode && (
+            <InviteCodeModal
+              league={showInviteCode}
+              onClose={() => setShowInviteCode(null)}
+            />
+          )}
+
+          {showJoinModal && (
+            <JoinLeagueModal
+              onJoin={handleJoinLeague}
+              onClose={() => setShowJoinModal(false)}
+            />
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h2>Liga: {selectedLeague.name}</h2>
-      <button onClick={() => setSelectedLeague(null)}>Cambiar Liga</button>
-      {loading ? (
-        <div>Cargando juegos...</div>
-      ) : error ? (
-        <div style={{ color: 'red' }}>{error}</div>
-      ) : (
-        <PickForm games={filteredGames} token={token} leagueId={selectedLeague.id} week={week} />
-      )}
-      {selectedLeague && week ? (
-        <LeagueStats token={token} leagueId={selectedLeague.id} week={week} />
-      ) : (
-        <div style={{ color: 'gray' }}>Cargando estadísticas...</div>
-      )}
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #002C5F 0%, #003D7A 100%)',
+      padding: '16px'
+    }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '16px',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          padding: '12px 16px',
+          borderRadius: '16px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          border: '2px solid #002C5F'
+        }}>
+          <h1 style={{
+            color: '#002C5F',
+            margin: 0,
+            fontSize: '18px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <span style={{ fontSize: '20px' }}>🏈</span>
+            Liga: {selectedLeague.name}
+          </h1>
+          <button
+            onClick={() => setSelectedLeague(null)}
+            style={{
+              backgroundColor: '#6C757D',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#545B62'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#6C757D'}
+          >
+            <span style={{ fontSize: '14px' }}>←</span>
+            Cambiar Liga
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+            <div className="spinner"></div>
+            <p style={{ marginTop: '16px', color: 'var(--text-secondary)' }}>
+              Cargando juegos...
+            </p>
+          </div>
+        ) : error ? (
+          <div className="card" style={{
+            backgroundColor: '#f8d7da',
+            borderColor: '#f5c6cb'
+          }}>
+            <div className="card-body" style={{ textAlign: 'center' }}>
+              <div style={{ color: 'var(--error-color)', fontSize: '16px' }}>
+                ⚠️ {error}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <PickForm games={filteredGames} token={token} leagueId={selectedLeague.id} week={week} />
+        )}
+
+        {selectedLeague && week ? (
+          <LeagueStats token={token} leagueId={selectedLeague.id} week={week} />
+        ) : (
+          <div className="card" style={{
+            backgroundColor: 'var(--background-secondary)',
+            textAlign: 'center',
+            padding: '24px'
+          }}>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+              Cargando estadísticas...
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-// Componente para crear liga
-function CreateLeagueForm({ onCreate, onCancel }) {
+// Componente modal para crear liga
+function CreateLeagueModal({ onCreate, onClose }) {
   const [name, setName] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [description, setDescription] = useState('');
   const [createdCode, setCreatedCode] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const result = await onCreate({ name, isPublic, description });
       if (result && result.inviteCode) {
@@ -299,45 +955,137 @@ function CreateLeagueForm({ onCreate, onCancel }) {
       }
     } catch (error) {
       console.error('Error creating league:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   if (createdCode) {
     return (
-      <div>
-        <h3>¡Liga Creada!</h3>
-        <p>Tu liga "{name}" ha sido creada exitosamente.</p>
-        <p><strong>Código de invitación:</strong> {createdCode}</p>
-        <p>Comparte este código con tus amigos para que se unan a la liga.</p>
-        <button onClick={() => { setCreatedCode(null); setName(''); setDescription(''); }}>Crear Otra Liga</button>
-        <button onClick={onCancel}>Cerrar</button>
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '20px'
+      }}>
+        <div style={{
+          backgroundColor: '#FFFFFF',
+          borderRadius: '12px',
+          padding: '24px',
+          maxWidth: '500px',
+          width: '100%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          border: '2px solid #002C5F'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '24px'
+          }}>
+            <h2 style={{ margin: 0, color: '#002C5F' }}>🎉 ¡Liga Creada!</h2>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#666666',
+                padding: '0',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <div style={{
+              fontSize: '18px',
+              marginBottom: '8px',
+              color: '#002C5F'
+            }}>
+              Tu liga "<strong>{name}</strong>" ha sido creada exitosamente.
+            </div>
+            <p style={{
+              color: '#666666',
+              marginBottom: '16px'
+            }}>
+              Comparte este código con tus amigos para que se unan a la liga:
+            </p>
+            <div style={{
+              backgroundColor: '#F8F9FA',
+              padding: '16px',
+              borderRadius: '8px',
+              fontFamily: 'monospace',
+              fontSize: '20px',
+              fontWeight: 'bold',
+              color: '#002C5F',
+              letterSpacing: '2px',
+              marginBottom: '20px',
+              border: '2px solid #002C5F'
+            }}>
+              {createdCode}
+            </div>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            justifyContent: 'center'
+          }}>
+            <button
+              onClick={() => {
+                setCreatedCode(null);
+                setName('');
+                setDescription('');
+              }}
+              style={{
+                backgroundColor: '#6C757D',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Crear Otra Liga
+            </button>
+            <button
+              onClick={onClose}
+              style={{
+                backgroundColor: '#002C5F',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <h3>Crear Liga</h3>
-      <input placeholder="Nombre" value={name} onChange={e => setName(e.target.value)} required />
-      <label>
-        <input type="checkbox" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} />
-        Pública
-      </label>
-      <textarea placeholder="Descripción" value={description} onChange={e => setDescription(e.target.value)} />
-      <button type="submit">Crear</button>
-      <button type="button" onClick={onCancel}>Cancelar</button>
-    </form>
-  );
-}
-
-// Componente modal para unirse a liga (responsive para móviles)
-function JoinLeagueModal({ onJoin, onClose }) {
-  const [inviteCode, setInviteCode] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onJoin({ inviteCode: inviteCode.toUpperCase() });
-  };
 
   return (
     <div style={{
@@ -346,7 +1094,7 @@ function JoinLeagueModal({ onJoin, onClose }) {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -354,30 +1102,28 @@ function JoinLeagueModal({ onJoin, onClose }) {
       padding: '20px'
     }}>
       <div style={{
-        backgroundColor: '#fff',
-        padding: '24px',
+        backgroundColor: '#FFFFFF',
         borderRadius: '12px',
-        maxWidth: '400px',
+        padding: '24px',
+        maxWidth: '500px',
         width: '100%',
-        maxHeight: '90vh',
-        overflow: 'auto',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+        border: '2px solid #002C5F'
       }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '20px'
+          marginBottom: '24px'
         }}>
-          <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Unirse a Liga</h3>
-          <button 
+          <h2 style={{ margin: 0, color: '#002C5F' }}>➕ Crear Liga</h2>
+          <button
             onClick={onClose}
             style={{
               background: 'none',
               border: 'none',
               fontSize: '24px',
               cursor: 'pointer',
-              color: '#666',
+              color: '#666666',
               padding: '0',
               width: '32px',
               height: '32px',
@@ -391,12 +1137,210 @@ function JoinLeagueModal({ onJoin, onClose }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '16px' }}>
             <label style={{
               display: 'block',
               marginBottom: '8px',
-              fontWeight: '500',
-              color: '#333'
+              fontWeight: '600',
+              color: '#002C5F'
+            }}>
+              Nombre de la Liga *
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: Liga de Amigos NFL"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #DEE2E6',
+                borderRadius: '6px',
+                fontSize: '14px',
+                boxSizing: 'border-box'
+              }}
+              disabled={loading}
+            />
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={e => setIsPublic(e.target.checked)}
+                disabled={loading}
+                style={{ width: '16px', height: '16px' }}
+              />
+              <span style={{
+                fontWeight: '600',
+                color: '#002C5F'
+              }}>
+                Liga Pública
+              </span>
+            </label>
+            <small style={{
+              color: '#666666',
+              fontSize: '12px',
+              display: 'block',
+              marginTop: '4px'
+            }}>
+              Las ligas públicas pueden ser encontradas por cualquier usuario
+            </small>
+          </div>
+
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              color: '#002C5F'
+            }}>
+              Descripción (opcional)
+            </label>
+            <textarea
+              placeholder="Describe tu liga..."
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #DEE2E6',
+                borderRadius: '6px',
+                fontSize: '14px',
+                resize: 'vertical',
+                minHeight: '80px',
+                boxSizing: 'border-box'
+              }}
+              rows="3"
+              disabled={loading}
+            />
+          </div>
+
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            justifyContent: 'flex-end'
+          }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                backgroundColor: '#6C757D',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+              disabled={loading}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              style={{
+                backgroundColor: '#002C5F',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+              disabled={loading || !name.trim()}
+            >
+              {loading ? 'Creando...' : 'Crear Liga'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Componente modal para unirse a liga
+// Componente modal para unirse a liga
+function JoinLeagueModal({ onJoin, onClose }) {
+  const [inviteCode, setInviteCode] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await onJoin({ inviteCode: inviteCode.toUpperCase() });
+    } catch (err) {
+      // Error ya manejado en onJoin
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: '#FFFFFF',
+        borderRadius: '12px',
+        padding: '24px',
+        maxWidth: '500px',
+        width: '100%',
+        border: '2px solid #002C5F'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <h2 style={{ margin: 0, color: '#002C5F' }}>🔗 Unirse a Liga</h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666666',
+              padding: '0',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              color: '#002C5F'
             }}>
               Código de invitación
             </label>
@@ -410,64 +1354,69 @@ function JoinLeagueModal({ onJoin, onClose }) {
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '2px solid #e1e5e9',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontFamily: 'monospace',
-                textTransform: 'uppercase',
+                border: '1px solid #DEE2E6',
+                borderRadius: '6px',
+                fontSize: '18px',
                 textAlign: 'center',
                 letterSpacing: '2px',
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
                 boxSizing: 'border-box'
               }}
+              disabled={loading}
               autoFocus
             />
-            <p style={{
-              margin: '8px 0 0 0',
+            <small style={{
+              color: '#666666',
               fontSize: '12px',
-              color: '#666',
-              textAlign: 'center'
+              textAlign: 'center',
+              display: 'block',
+              marginTop: '8px'
             }}>
               El código tiene 8 caracteres alfanuméricos
-            </p>
+            </small>
           </div>
 
           <div style={{
             display: 'flex',
             gap: '12px',
-            flexDirection: window.innerWidth < 480 ? 'column' : 'row'
+            justifyContent: 'center',
+            marginTop: '24px'
           }}>
             <button
               type="button"
               onClick={onClose}
               style={{
-                flex: 1,
-                padding: '12px',
-                background: '#6c757d',
-                color: '#fff',
+                backgroundColor: '#6C757D',
+                color: '#FFFFFF',
                 border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '500',
-                cursor: 'pointer'
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                flex: 1
               }}
+              disabled={loading}
             >
               Cancelar
             </button>
             <button
               type="submit"
               style={{
-                flex: 1,
-                padding: '12px',
-                background: '#0074D9',
-                color: '#fff',
+                backgroundColor: '#002C5F',
+                color: '#FFFFFF',
                 border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '500',
-                cursor: 'pointer'
+                padding: '10px 16px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                flex: 1
               }}
+              disabled={loading || inviteCode.length !== 8}
             >
-              Unirse a Liga
+              {loading ? 'Uniéndose...' : 'Unirse a Liga'}
             </button>
           </div>
         </form>
@@ -480,7 +1429,7 @@ function JoinLeagueModal({ onJoin, onClose }) {
 function InviteCodeModal({ league, onClose }) {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(league.inviteCode);
-    alert('Código copiado al portapapeles!');
+    alert('✅ Código copiado al portapapeles!');
   };
 
   return (
@@ -490,62 +1439,105 @@ function InviteCodeModal({ league, onClose }) {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 1000
+      zIndex: 1000,
+      padding: '20px'
     }}>
       <div style={{
-        backgroundColor: '#fff',
-        padding: '20px',
-        borderRadius: '8px',
-        maxWidth: '400px',
-        width: '90%'
+        backgroundColor: '#FFFFFF',
+        borderRadius: '12px',
+        padding: '24px',
+        maxWidth: '500px',
+        width: '100%',
+        border: '2px solid #002C5F'
       }}>
-        <h3>Invitar a "{league.name}"</h3>
-        <p>Comparte este código con tus amigos para que se unan a la liga:</p>
         <div style={{
-          backgroundColor: '#f5f5f5',
-          padding: '10px',
-          borderRadius: '4px',
-          fontFamily: 'monospace',
-          fontSize: '18px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          margin: '10px 0'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
         }}>
-          {league.inviteCode}
+          <h2 style={{ margin: 0, color: '#002C5F' }}>📤 Invitar a "{league.name}"</h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666666',
+              padding: '0',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
         </div>
-        <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-          <button 
+
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{
+            color: '#666666',
+            marginBottom: '16px',
+            fontSize: '16px'
+          }}>
+            Comparte este código con tus amigos para que se unan a la liga:
+          </p>
+          <div style={{
+            backgroundColor: '#F8F9FA',
+            padding: '20px',
+            borderRadius: '8px',
+            fontFamily: 'monospace',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#002C5F',
+            letterSpacing: '3px',
+            marginBottom: '20px',
+            border: '2px solid #002C5F'
+          }}>
+            {league.inviteCode}
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center' }}>
+          <button
             onClick={handleCopyCode}
             style={{
-              padding: '8px 16px',
-              background: '#0074D9',
-              color: '#fff',
+              backgroundColor: '#002C5F',
+              color: '#FFFFFF',
               border: 'none',
-              borderRadius: '4px',
+              padding: '12px 24px',
+              borderRadius: '12px',
+              fontSize: '16px',
+              fontWeight: '600',
               cursor: 'pointer'
             }}
           >
-            Copiar Código
+            📋 Copiar Código
           </button>
         </div>
-        <button 
-          onClick={onClose}
-          style={{
-            width: '100%',
-            padding: '8px',
-            background: '#6c757d',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Cerrar
-        </button>
+
+        <div style={{
+          marginTop: '20px',
+          padding: '16px',
+          backgroundColor: '#F8F9FA',
+          borderRadius: '8px',
+          fontSize: '14px',
+          color: '#666666'
+        }}>
+          <strong style={{ color: '#002C5F' }}>💡 Consejos:</strong>
+          <ul style={{ margin: '8px 0 0 20px', padding: 0 }}>
+            <li>Comparte el código por WhatsApp, email o redes sociales</li>
+            <li>El código es único para esta liga</li>
+            <li>Cualquier persona con el código puede unirse</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ export default function LoginRegister({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -13,6 +14,8 @@ export default function LoginRegister({ onLogin }) {
   const handleSubmit = async e => {
     e.preventDefault();
     setError('');
+    setLoading(true);
+
     try {
       if (isLogin) {
         const res = await loginUser({ email: form.email, password: form.password });
@@ -25,57 +28,250 @@ export default function LoginRegister({ onLogin }) {
         const res = await registerUser(form);
         if (res.message === 'Usuario registrado correctamente.') {
           setIsLogin(true);
+          setForm({ username: '', email: '', password: '' });
         } else {
           setError(res.message || 'Error al registrarse');
         }
       }
     } catch (err) {
-      setError('Error de conexión');
+      setError('Error de conexión. Verifica tu conexión a internet.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '40px auto', padding: 24, borderRadius: 8, boxShadow: '0 2px 8px #ccc', background: '#fff' }}>
-      <h2 style={{ textAlign: 'center' }}>CartelNFL</h2>
-      <form onSubmit={handleSubmit}>
-        {!isLogin && (
-          <input
-            type="text"
-            name="username"
-            placeholder="Usuario"
-            value={form.username}
-            onChange={handleChange}
-            required
-            style={{ width: '100%', marginBottom: 12, padding: 8 }}
-          />
-        )}
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-          style={{ width: '100%', marginBottom: 12, padding: 8 }}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Contraseña"
-          value={form.password}
-          onChange={handleChange}
-          required
-          style={{ width: '100%', marginBottom: 12, padding: 8 }}
-        />
-        <button type="submit" style={{ width: '100%', padding: 10, background: '#002244', color: '#fff', border: 'none', borderRadius: 4 }}>
-          {isLogin ? 'Iniciar sesión' : 'Registrarse'}
-        </button>
-        {error && <div style={{ color: 'red', marginTop: 10 }}>{error}</div>}
-      </form>
-      <div style={{ textAlign: 'center', marginTop: 16 }}>
-        <button onClick={() => setIsLogin(!isLogin)} style={{ background: 'none', border: 'none', color: '#0074D9', cursor: 'pointer' }}>
-          {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
-        </button>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      background: 'linear-gradient(135deg, #002C5F 0%, #003D7A 100%)'
+    }}>
+      <div style={{
+        backgroundColor: '#FFFFFF',
+        padding: '40px',
+        borderRadius: '16px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        border: '2px solid #002C5F',
+        maxWidth: '450px',
+        width: '100%',
+        textAlign: 'center'
+      }}>
+        {/* Logo y título */}
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{
+            fontSize: '48px',
+            marginBottom: '16px'
+          }}>
+            🏈
+          </div>
+          <h1 style={{
+            color: '#002C5F',
+            fontSize: '32px',
+            fontWeight: '700',
+            margin: '0 0 8px 0',
+            textAlign: 'center'
+          }}>
+            CartelNFL
+          </h1>
+          <p style={{
+            color: '#666666',
+            fontSize: '16px',
+            margin: 0,
+            textAlign: 'center'
+          }}>
+            {isLogin ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta'}
+          </p>
+        </div>
+
+        {/* Formulario */}
+        <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
+          {!isLogin && (
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#002C5F',
+                fontSize: '14px'
+              }}>
+                Usuario
+              </label>
+              <input
+                type="text"
+                name="username"
+                placeholder="Tu nombre de usuario"
+                value={form.username}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  border: '2px solid #DEE2E6',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  backgroundColor: '#FFFFFF',
+                  color: '#002C5F',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.3s ease'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#002C5F'}
+                onBlur={(e) => e.target.style.borderColor = '#DEE2E6'}
+              />
+            </div>
+          )}
+
+          <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              color: '#002C5F',
+              fontSize: '14px'
+            }}>
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              placeholder="tu@email.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                border: '2px solid #DEE2E6',
+                borderRadius: '8px',
+                fontSize: '16px',
+                backgroundColor: '#FFFFFF',
+                color: '#002C5F',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#002C5F'}
+              onBlur={(e) => e.target.style.borderColor = '#DEE2E6'}
+            />
+          </div>
+
+          <div style={{ marginBottom: '24px', textAlign: 'left' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              color: '#002C5F',
+              fontSize: '14px'
+            }}>
+              Contraseña
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Tu contraseña"
+              value={form.password}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                border: '2px solid #DEE2E6',
+                borderRadius: '8px',
+                fontSize: '16px',
+                backgroundColor: '#FFFFFF',
+                color: '#002C5F',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#002C5F'}
+              onBlur={(e) => e.target.style.borderColor = '#DEE2E6'}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '16px',
+              backgroundColor: '#002C5F',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s ease',
+              marginBottom: '16px'
+            }}
+            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#001B3A')}
+            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#002C5F')}
+          >
+            {loading ? (
+              <div style={{
+                border: '2px solid #DEE2E6',
+                borderTop: '2px solid #002C5F',
+                borderRadius: '50%',
+                width: '20px',
+                height: '20px',
+                animation: 'spin 1s linear infinite',
+                display: 'inline-block',
+                marginRight: '8px'
+              }}></div>
+            ) : null}
+            {loading ? 'Cargando...' : (isLogin ? 'Iniciar sesión' : 'Registrarse')}
+          </button>
+
+          {error && (
+            <div style={{
+              color: '#DC3545',
+              backgroundColor: '#f8d7da',
+              border: '1px solid #f5c6cb',
+              borderRadius: '8px',
+              padding: '12px',
+              marginBottom: '16px',
+              fontSize: '14px',
+              textAlign: 'center'
+            }}>
+              {error}
+            </div>
+          )}
+        </form>
+
+        {/* Toggle entre login y registro */}
+        <div style={{
+          borderTop: '1px solid #DEE2E6',
+          paddingTop: '20px'
+        }}>
+          <button
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+              setForm({ username: '', email: '', password: '' });
+            }}
+            disabled={loading}
+            style={{
+              background: 'none',
+              border: '2px solid #002C5F',
+              color: '#002C5F',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s ease',
+              width: '100%'
+            }}
+            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#002C5F') && (e.target.style.color = '#FFFFFF')}
+            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = 'transparent') && (e.target.style.color = '#002C5F')}
+          >
+            {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+          </button>
+        </div>
       </div>
     </div>
   );
