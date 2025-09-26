@@ -37,7 +37,7 @@
 
 5. **Accede a la aplicación:**
    - Frontend: http://tu-servidor-ip
-   - Backend: http://tu-servidor-ip:3000 (si necesitas acceder directamente)
+   - Backend: http://tu-servidor-ip:5001 (si necesitas acceder directamente)
 
 ## Configuración para acceso público
 
@@ -62,7 +62,7 @@ Para que todo el mundo pueda acceder al frontend:
        }
 
        location /api {
-           proxy_pass http://localhost:3000;
+           proxy_pass http://localhost:5001;
            proxy_set_header Host $host;
            proxy_set_header X-Real-IP $remote_addr;
        }

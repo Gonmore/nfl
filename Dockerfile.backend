@@ -12,8 +12,8 @@ RUN npm install
 # Copiar el código fuente
 COPY . .
 
-# Exponer el puerto (asumiendo que el backend usa 3000 o similar)
-EXPOSE 3000
+# Exponer el puerto (asumiendo que el backend usa 5001)
+EXPOSE 5001
 
 # Comando para ejecutar
 CMD ["npm", "start"]
