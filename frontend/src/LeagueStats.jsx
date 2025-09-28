@@ -195,38 +195,42 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                     }}>
                       <tr>
                         <th style={{
-                          padding: '16px',
+                          padding: '12px 8px',
                           textAlign: 'center',
-                          fontSize: '18px',
+                          fontSize: '16px',
                           fontWeight: '700',
-                          borderBottom: '2px solid rgba(255, 255, 255, 0.3)'
+                          borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
+                          width: '40px'
                         }}>
-                          Posición
+                          POS
                         </th>
                         <th style={{
-                          padding: '16px',
+                          padding: '12px 8px',
                           textAlign: 'left',
-                          fontSize: '18px',
+                          fontSize: '16px',
                           fontWeight: '700',
-                          borderBottom: '2px solid rgba(255, 255, 255, 0.3)'
+                          borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
+                          width: '120px'
                         }}>
                           Usuario
                         </th>
                         <th style={{
-                          padding: '16px',
+                          padding: '12px 8px',
                           textAlign: 'center',
-                          fontSize: '18px',
+                          fontSize: '16px',
                           fontWeight: '700',
-                          borderBottom: '2px solid rgba(255, 255, 255, 0.3)'
+                          borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
+                          width: '80px'
                         }}>
-                          Semana {selectedWeek}
+                          GW {selectedWeek}
                         </th>
                         <th style={{
-                          padding: '16px',
+                          padding: '12px 8px',
                           textAlign: 'center',
-                          fontSize: '18px',
+                          fontSize: '16px',
                           fontWeight: '700',
-                          borderBottom: '2px solid rgba(255, 255, 255, 0.3)'
+                          borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
+                          width: '80px'
                         }}>
                           Total
                         </th>
@@ -251,21 +255,21 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                         onClick={() => handleUserClick(user.userId, user.user)}
                         >
                           <td style={{
-                            padding: '16px',
+                            padding: '12px 8px',
                             textAlign: 'center',
-                            fontSize: '16px',
+                            fontSize: '14px',
                             fontWeight: '600',
                             color: '#002C5F'
                           }}>
                             <div style={{
-                              width: '40px',
-                              height: '40px',
+                              width: '32px',
+                              height: '32px',
                               borderRadius: '50%',
                               backgroundColor: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#002C5F',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontSize: '18px',
+                              fontSize: '14px',
                               fontWeight: 'bold',
                               color: index < 3 ? '#002C5F' : 'white',
                               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
@@ -275,26 +279,26 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                             </div>
                           </td>
                           <td style={{
-                            padding: '16px',
-                            fontSize: '16px',
+                            padding: '12px 8px',
+                            fontSize: '14px',
                             fontWeight: '600',
                             color: '#002C5F'
                           }}>
                             {user.user}
                           </td>
                           <td style={{
-                            padding: '16px',
+                            padding: '12px 8px',
                             textAlign: 'center',
-                            fontSize: '16px',
+                            fontSize: '14px',
                             fontWeight: 'bold',
                             color: '#002C5F'
                           }}>
                             {user.weekly} pts
                           </td>
                           <td style={{
-                            padding: '16px',
+                            padding: '12px 8px',
                             textAlign: 'center',
-                            fontSize: '16px',
+                            fontSize: '14px',
                             fontWeight: 'bold',
                             color: '#002C5F'
                           }}>

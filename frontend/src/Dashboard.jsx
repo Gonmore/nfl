@@ -13,6 +13,14 @@ export default function Dashboard({ user, token, onLogout }) {
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [showInviteCode, setShowInviteCode] = useState(null);
   const [standings, setStandings] = useState([]);
   const [previousPositions, setPreviousPositions] = useState({});
@@ -163,7 +171,7 @@ export default function Dashboard({ user, token, onLogout }) {
             gridColumn: '1 / -1',
             backgroundColor: 'rgba(255, 255, 255, 0.98)',
             borderRadius: '20px',
-            padding: '20px 24px',
+            padding: '12px 16px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
             border: '3px solid #1A365D',
             backdropFilter: 'blur(10px)'
@@ -171,7 +179,8 @@ export default function Dashboard({ user, token, onLogout }) {
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              gap: '16px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{
@@ -203,34 +212,32 @@ export default function Dashboard({ user, token, onLogout }) {
               <button
                 onClick={onLogout}
                 style={{
-                  backgroundColor: '#E53E3E',
+                  backgroundColor: '#A0AEC0',
                   color: '#FFFFFF',
                   border: 'none',
-                  padding: '12px 20px',
-                  borderRadius: '16px',
-                  fontSize: '14px',
-                  fontWeight: '700',
+                  padding: '8px',
+                  borderRadius: '50%',
+                  fontSize: '16px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 4px 12px rgba(229, 62, 62, 0.3)',
+                  justifyContent: 'center',
+                  width: '40px',
+                  height: '40px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                   transition: 'all 0.3s ease'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#C53030';
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 6px 16px rgba(229, 62, 62, 0.4)';
+                  e.target.style.backgroundColor = '#8FA4B3';
+                  e.target.style.transform = 'scale(1.1)';
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#E53E3E';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(229, 62, 62, 0.3)';
+                  e.target.style.backgroundColor = '#A0AEC0';
+                  e.target.style.transform = 'scale(1)';
                 }}
+                title="Cerrar Sesión"
               >
-                <span style={{ fontSize: '16px' }}>🚪</span>
-                Cerrar Sesión
+                <span style={{ fontSize: '18px', color: '#E53E3E' }}>⏻</span>
               </button>
             </div>
           </div>
@@ -250,7 +257,7 @@ export default function Dashboard({ user, token, onLogout }) {
             <div style={{
               background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
               color: '#FFFFFF',
-              padding: '24px 20px',
+              padding: '12px 20px',
               borderBottom: '2px solid #4A5568'
             }}>
               <div style={{
@@ -277,15 +284,15 @@ export default function Dashboard({ user, token, onLogout }) {
                       backgroundColor: '#38A169',
                       color: '#FFFFFF',
                       border: 'none',
-                      padding: '10px',
+                      padding: '6px',
                       borderRadius: '12px',
-                      fontSize: '18px',
+                      fontSize: '16px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '44px',
-                      height: '44px',
+                      width: '36px',
+                      height: '36px',
                       boxShadow: '0 4px 12px rgba(56, 161, 105, 0.3)',
                       transition: 'all 0.3s ease'
                     }}
@@ -301,7 +308,7 @@ export default function Dashboard({ user, token, onLogout }) {
                     }}
                     title="Crear Liga"
                   >
-                    <span style={{ fontSize: '18px' }}>➕</span>
+                    <span style={{ fontSize: '16px', color: '#FFFFFF' }}>➕</span>
                   </button>
                   <button
                     onClick={() => setShowJoinModal(true)}
@@ -309,15 +316,15 @@ export default function Dashboard({ user, token, onLogout }) {
                       backgroundColor: '#3182CE',
                       color: '#FFFFFF',
                       border: 'none',
-                      padding: '10px',
+                      padding: '6px',
                       borderRadius: '12px',
-                      fontSize: '18px',
+                      fontSize: '16px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '44px',
-                      height: '44px',
+                      width: '36px',
+                      height: '36px',
                       boxShadow: '0 4px 12px rgba(49, 130, 206, 0.3)',
                       transition: 'all 0.3s ease'
                     }}
@@ -333,7 +340,7 @@ export default function Dashboard({ user, token, onLogout }) {
                     }}
                     title="Unirse a Liga"
                   >
-                    <span style={{ fontSize: '18px' }}>🔗</span>
+                    <span style={{ fontSize: '16px' }}>🔗</span>
                   </button>
                 </div>
               </div>
@@ -546,7 +553,7 @@ export default function Dashboard({ user, token, onLogout }) {
             <div style={{
               background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
               color: '#FFFFFF',
-              padding: '24px 20px',
+              padding: '16px 20px',
               borderBottom: '2px solid #4A5568'
             }}>
               <h2 style={{
@@ -587,54 +594,55 @@ export default function Dashboard({ user, token, onLogout }) {
                       zIndex: 1
                     }}>
                       <th style={{
-                        padding: '12px 8px',
+                        padding: '12px 4px',
                         textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '60px',
+                        width: '20px',
                         fontSize: '13px',
                         letterSpacing: '0.5px'
                       }}>
                         POS
                       </th>
                       <th style={{
-                        padding: '12px 12px',
+                        padding: '12px 8px',
                         textAlign: 'left',
                         fontWeight: '800',
                         color: '#FFFFFF',
+                        width: '40px',
                         fontSize: '13px',
                         letterSpacing: '0.5px'
                       }}>
-                        EQUIPO
+                        TEAM
                       </th>
                       <th style={{
-                        padding: '12px 8px',
+                        padding: '12px 4px',
                         textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '70px',
+                        width: '30px',
                         fontSize: '13px',
                         letterSpacing: '0.5px'
                       }}>
                         W
                       </th>
                       <th style={{
-                        padding: '12px 8px',
+                        padding: '12px 4px',
                         textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '70px',
+                        width: '30px',
                         fontSize: '13px',
                         letterSpacing: '0.5px'
                       }}>
                         L
                       </th>
                       <th style={{
-                        padding: '12px 8px',
+                        padding: '12px 4px',
                         textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '70px',
+                        width: '30px',
                         fontSize: '13px',
                         letterSpacing: '0.5px'
                       }}>
@@ -659,7 +667,7 @@ export default function Dashboard({ user, token, onLogout }) {
                       }}
                       >
                         <td style={{
-                          padding: '12px 8px',
+                          padding: '12px 4px',
                           textAlign: 'center',
                           fontWeight: '700',
                           color: '#1A365D',
@@ -717,17 +725,19 @@ export default function Dashboard({ user, token, onLogout }) {
                                 }}
                               />
                             </div>
-                            <span style={{
-                              fontSize: '14px',
-                              fontWeight: '700',
-                              color: '#1A365D'
-                            }}>
-                              {team.abbreviation}
-                            </span>
+                            {!isMobile && (
+                              <span style={{
+                                fontSize: '14px',
+                                fontWeight: '700',
+                                color: '#1A365D'
+                              }}>
+                                {team.abbreviation}
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td style={{
-                          padding: '12px 8px',
+                          padding: '12px 4px',
                           textAlign: 'center',
                           fontSize: '14px',
                           fontWeight: '700',
@@ -739,7 +749,7 @@ export default function Dashboard({ user, token, onLogout }) {
                           {team.wins}
                         </td>
                         <td style={{
-                          padding: '12px 8px',
+                          padding: '12px 4px',
                           textAlign: 'center',
                           fontSize: '14px',
                           fontWeight: '700',
@@ -751,7 +761,7 @@ export default function Dashboard({ user, token, onLogout }) {
                           {team.losses}
                         </td>
                         <td style={{
-                          padding: '12px 8px',
+                          padding: '12px 4px',
                           textAlign: 'center',
                           fontSize: '14px',
                           fontWeight: '700',
