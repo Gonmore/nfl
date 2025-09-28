@@ -117,6 +117,20 @@ export async function makePicks(token, leagueId, picks) {
   return await res.json();
 }
 
+export async function getUserPicks(token, leagueId, week) {
+  console.log('Calling getUserPicks with token:', token ? 'present' : 'null', 'leagueId:', leagueId, 'week:', week);
+  const res = await fetch(`${API_URL}/picks/user?leagueId=${leagueId}&week=${week}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  const data = await res.json();
+  console.log('getUserPicks response:', data);
+  return data;
+}
+
 export async function getLeagueStats(token, leagueId, week) {
   console.log('Calling getLeagueStats with token:', token ? 'present' : 'null', 'leagueId:', leagueId, 'week:', week);
   const res = await fetch(`${API_URL}/stats/league?leagueId=${leagueId}&week=${week}`, {
@@ -133,7 +147,9 @@ export async function getLeagueStats(token, leagueId, week) {
 
 export async function getUserPicksDetails(token, leagueId, week, userId) {
   console.log('Calling getUserPicksDetails with token:', token ? 'present' : 'null', 'leagueId:', leagueId, 'week:', week, 'userId:', userId);
-  const res = await fetch(`${API_URL}/stats/user-picks?leagueId=${leagueId}&week=${week}&userId=${userId}`, {
+  const params = new URLSearchParams({ leagueId: leagueId.toString(), week: week.toString() });
+  if (userId) params.append('userId', userId.toString());
+  const res = await fetch(`${API_URL}/stats/user-picks?${params}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

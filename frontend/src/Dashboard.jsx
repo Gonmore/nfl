@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import PickForm from './PickForm.jsx';
 import LeagueStats from './LeagueStats.jsx';
-import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague } from './api';
+import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails } from './api';
+import { teamLogos } from './teamLogos.js';
 
 export default function Dashboard({ user, token, onLogout }) {
   const [games, setGames] = useState([]);
@@ -13,6 +14,9 @@ export default function Dashboard({ user, token, onLogout }) {
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [showInviteCode, setShowInviteCode] = useState(null);
+  const [standings, setStandings] = useState([]);
+  const [previousPositions, setPreviousPositions] = useState({});
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -21,9 +25,12 @@ export default function Dashboard({ user, token, onLogout }) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  const [showInviteCode, setShowInviteCode] = useState(null);
-  const [standings, setStandings] = useState([]);
-  const [previousPositions, setPreviousPositions] = useState({});
+  const [showGameWeekOptions, setShowGameWeekOptions] = useState(false);
+  const [isDuringGameWeek, setIsDuringGameWeek] = useState(false);
+  const [showScoreView, setShowScoreView] = useState(false);
+  const [currentWeekGames, setCurrentWeekGames] = useState([]);
+  const [userPicksWithResults, setUserPicksWithResults] = useState([]);
+  const [totalPoints, setTotalPoints] = useState(0);
 
   // Obtiene ligas del usuario
   useEffect(() => {
@@ -95,6 +102,26 @@ export default function Dashboard({ user, token, onLogout }) {
           }
         }
         setWeek(currentWeek);
+
+        // Detectar si estamos en horario de jornada
+        if (res.games && res.games.length > 0) {
+          const filteredGames = res.games.filter(g => g.week === currentWeek);
+          const deadline = filteredGames.length > 0 ? new Date(Math.min(...filteredGames.map(g => new Date(g.date).getTime()))) : null;
+          
+          if (deadline) {
+            const dayOfWeek = now.getDay(); // 0=domingo, 4=jueves, 1=lunes
+            const hour = now.getHours();
+            
+            // Jueves después de las 20:00
+            const duringGameWeek = (dayOfWeek === 4 && hour >= 20) || 
+                                   (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) || 
+                                   (dayOfWeek === 1);
+            
+            const isDeadlinePassed = deadline && now > deadline;
+            
+            setIsDuringGameWeek(duringGameWeek);
+          }
+        }
       } catch (err) {
         setError('Error al cargar juegos');
       }
@@ -150,7 +177,405 @@ export default function Dashboard({ user, token, onLogout }) {
     }
   };
 
+  const handleLeagueSelect = (league) => {
+    setSelectedLeague(league);
+    // Mostrar opciones de jornada si estamos en horario de jornada
+    if (isDuringGameWeek) {
+      setShowGameWeekOptions(true);
+    }
+  };
+
   const filteredGames = games.filter(g => g.week === week);
+
+  // Modal de opciones de jornada
+  if (showGameWeekOptions && selectedLeague) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0A1929 0%, #1A365D 50%, #2D3748 100%)',
+        padding: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+          border: '3px solid #1A365D',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+          backdropFilter: 'blur(10px)',
+          maxWidth: '500px',
+          width: '100%',
+          padding: '32px'
+        }}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '32px'
+          }}>
+            <div style={{
+              fontSize: '24px',
+              fontWeight: '700',
+              color: '#1A365D',
+              marginBottom: '16px'
+            }}>
+              🏈 Jornada en Juego
+            </div>
+            <p style={{
+              color: '#4A5568',
+              fontSize: '16px',
+              margin: '0'
+            }}>
+              La semana {week} está en curso. ¿Qué deseas hacer en <strong>{selectedLeague.name}</strong>?
+            </p>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            maxWidth: '400px',
+            margin: '0 auto'
+          }}>
+            <button
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  // Cargar juegos de la semana actual
+                  const gamesResponse = await getGames(token);
+                  const weekGames = gamesResponse.games.filter(g => g.week === week);
+                  setCurrentWeekGames(weekGames);
+
+                  // Cargar picks del usuario para esta semana con resultados
+                  const picksResponse = await getUserPicksDetails(token, selectedLeague.id, week);
+                  setUserPicksWithResults(picksResponse.details || []);
+
+                  // Calcular puntos totales
+                  const total = (picksResponse.details || []).reduce((sum, pick) => sum + (pick.points || 0), 0);
+                  setTotalPoints(total);
+
+                  setShowGameWeekOptions(false);
+                  setShowScoreView(true);
+                } catch (error) {
+                  console.error('Error loading score data:', error);
+                  alert('Error al cargar los datos del score. Inténtalo de nuevo.');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              style={{
+                background: 'linear-gradient(135deg, #38A169 0%, #2F855A 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '20px',
+                borderRadius: '16px',
+                fontSize: '18px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                boxShadow: '0 6px 20px rgba(56, 161, 105, 0.4)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-3px)';
+                e.target.style.boxShadow = '0 10px 30px rgba(56, 161, 105, 0.6)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 6px 20px rgba(56, 161, 105, 0.4)';
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>📊</span>
+              Ver mi Score - Semana {week}
+            </button>
+
+            <button
+              onClick={() => {
+                setShowGameWeekOptions(false);
+                // Continuar con la vista normal de picks
+              }}
+              style={{
+                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '20px',
+                borderRadius: '16px',
+                fontSize: '18px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                boxShadow: '0 6px 20px rgba(79, 70, 229, 0.4)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-3px)';
+                e.target.style.boxShadow = '0 10px 30px rgba(79, 70, 229, 0.6)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 6px 20px rgba(79, 70, 229, 0.4)';
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>🎯</span>
+              Hacer Picks - Semana {week + 1}
+            </button>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '24px' }}>
+            <button
+              onClick={() => {
+                setShowGameWeekOptions(false);
+                setSelectedLeague(null);
+              }}
+              style={{
+                backgroundColor: '#6C757D',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#545B62'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#6C757D'}
+            >
+              ← Cambiar Liga
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Vista de score durante jornada en juego
+  if (showScoreView && selectedLeague) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0A1929 0%, #1A365D 50%, #2D3748 100%)',
+        padding: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+          border: '3px solid #1A365D',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+          backdropFilter: 'blur(10px)',
+          maxWidth: '800px',
+          width: '100%',
+          padding: '32px'
+        }}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '24px'
+          }}>
+            <h2 style={{
+              margin: 0,
+              fontSize: '24px',
+              fontWeight: '800',
+              color: '#1A365D',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px'
+            }}>
+              <span style={{ fontSize: '28px' }}>📊</span>
+              Mi Score - Semana {week}
+            </h2>
+            <p style={{ color: '#4A5568', margin: '8px 0 0 0' }}>
+              Liga: {selectedLeague.name}
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '16px',
+            marginBottom: '32px'
+          }}>
+            {currentWeekGames.map(game => {
+              const userPick = userPicksWithResults.find(p => p.gameId === game.id);
+              const isCorrect = userPick && userPick.correct;
+              const isFinished = game.winner !== null;
+              
+              return (
+                <div key={game.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '12px',
+                  backgroundColor: isFinished 
+                    ? (isCorrect ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)')
+                    : 'rgba(240, 240, 240, 0.9)',
+                  borderRadius: '12px',
+                  border: `2px solid ${isFinished 
+                    ? (isCorrect ? '#22C55E' : '#EF4444')
+                    : 'rgba(0, 44, 95, 0.2)'}`,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  gap: '8px',
+                  position: 'relative'
+                }}>
+                  {/* Indicador de puntos */}
+                  {isFinished && userPick && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      backgroundColor: isCorrect ? '#22C55E' : '#EF4444',
+                      color: 'white',
+                      borderRadius: '50%',
+                      width: '24px',
+                      height: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                    }}>
+                      {userPick.points}
+                    </div>
+                  )}
+
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'white',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    border: userPick && userPick.pick === game.awayTeam ? '3px solid #002C5F' : '3px solid transparent',
+                    boxShadow: userPick && userPick.pick === game.awayTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    opacity: userPick && userPick.pick === game.awayTeam ? 1 : 0.6
+                  }}>
+                    <img
+                      src={teamLogos[game.awayTeam]}
+                      alt={game.awayTeam}
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        e.target.src = `https://a.espncdn.com/i/teamlogos/nfl/500/${game.awayTeam.toLowerCase()}.png`;
+                      }}
+                    />
+                  </div>
+
+                  <div style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#002C5F'
+                  }}>
+                    vs
+                  </div>
+
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'white',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    border: userPick && userPick.pick === game.homeTeam ? '3px solid #002C5F' : '3px solid transparent',
+                    boxShadow: userPick && userPick.pick === game.homeTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    opacity: userPick && userPick.pick === game.homeTeam ? 1 : 0.6
+                  }}>
+                    <img
+                      src={teamLogos[game.homeTeam]}
+                      alt={game.homeTeam}
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        e.target.src = `https://a.espncdn.com/i/teamlogos/nfl/500/${game.homeTeam.toLowerCase()}.png`;
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{
+            textAlign: 'center',
+            padding: '24px',
+            background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+            borderRadius: '16px',
+            color: 'white'
+          }}>
+            <div style={{ fontSize: '18px', marginBottom: '8px', opacity: 0.9 }}>
+              Puntos Totales - Semana {week}
+            </div>
+            <div style={{ fontSize: '48px', fontWeight: '900', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
+              {totalPoints}
+            </div>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <button
+              onClick={() => {
+                setShowScoreView(false);
+                setShowGameWeekOptions(true);
+              }}
+              style={{
+                backgroundColor: '#6C757D',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                marginRight: '12px'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#545B62'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#6C757D'}
+            >
+              ← Volver
+            </button>
+            <button
+              onClick={() => {
+                setShowScoreView(false);
+                setSelectedLeague(null);
+              }}
+              style={{
+                backgroundColor: '#002C5F',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#001B3A'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#002C5F'}
+            >
+              Cambiar Liga
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!selectedLeague) {
     return (
@@ -434,7 +859,7 @@ export default function Dashboard({ user, token, onLogout }) {
                       }}
                     >
                       <button
-                        onClick={() => setSelectedLeague(league)}
+                        onClick={() => handleLeagueSelect(league)}
                         style={{
                           width: '100%',
                           background: 'none',

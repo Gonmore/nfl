@@ -125,9 +125,12 @@ async function calculateScores(leagueId, week) {
 const getUserPicksDetails = async (req, res) => {
   try {
     const { leagueId, week, userId } = req.query;
+    const currentUserId = req.user.id; // Use user ID from JWT token
+    const targetUserId = userId ? parseInt(userId) : currentUserId;
+    
     // Get picks for the user, league, week
     const picks = await Pick.findAll({
-      where: { leagueId, week, userId },
+      where: { leagueId, week, userId: targetUserId },
       include: [Game]
     });
 

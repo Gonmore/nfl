@@ -1,41 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { makePicks, getGamesByWeek } from './api';
-
-// Logos de equipos NFL (usando ESPN)
-const teamLogos = {
-  "Arizona Cardinals": "https://a.espncdn.com/i/teamlogos/nfl/500/ari.png",
-  "Atlanta Falcons": "https://a.espncdn.com/i/teamlogos/nfl/500/atl.png",
-  "Baltimore Ravens": "https://a.espncdn.com/i/teamlogos/nfl/500/bal.png",
-  "Buffalo Bills": "https://a.espncdn.com/i/teamlogos/nfl/500/buf.png",
-  "Carolina Panthers": "https://a.espncdn.com/i/teamlogos/nfl/500/car.png",
-  "Chicago Bears": "https://a.espncdn.com/i/teamlogos/nfl/500/chi.png",
-  "Cincinnati Bengals": "https://a.espncdn.com/i/teamlogos/nfl/500/cin.png",
-  "Cleveland Browns": "https://a.espncdn.com/i/teamlogos/nfl/500/cle.png",
-  "Dallas Cowboys": "https://a.espncdn.com/i/teamlogos/nfl/500/dal.png",
-  "Denver Broncos": "https://a.espncdn.com/i/teamlogos/nfl/500/den.png",
-  "Detroit Lions": "https://a.espncdn.com/i/teamlogos/nfl/500/det.png",
-  "Green Bay Packers": "https://a.espncdn.com/i/teamlogos/nfl/500/gb.png",
-  "Houston Texans": "https://a.espncdn.com/i/teamlogos/nfl/500/hou.png",
-  "Indianapolis Colts": "https://a.espncdn.com/i/teamlogos/nfl/500/ind.png",
-  "Jacksonville Jaguars": "https://a.espncdn.com/i/teamlogos/nfl/500/jax.png",
-  "Kansas City Chiefs": "https://a.espncdn.com/i/teamlogos/nfl/500/kc.png",
-  "Las Vegas Raiders": "https://a.espncdn.com/i/teamlogos/nfl/500/lv.png",
-  "Los Angeles Chargers": "https://a.espncdn.com/i/teamlogos/nfl/500/lac.png",
-  "Los Angeles Rams": "https://a.espncdn.com/i/teamlogos/nfl/500/lar.png",
-  "Miami Dolphins": "https://a.espncdn.com/i/teamlogos/nfl/500/mia.png",
-  "Minnesota Vikings": "https://a.espncdn.com/i/teamlogos/nfl/500/min.png",
-  "New England Patriots": "https://a.espncdn.com/i/teamlogos/nfl/500/ne.png",
-  "New Orleans Saints": "https://a.espncdn.com/i/teamlogos/nfl/500/no.png",
-  "New York Giants": "https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png",
-  "New York Jets": "https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png",
-  "Philadelphia Eagles": "https://a.espncdn.com/i/teamlogos/nfl/500/phi.png",
-  "Pittsburgh Steelers": "https://a.espncdn.com/i/teamlogos/nfl/500/pit.png",
-  "San Francisco 49ers": "https://a.espncdn.com/i/teamlogos/nfl/500/sf.png",
-  "Seattle Seahawks": "https://a.espncdn.com/i/teamlogos/nfl/500/sea.png",
-  "Tampa Bay Buccaneers": "https://a.espncdn.com/i/teamlogos/nfl/500/tb.png",
-  "Tennessee Titans": "https://a.espncdn.com/i/teamlogos/nfl/500/ten.png",
-  "Washington Commanders": "https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png",
-};
+import { makePicks, getGamesByWeek, getUserPicks } from './api';
+import { teamLogos } from './teamLogos';
 
 export default function PickForm({ games, token, leagueId, week }) {
   const [picks, setPicks] = useState({});
@@ -48,6 +13,60 @@ export default function PickForm({ games, token, leagueId, week }) {
   const deadline = games.length > 0 ? new Date(Math.min(...games.map(g => new Date(g.date).getTime()))) : null;
   const now = new Date();
   const isDeadlinePassed = deadline && now > deadline;
+
+  // Detectar si estamos en horario de jornada en juego (jueves 20:00 a lunes 23:59)
+  const isDuringGameWeek = () => {
+    if (!deadline) return false;
+    
+    const dayOfWeek = now.getDay(); // 0=domingo, 4=jueves, 1=lunes
+    const hour = now.getHours();
+    
+    // Jueves después de las 20:00
+    if (dayOfWeek === 4 && hour >= 20) return true;
+    // Viernes, sábado, domingo
+    if (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) return true;
+    // Lunes antes de las 24:00
+    if (dayOfWeek === 1) return true;
+    
+    return false;
+  };
+
+  const duringGameWeek = isDuringGameWeek();
+
+  // Si estamos en horario de jornada y no hemos pasado la fecha límite, mostrar mensaje
+  if (duringGameWeek && !isDeadlinePassed) {
+    return (
+      <div className="card" style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        border: '3px solid #1A365D',
+        borderRadius: '20px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+        backdropFilter: 'blur(10px)'
+      }}>
+        <div className="card-body">
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '24px'
+          }}>
+            <div style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#E53E3E',
+              marginBottom: '8px'
+            }}>
+              ⏰ Jornada en Juego
+            </div>
+            <p style={{
+              color: '#4A5568',
+              margin: '0'
+            }}>
+              La semana {week} está en curso. Las opciones de visualización están disponibles desde el menú principal de ligas.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (isDeadlinePassed && games.length > 0) {
@@ -66,6 +85,29 @@ export default function PickForm({ games, token, leagueId, week }) {
     }
   }, [isDeadlinePassed, games, week, token]);
 
+  // Cargar picks existentes del usuario
+  useEffect(() => {
+    const loadExistingPicks = async () => {
+      try {
+        const currentWeek = isDeadlinePassed ? nextWeek : week;
+        if (currentWeek && token && leagueId) {
+          const data = await getUserPicks(token, leagueId, currentWeek);
+          if (data.picks && data.picks.length > 0) {
+            const existingPicks = {};
+            data.picks.forEach(pick => {
+              existingPicks[pick.gameId] = pick.pick;
+            });
+            setPicks(existingPicks);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading existing picks:', error);
+      }
+    };
+
+    loadExistingPicks();
+  }, [token, leagueId, week, isDeadlinePassed, nextWeek]);
+
   const handlePick = (gameId, team) => {
     setPicks({ ...picks, [gameId]: team });
   };
@@ -74,7 +116,19 @@ export default function PickForm({ games, token, leagueId, week }) {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-    const picksArr = (isDeadlinePassed ? nextWeekGames : games).filter(g => picks[g.id]).map(g => ({ gameId: g.id, pick: picks[g.id], week: isDeadlinePassed ? nextWeek : week }));
+
+    // Obtener los partidos actuales
+    const currentGames = isDeadlinePassed ? nextWeekGames : games;
+
+    // Verificar que se hayan hecho picks para todos los partidos
+    const missingPicks = currentGames.filter(game => !picks[game.id]);
+    if (missingPicks.length > 0) {
+      setMessage(`Debes hacer picks para todos los partidos. Faltan ${missingPicks.length} pick(s).`);
+      setLoading(false);
+      return;
+    }
+
+    const picksArr = currentGames.filter(g => picks[g.id]).map(g => ({ gameId: g.id, pick: picks[g.id], week: isDeadlinePassed ? nextWeek : week }));
     const res = await makePicks(token, leagueId, picksArr);
     setMessage(res.message || 'Picks enviados');
     setLoading(false);

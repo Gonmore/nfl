@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getLeagueStats, getUserPicksDetails } from './api';
+import { teamLogos } from './teamLogos';
 
 export default function LeagueStats({ token, leagueId, week: initialWeek }) {
   const [weeklyStats, setWeeklyStats] = useState([]);
@@ -41,6 +42,7 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
     setDetailsLoading(true);
     try {
       const res = await getUserPicksDetails(token, leagueId, week, userId);
+      console.log('Modal details response:', res);
       setModalDetails(res.details || []);
       const totalPoints = res.details.reduce((sum, detail) => sum + detail.points, 0);
       setModalTotalPoints(totalPoints);
@@ -489,7 +491,7 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
               overflowY: 'auto',
               padding: '0 28px 28px 28px'
             }}>
-              {!detailsLoading && modalDetails.map(detail => (
+              {!detailsLoading && modalDetails.map(detail => { return (
                 <div key={detail.gameId} style={{
                   marginBottom: '20px',
                   padding: '20px',
@@ -516,12 +518,38 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                     marginBottom: '16px'
                   }}>
                     <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
                       fontWeight: '800',
                       color: '#002C5F',
                       fontSize: '18px',
                       textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                     }}>
-                      {detail.awayTeam} vs {detail.homeTeam}
+                      <img
+                        src={teamLogos[detail.awayTeam]}
+                        alt={detail.awayTeam}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      <span>{detail.awayTeam}</span>
+                      <span>vs</span>
+                      <span>{detail.homeTeam}</span>
+                      <img
+                        src={teamLogos[detail.homeTeam]}
+                        alt={detail.homeTeam}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          objectFit: 'cover'
+                        }}
+                      />
                     </div>
                     <div style={{
                       fontSize: '14px',
@@ -552,7 +580,7 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                     <strong style={{ color: '#4F46E5', fontWeight: '700' }}> Puntos:</strong> {detail.points}
                   </div>
                 </div>
-              ))}
+              ) } ) }
             </div>
           </div>
         </div>
