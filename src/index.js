@@ -5,7 +5,7 @@ const { sequelize } = require('./models');
 
 const cors = require('cors');
 app.use(cors({
-  origin: true,
+  origin: ['https://nfl-frontend.onrender.com', 'http://localhost:4001'],
   credentials: true
 }));
 
