@@ -1,5 +1,5 @@
 // API base URL (ajusta si usas otro puerto o dominio)
-const API_URL = 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';  // Para desarrollo local
 
 export async function registerUser({ username, email, password }) {
   console.log('Calling registerUser with:', { username, email, password: '***' });
