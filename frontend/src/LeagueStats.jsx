@@ -513,7 +513,7 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                 >
                   <div style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent: 'center',
                     alignItems: 'center',
                     marginBottom: '16px'
                   }}>
@@ -521,7 +521,7 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '8px',
+                      gap: '12px',
                       fontWeight: '800',
                       color: '#002C5F',
                       fontSize: '18px',
@@ -531,41 +531,23 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                         src={teamLogos[detail.awayTeam]}
                         alt={detail.awayTeam}
                         style={{
-                          width: '32px',
-                          height: '32px',
+                          width: '48px',
+                          height: '48px',
                           borderRadius: '50%',
                           objectFit: 'cover'
                         }}
                       />
-                      <span>{detail.awayTeam}</span>
                       <span>vs</span>
-                      <span>{detail.homeTeam}</span>
                       <img
                         src={teamLogos[detail.homeTeam]}
                         alt={detail.homeTeam}
                         style={{
-                          width: '32px',
-                          height: '32px',
+                          width: '48px',
+                          height: '48px',
                           borderRadius: '50%',
                           objectFit: 'cover'
                         }}
                       />
-                    </div>
-                    <div style={{
-                      fontSize: '14px',
-                      padding: '8px 16px',
-                      borderRadius: '24px',
-                      background: detail.correct ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' : 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-                      color: 'white',
-                      fontWeight: '700',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
-                    }}>
-                      {detail.correct ? '✅ Correcto' : '❌ Incorrecto'}
                     </div>
                   </div>
 
