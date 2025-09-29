@@ -3,7 +3,6 @@ const Game = require('../models/Game');
 const Score = require('../models/Score');
 const LeagueMember = require('../models/LeagueMember');
 const User = require('../models/User');
-const { Op } = require('sequelize');
 
 const getLeagueStats = async (req, res) => {
   try {

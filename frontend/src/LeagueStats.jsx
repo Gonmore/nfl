@@ -521,33 +521,61 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '12px',
+                      gap: '16px',
                       fontWeight: '800',
                       color: '#002C5F',
                       fontSize: '18px',
                       textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                     }}>
-                      <img
-                        src={teamLogos[detail.awayTeam]}
-                        alt={detail.awayTeam}
-                        style={{
-                          width: '48px',
-                          height: '48px',
-                          borderRadius: '50%',
-                          objectFit: 'cover'
-                        }}
-                      />
-                      <span>vs</span>
-                      <img
-                        src={teamLogos[detail.homeTeam]}
-                        alt={detail.homeTeam}
-                        style={{
-                          width: '48px',
-                          height: '48px',
-                          borderRadius: '50%',
-                          objectFit: 'cover'
-                        }}
-                      />
+                      {detail.winner === detail.homeTeam ? (
+                        <>
+                          <img
+                            src={teamLogos[detail.homeTeam]}
+                            alt={detail.homeTeam}
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <span>vs</span>
+                          <img
+                            src={teamLogos[detail.awayTeam]}
+                            alt={detail.awayTeam}
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <img
+                            src={teamLogos[detail.awayTeam]}
+                            alt={detail.awayTeam}
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <span>vs</span>
+                          <img
+                            src={teamLogos[detail.homeTeam]}
+                            alt={detail.homeTeam}
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
 

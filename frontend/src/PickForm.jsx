@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { makePicks, getGamesByWeek, getUserPicks } from './api';
+import { makePicks, getGamesByWeek, getUserPicks, getStandings } from './api';
 import { teamLogos } from './teamLogos';
 
 export default function PickForm({ games, token, leagueId, week }) {
   const [picks, setPicks] = useState({});
-  const [message, setMessage] = useState('');
+  const [message] = useState('');
   const [loading, setLoading] = useState(false);
   const [nextWeekGames, setNextWeekGames] = useState([]);
   const [nextWeek, setNextWeek] = useState(null);
+  const [teamRecords, setTeamRecords] = useState({});
+  const [recordsLoading, setRecordsLoading] = useState(true);
 
   // Calcular fecha límite: inicio del primer partido de la semana
   const deadline = games.length > 0 ? new Date(Math.min(...games.map(g => new Date(g.date).getTime()))) : null;
@@ -106,6 +108,23 @@ export default function PickForm({ games, token, leagueId, week }) {
     };
 
     loadExistingPicks();
+
+    // Load team records
+    const loadStandings = async () => {
+      try {
+        const standingsRes = await getStandings(token);
+        const records = {};
+        standingsRes.standings.forEach(team => {
+          records[team.name] = team.winPercentage;
+        });
+        setTeamRecords(records);
+        setRecordsLoading(false);
+      } catch (error) {
+        console.error('Error loading standings:', error);
+        setRecordsLoading(false);
+      }
+    };
+    loadStandings();
   }, [token, leagueId, week, isDeadlinePassed, nextWeek]);
 
   const handlePick = (gameId, team) => {
@@ -184,104 +203,124 @@ export default function PickForm({ games, token, leagueId, week }) {
                 {nextWeekGames.map(game => (
                   <div key={game.id} style={{
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '8px 12px',
+                    padding: '12px 10px',
                     backgroundColor: 'rgba(240, 240, 240, 0.9)',
                     borderRadius: '12px',
                     border: '2px solid rgba(0, 44, 95, 0.2)',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    gap: '6px'
+                    gap: '4px'
                   }}>
-                    <div style={{
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: 'white',
-                      borderRadius: '50%',
-                      width: '44px',
-                      height: '44px'
-                    }}>
-                      <input
-                        type="radio"
-                        name={`game-${game.id}`}
-                        checked={picks[game.id] === game.awayTeam}
-                        onChange={() => handlePick(game.id, game.awayTeam)}
-                        disabled={loading}
-                        style={{
-                          position: 'absolute',
-                          opacity: 0,
-                          width: '100%',
-                          height: '100%',
-                          margin: 0,
-                          cursor: 'pointer'
-                        }}
-                      />
-                      <img
-                        src={teamLogos[game.awayTeam]}
-                        alt={game.awayTeam}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          cursor: 'pointer',
-                          border: picks[game.id] === game.awayTeam ? '3px solid #002C5F' : '3px solid transparent',
-                          boxShadow: picks[game.id] === game.awayTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
-                          transition: 'all 0.2s ease'
-                        }}
-                      />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'white',
+                        borderRadius: '50%',
+                        width: '44px',
+                        height: '44px'
+                      }}>
+                        <input
+                          type="radio"
+                          name={`game-${game.id}`}
+                          checked={picks[game.id] === game.awayTeam}
+                          onChange={() => handlePick(game.id, game.awayTeam)}
+                          disabled={loading}
+                          style={{
+                            position: 'absolute',
+                            opacity: 0,
+                            width: '100%',
+                            height: '100%',
+                            margin: 0,
+                            cursor: 'pointer'
+                          }}
+                        />
+                        <img
+                          src={teamLogos[game.awayTeam]}
+                          alt={game.awayTeam}
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            cursor: 'pointer',
+                            border: picks[game.id] === game.awayTeam ? '3px solid #002C5F' : '3px solid transparent',
+                            boxShadow: picks[game.id] === game.awayTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                            transition: 'all 0.2s ease'
+                          }}
+                        />
+                      </div>
+                      <div style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#002C5F'
+                      }}>
+                        -
+                      </div>
+                      <div style={{
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'white',
+                        borderRadius: '50%',
+                        width: '44px',
+                        height: '44px'
+                      }}>
+                        <input
+                          type="radio"
+                          name={`game-${game.id}`}
+                          checked={picks[game.id] === game.homeTeam}
+                          onChange={() => handlePick(game.id, game.homeTeam)}
+                          disabled={loading}
+                          style={{
+                            position: 'absolute',
+                            opacity: 0,
+                            width: '100%',
+                            height: '100%',
+                            margin: 0,
+                            cursor: 'pointer'
+                          }}
+                        />
+                        <img
+                          src={teamLogos[game.homeTeam]}
+                          alt={game.homeTeam}
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            cursor: 'pointer',
+                            border: picks[game.id] === game.homeTeam ? '3px solid #002C5F' : '3px solid transparent',
+                            boxShadow: picks[game.id] === game.homeTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                            transition: 'all 0.2s ease'
+                          }}
+                        />
+                      </div>
                     </div>
-
-                    <div style={{
-                      fontSize: '18px',
-                      fontWeight: '600',
-                      color: '#002C5F',
-                      margin: '0 2px'
-                    }}>
-                      -
-                    </div>
-
-                    <div style={{
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: 'white',
-                      borderRadius: '50%',
-                      width: '44px',
-                      height: '44px'
-                    }}>
-                      <input
-                        type="radio"
-                        name={`game-${game.id}`}
-                        checked={picks[game.id] === game.homeTeam}
-                        onChange={() => handlePick(game.id, game.homeTeam)}
-                        disabled={loading}
-                        style={{
-                          position: 'absolute',
-                          opacity: 0,
-                          width: '100%',
-                          height: '100%',
-                          margin: 0,
-                          cursor: 'pointer'
-                        }}
-                      />
-                      <img
-                        src={teamLogos[game.homeTeam]}
-                        alt={game.homeTeam}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          cursor: 'pointer',
-                          border: picks[game.id] === game.homeTeam ? '3px solid #002C5F' : '3px solid transparent',
-                          boxShadow: picks[game.id] === game.homeTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
-                          transition: 'all 0.2s ease'
-                        }}
-                      />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ fontSize: '10px', fontWeight: '600', minWidth: '35px', textAlign: 'center' }}>
+                        {recordsLoading ? (
+                          <span style={{ color: 'gray' }}>...</span>
+                        ) : (
+                          <>
+                            <span style={{ color: 'green' }}>{(teamRecords[game.awayTeam] || '0-0-0').split('-')[0]}</span> / <span style={{ color: 'red' }}>{(teamRecords[game.awayTeam] || '0-0-0').split('-')[1]}</span>
+                          </>
+                        )}
+                      </div>
+                      <div style={{ width: '18px' }}></div>
+                      <div style={{ fontSize: '10px', fontWeight: '600', minWidth: '35px', textAlign: 'center' }}>
+                        {recordsLoading ? (
+                          <span style={{ color: 'gray' }}>...</span>
+                        ) : (
+                          <>
+                            <span style={{ color: 'green' }}>{(teamRecords[game.homeTeam] || '0-0-0').split('-')[0]}</span> / <span style={{ color: 'red' }}>{(teamRecords[game.homeTeam] || '0-0-0').split('-')[1]}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -380,104 +419,124 @@ export default function PickForm({ games, token, leagueId, week }) {
             {games.map(game => (
               <div key={game.id} style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                padding: '8px 12px',
+                padding: '12px 10px',
                 backgroundColor: 'rgba(240, 240, 240, 0.9)',
                 borderRadius: '12px',
                 border: '2px solid rgba(0, 44, 95, 0.2)',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                gap: '6px'
+                gap: '4px'
               }}>
-                <div style={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'white',
-                  borderRadius: '50%',
-                  width: '44px',
-                  height: '44px'
-                }}>
-                  <input
-                    type="radio"
-                    name={`game-${game.id}`}
-                    checked={picks[game.id] === game.awayTeam}
-                    onChange={() => handlePick(game.id, game.awayTeam)}
-                    disabled={loading}
-                    style={{
-                      position: 'absolute',
-                      opacity: 0,
-                      width: '100%',
-                      height: '100%',
-                      margin: 0,
-                      cursor: 'pointer'
-                    }}
-                  />
-                  <img
-                    src={teamLogos[game.awayTeam]}
-                    alt={game.awayTeam}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      cursor: 'pointer',
-                      border: picks[game.id] === game.awayTeam ? '3px solid #002C5F' : '3px solid transparent',
-                      boxShadow: picks[game.id] === game.awayTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
-                      transition: 'all 0.2s ease'
-                    }}
-                  />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'white',
+                    borderRadius: '50%',
+                    width: '44px',
+                    height: '44px'
+                  }}>
+                    <input
+                      type="radio"
+                      name={`game-${game.id}`}
+                      checked={picks[game.id] === game.awayTeam}
+                      onChange={() => handlePick(game.id, game.awayTeam)}
+                      disabled={loading}
+                      style={{
+                        position: 'absolute',
+                        opacity: 0,
+                        width: '100%',
+                        height: '100%',
+                        margin: 0,
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <img
+                      src={teamLogos[game.awayTeam]}
+                      alt={game.awayTeam}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        cursor: 'pointer',
+                        border: picks[game.id] === game.awayTeam ? '3px solid #002C5F' : '3px solid transparent',
+                        boxShadow: picks[game.id] === game.awayTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    />
+                  </div>
+                  <div style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#002C5F'
+                  }}>
+                    -
+                  </div>
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'white',
+                    borderRadius: '50%',
+                    width: '44px',
+                    height: '44px'
+                  }}>
+                    <input
+                      type="radio"
+                      name={`game-${game.id}`}
+                      checked={picks[game.id] === game.homeTeam}
+                      onChange={() => handlePick(game.id, game.homeTeam)}
+                      disabled={loading}
+                      style={{
+                        position: 'absolute',
+                        opacity: 0,
+                        width: '100%',
+                        height: '100%',
+                        margin: 0,
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <img
+                      src={teamLogos[game.homeTeam]}
+                      alt={game.homeTeam}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        cursor: 'pointer',
+                        border: picks[game.id] === game.homeTeam ? '3px solid #002C5F' : '3px solid transparent',
+                        boxShadow: picks[game.id] === game.homeTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    />
+                  </div>
                 </div>
-
-                <div style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#002C5F',
-                  margin: '0 2px'
-                }}>
-                  -
-                </div>
-
-                <div style={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'white',
-                  borderRadius: '50%',
-                  width: '44px',
-                  height: '44px'
-                }}>
-                  <input
-                    type="radio"
-                    name={`game-${game.id}`}
-                    checked={picks[game.id] === game.homeTeam}
-                    onChange={() => handlePick(game.id, game.homeTeam)}
-                    disabled={loading}
-                    style={{
-                      position: 'absolute',
-                      opacity: 0,
-                      width: '100%',
-                      height: '100% ',
-                      margin: 0,
-                      cursor: 'pointer'
-                    }}
-                  />
-                  <img
-                    src={teamLogos[game.homeTeam]}
-                    alt={game.homeTeam}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      cursor: 'pointer',
-                      border: picks[game.id] === game.homeTeam ? '3px solid #002C5F' : '3px solid transparent',
-                      boxShadow: picks[game.id] === game.homeTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
-                      transition: 'all 0.2s ease'
-                    }}
-                  />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: '600', minWidth: '35px', textAlign: 'center' }}>
+                    {recordsLoading ? (
+                      <span style={{ color: 'gray' }}>...</span>
+                    ) : (
+                      <>
+                        <span style={{ color: 'green' }}>{(teamRecords[game.awayTeam] || '0-0-0').split('-')[0]}</span> / <span style={{ color: 'red' }}>{(teamRecords[game.awayTeam] || '0-0-0').split('-')[1]}</span>
+                      </>
+                    )}
+                  </div>
+                  <div style={{ width: '18px' }}></div>
+                  <div style={{ fontSize: '10px', fontWeight: '600', minWidth: '35px', textAlign: 'center' }}>
+                    {recordsLoading ? (
+                      <span style={{ color: 'gray' }}>...</span>
+                    ) : (
+                      <>
+                        <span style={{ color: 'green' }}>{(teamRecords[game.homeTeam] || '0-0-0').split('-')[0]}</span> / <span style={{ color: 'red' }}>{(teamRecords[game.homeTeam] || '0-0-0').split('-')[1]}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
