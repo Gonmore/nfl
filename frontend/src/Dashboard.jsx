@@ -1008,7 +1008,7 @@ export default function Dashboard({ user, token, onLogout }) {
                   borderCollapse: 'collapse',
                   margin: 0,
                   fontSize: '14px',
-                  minWidth: '400px'
+                  minWidth: '100%'
                 }}>
                   <thead>
                     <tr style={{
@@ -1019,56 +1019,56 @@ export default function Dashboard({ user, token, onLogout }) {
                       zIndex: 1
                     }}>
                       <th style={{
-                        padding: '12px 4px',
+                        padding: '8px 2px',
                         textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '20px',
-                        fontSize: '13px',
+                        width: '15%',
+                        fontSize: '12px',
                         letterSpacing: '0.5px'
                       }}>
                         POS
                       </th>
                       <th style={{
-                        padding: '12px 8px',
-                        textAlign: 'left',
+                        padding: '8px 2px',
+                        textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '40px',
-                        fontSize: '13px',
+                        width: '25%',
+                        fontSize: '12px',
                         letterSpacing: '0.5px'
                       }}>
                         TEAM
                       </th>
                       <th style={{
-                        padding: '12px 4px',
+                        padding: '8px 2px',
                         textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '30px',
-                        fontSize: '13px',
+                        width: '20%',
+                        fontSize: '12px',
                         letterSpacing: '0.5px'
                       }}>
                         W
                       </th>
                       <th style={{
-                        padding: '12px 4px',
+                        padding: '8px 2px',
                         textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '30px',
-                        fontSize: '13px',
+                        width: '20%',
+                        fontSize: '12px',
                         letterSpacing: '0.5px'
                       }}>
                         L
                       </th>
                       <th style={{
-                        padding: '12px 4px',
+                        padding: '8px 2px',
                         textAlign: 'center',
                         fontWeight: '800',
                         color: '#FFFFFF',
-                        width: '30px',
-                        fontSize: '13px',
+                        width: '20%',
+                        fontSize: '12px',
                         letterSpacing: '0.5px'
                       }}>
                         T
@@ -1092,30 +1092,30 @@ export default function Dashboard({ user, token, onLogout }) {
                       }}
                       >
                         <td style={{
-                          padding: '12px 4px',
+                          padding: '8px 2px',
                           textAlign: 'center',
                           fontWeight: '700',
                           color: '#1A365D',
-                          fontSize: '14px'
+                          fontSize: '13px'
                         }}>
                           <div style={{
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            gap: '2px'
+                            gap: '1px'
                           }}>
-                            <span style={{ fontSize: '16px', fontWeight: '800' }}>
+                            <span style={{ fontSize: '14px', fontWeight: '800' }}>
                               {team.position}
                             </span>
                             {team.change !== 0 && (
                               <span style={{
-                                fontSize: '11px',
+                                fontSize: '10px',
                                 color: team.change > 0 ? '#38A169' : '#E53E3E',
                                 fontWeight: '700',
                                 backgroundColor: team.change > 0 ? '#C6F6D5' : '#FED7D7',
-                                padding: '2px 6px',
-                                borderRadius: '8px',
-                                minWidth: '20px',
+                                padding: '1px 4px',
+                                borderRadius: '6px',
+                                minWidth: '16px',
                                 textAlign: 'center'
                               }}>
                                 {team.change > 0 ? '↑' : '↓'}
@@ -1123,18 +1123,18 @@ export default function Dashboard({ user, token, onLogout }) {
                             )}
                           </div>
                         </td>
-                        <td style={{ padding: '12px' }}>
+                        <td style={{ padding: '8px 2px' }}>
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '12px'
+                            justifyContent: 'center'
                           }}>
                             <div style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '8px',
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '4px',
                               overflow: 'hidden',
-                              border: '2px solid #E2E8F0',
+                              border: '1px solid #E2E8F0',
                               flexShrink: 0
                             }}>
                               <img
@@ -1150,50 +1150,41 @@ export default function Dashboard({ user, token, onLogout }) {
                                 }}
                               />
                             </div>
-                            {!isMobile && (
-                              <span style={{
-                                fontSize: '14px',
-                                fontWeight: '700',
-                                color: '#1A365D'
-                              }}>
-                                {team.abbreviation}
-                              </span>
-                            )}
                           </div>
                         </td>
                         <td style={{
-                          padding: '12px 4px',
+                          padding: '8px 2px',
                           textAlign: 'center',
-                          fontSize: '14px',
+                          fontSize: '13px',
                           fontWeight: '700',
                           color: '#38A169',
                           backgroundColor: '#F0FFF4',
-                          borderRadius: '8px',
-                          margin: '0 4px'
+                          borderRadius: '6px',
+                          margin: '0 2px'
                         }}>
                           {team.wins}
                         </td>
                         <td style={{
-                          padding: '12px 4px',
+                          padding: '8px 2px',
                           textAlign: 'center',
-                          fontSize: '14px',
+                          fontSize: '13px',
                           fontWeight: '700',
                           color: '#E53E3E',
                           backgroundColor: '#FFF5F5',
-                          borderRadius: '8px',
-                          margin: '0 4px'
+                          borderRadius: '6px',
+                          margin: '0 2px'
                         }}>
                           {team.losses}
                         </td>
                         <td style={{
-                          padding: '12px 4px',
+                          padding: '8px 2px',
                           textAlign: 'center',
-                          fontSize: '14px',
+                          fontSize: '13px',
                           fontWeight: '700',
                           color: '#718096',
                           backgroundColor: '#F7FAFC',
-                          borderRadius: '8px',
-                          margin: '0 4px'
+                          borderRadius: '6px',
+                          margin: '0 2px'
                         }}>
                           {team.ties}
                         </td>
