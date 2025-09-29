@@ -495,20 +495,20 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                 <div key={detail.gameId} style={{
                   marginBottom: '20px',
                   padding: '20px',
-                  background: detail.correct ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%)' : 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%)',
-                  border: `3px solid ${detail.correct ? '#22C55E' : '#EF4444'}`,
+                  background: detail.points > 0 ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%)' : 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%)',
+                  border: `3px solid ${detail.points > 0 ? '#22C55E' : '#EF4444'}`,
                   borderRadius: '20px',
-                  boxShadow: detail.correct ? '0 6px 20px rgba(34, 197, 94, 0.2)' : '0 6px 20px rgba(239, 68, 68, 0.2)',
+                  boxShadow: detail.points > 0 ? '0 6px 20px rgba(34, 197, 94, 0.2)' : '0 6px 20px rgba(239, 68, 68, 0.2)',
                   transition: 'all 0.3s ease',
                   backdropFilter: 'blur(5px)'
                 }}
                 onMouseOver={(e) => {
                   e.target.style.transform = 'translateY(-4px)';
-                  e.target.style.boxShadow = detail.correct ? '0 12px 32px rgba(34, 197, 94, 0.3)' : '0 12px 32px rgba(239, 68, 68, 0.3)';
+                  e.target.style.boxShadow = detail.points > 0 ? '0 12px 32px rgba(34, 197, 94, 0.3)' : '0 12px 32px rgba(239, 68, 68, 0.3)';
                 }}
                 onMouseOut={(e) => {
                   e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = detail.correct ? '0 6px 20px rgba(34, 197, 94, 0.2)' : '0 6px 20px rgba(239, 68, 68, 0.2)';
+                  e.target.style.boxShadow = detail.points > 0 ? '0 6px 20px rgba(34, 197, 94, 0.2)' : '0 6px 20px rgba(239, 68, 68, 0.2)';
                 }}
                 >
                   <div style={{
