@@ -1,6 +1,6 @@
 #root {
   min-height: 100vh;
-  font-family: 'Kickoff', 'Comic Sans MS', cursive;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .container {
