@@ -9,7 +9,8 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
 app.get('/', (req, res) => {
@@ -55,7 +56,7 @@ const League = require('./models/League');
 const User = require('./models/User');
 const bcrypt = require('bcryptjs');
 
-sequelize.sync().then(async () => {
+sequelize.sync({ alter: true }).then(async () => {
   // Crear usuario admin si no existe
   let adminUser = await User.findOne({ where: { email: 'admin@cartelnfl.com' } });
   if (!adminUser) {

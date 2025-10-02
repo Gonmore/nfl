@@ -30,6 +30,7 @@ const getLeagueStats = async (req, res) => {
     const weekly = members.map(m => ({
       userId: m.userId,
       user: m.User.username,
+      profileImage: m.User.profileImage,
       points: weeklyScoresMap[m.userId] || 0
     })).sort((a, b) => b.points - a.points);
 
@@ -54,6 +55,7 @@ const getLeagueStats = async (req, res) => {
     const total = members.map(m => ({
       userId: m.userId,
       user: m.User.username,
+      profileImage: m.User.profileImage,
       points: totalScoresMap[m.userId] || 0
     })).sort((a, b) => b.points - a.points);
 

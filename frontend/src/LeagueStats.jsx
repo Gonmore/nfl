@@ -169,12 +169,12 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
             }}>
               {(() => {
                 const allUsers = new Map();
-                weeklyStats.forEach(s => allUsers.set(s.userId, { user: s.user, userId: s.userId, weekly: s.points, total: 0 }));
+                weeklyStats.forEach(s => allUsers.set(s.userId, { user: s.user, userId: s.userId, profileImage: s.profileImage, weekly: s.points, total: 0 }));
                 totalStats.forEach(s => {
                   if (allUsers.has(s.userId)) {
                     allUsers.get(s.userId).total = s.points;
                   } else {
-                    allUsers.set(s.userId, { user: s.user, userId: s.userId, weekly: 0, total: s.points });
+                    allUsers.set(s.userId, { user: s.user, userId: s.userId, profileImage: s.profileImage, weekly: 0, total: s.points });
                   }
                 });
                 const sortedUsers = Array.from(allUsers.values()).sort((a, b) => b.total - a.total);
@@ -285,7 +285,25 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                             fontWeight: '600',
                             color: '#002C5F'
                           }}>
-                            {user.user}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}>
+                              <img
+                                src={user.profileImage || '/default-avatar.svg'}
+                                alt={user.user}
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  borderRadius: '50%',
+                                  objectFit: 'cover',
+                                  border: '2px solid #002C5F',
+                                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                                }}
+                              />
+                              <span>{user.user}</span>
+                            </div>
                           </td>
                           <td style={{
                             padding: '12px 8px',

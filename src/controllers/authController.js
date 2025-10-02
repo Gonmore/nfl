@@ -42,10 +42,50 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Contraseña incorrecta.' });
     }
     const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    return res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
+    return res.json({ token, user: { id: user.id, username: user.username, email: user.email, profileImage: user.profileImage } });
   } catch (error) {
     return res.status(500).json({ message: 'Error en el login.', error });
   }
 };
 
-module.exports = { register, login };
+const updateProfile = async (req, res) => {
+  try {
+    const { username, password, profileImage } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    // Verificar si el username ya existe (solo si está cambiando)
+    if (username && username !== user.username) {
+      const existingUser = await User.findOne({ where: { username } });
+      if (existingUser) {
+        return res.status(409).json({ message: 'El nombre de usuario ya está en uso.' });
+      }
+    }
+
+    // Preparar los campos a actualizar
+    const updateData = {};
+    if (username) updateData.username = username;
+    if (password) updateData.password = await bcrypt.hash(password, 10);
+    if (profileImage !== undefined) updateData.profileImage = profileImage;
+
+    await user.update(updateData);
+
+    return res.json({
+      message: 'Perfil actualizado correctamente.',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        profileImage: user.profileImage
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al actualizar el perfil.', error });
+  }
+};
+
+module.exports = { register, login, updateProfile };

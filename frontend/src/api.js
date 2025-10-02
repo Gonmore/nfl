@@ -171,3 +171,18 @@ export async function joinGeneralLeague(token) {
   });
   return await res.json();
 }
+
+export async function updateProfile(token, { username, password, profileImage }) {
+  console.log('Calling updateProfile with token:', token ? 'present' : 'null');
+  const res = await fetch(`${API_URL}/auth/profile`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ username, password, profileImage })
+  });
+  const data = await res.json();
+  console.log('updateProfile response:', data);
+  return data;
+}

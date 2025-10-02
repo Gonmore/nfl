@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PickForm from './PickForm.jsx';
 import LeagueStats from './LeagueStats.jsx';
-import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails } from './api';
+import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, updateProfile } from './api';
 import { teamLogos } from './teamLogos.js';
 
 export default function Dashboard({ user, token, onLogout }) {
@@ -31,6 +31,11 @@ export default function Dashboard({ user, token, onLogout }) {
   const [currentWeekGames, setCurrentWeekGames] = useState([]);
   const [userPicksWithResults, setUserPicksWithResults] = useState([]);
   const [totalPoints, setTotalPoints] = useState(0);
+
+  // Estados para foto de perfil
+  const [profileImage, setProfileImage] = useState(user?.profileImage || null);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Obtiene ligas del usuario
   useEffect(() => {
@@ -186,6 +191,51 @@ export default function Dashboard({ user, token, onLogout }) {
   };
 
   const filteredGames = games.filter(g => g.week === week);
+
+  // Funciones para manejar foto de perfil
+  const handleImageUpload = (file) => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImage(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleProfileClick = () => {
+    setShowProfileDropdown(!showProfileDropdown);
+  };
+
+  const handleEditProfile = () => {
+    setShowProfileDropdown(false);
+    setShowProfileModal(true);
+  };
+
+  const handleLogout = () => {
+    setShowProfileDropdown(false);
+    onLogout();
+  };
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showProfileDropdown && !event.target.closest('.profile-container')) {
+        setShowProfileDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showProfileDropdown]);
+
+  // Función para manejar actualización del perfil
+  const handleProfileUpdate = (updatedUser) => {
+    // Aquí podrías actualizar el estado del usuario si es necesario
+    // Por ahora, solo aseguramos que la imagen se actualice correctamente
+    if (updatedUser.profileImage !== undefined) {
+      setProfileImage(updatedUser.profileImage);
+    }
+  };
 
   // Modal de opciones de jornada
   if (showGameWeekOptions && selectedLeague) {
@@ -648,39 +698,125 @@ export default function Dashboard({ user, token, onLogout }) {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={onLogout}
-                style={{
-                  background: 'linear-gradient(135deg, #E53E3E 0%, #C53030 100%)',
-                  color: '#FFFFFF',
-                  border: '2px solid #E53E3E',
-                  padding: '10px',
-                  borderRadius: '12px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '40px',
-                  height: '40px',
-                  boxShadow: '0 6px 20px rgba(229, 62, 62, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2)',
-                  transition: 'all 0.3s ease',
-                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.background = 'linear-gradient(135deg, #C53030 0%, #9B2C2C 100%)';
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 8px 25px rgba(229, 62, 62, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3)';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.background = 'linear-gradient(135deg, #E53E3E 0%, #C53030 100%)';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 6px 20px rgba(229, 62, 62, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2)';
-                }}
-                title="Cerrar Sesión"
-              >
-                <span style={{ fontSize: '22px', fontFamily: 'Brush Script MT, cursive' }}>⏻</span>
-              </button>
+              {/* Foto de perfil con dropdown */}
+              <div className="profile-container" style={{ position: 'relative' }}>
+                <div
+                  onClick={handleProfileClick}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: profileImage ? 'transparent' : '#1A365D',
+                    border: '2px solid #1A365D',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.3)',
+                    transition: 'all 0.3s ease',
+                    overflow: 'hidden'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.boxShadow = '0 6px 16px rgba(26, 54, 93, 0.4)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(26, 54, 93, 0.3)';
+                  }}
+                  title="Perfil"
+                >
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt="Foto de perfil"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '18px', color: '#FFFFFF' }}>👤</span>
+                  )}
+                </div>
+
+                {/* Dropdown del perfil */}
+                {showProfileDropdown && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '50px',
+                    right: '0',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+                    border: '2px solid #E2E8F0',
+                    zIndex: 1000,
+                    minWidth: '180px',
+                    overflow: 'hidden'
+                  }}>
+                    <button
+                      onClick={handleEditProfile}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1A365D',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#F8FAFC';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <span style={{ fontSize: '16px' }}>⚙️</span>
+                      Editar Perfil
+                    </button>
+                    <div style={{
+                      height: '1px',
+                      backgroundColor: '#E2E8F0',
+                      margin: '0 8px'
+                    }}></div>
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#E53E3E',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#FFF5F5';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <span style={{ fontSize: '16px' }}>⏻</span>
+                      Cerrar Sesión
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -1275,6 +1411,17 @@ export default function Dashboard({ user, token, onLogout }) {
             <JoinLeagueModal
               onJoin={handleJoinLeague}
               onClose={() => setShowJoinModal(false)}
+            />
+          )}
+
+          {showProfileModal && (
+            <ProfileModal
+              onClose={() => setShowProfileModal(false)}
+              profileImage={profileImage}
+              onImageUpload={handleImageUpload}
+              user={user}
+              token={token}
+              onProfileUpdate={handleProfileUpdate}
             />
           )}
         </div>
@@ -1990,6 +2137,489 @@ function InviteCodeModal({ league, onClose }) {
             <li>El código es único para esta liga</li>
             <li>Cualquier persona con el código puede unirse</li>
           </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Componente modal para editar perfil
+function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onProfileUpdate }) {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(profileImage);
+  const [username, setUsername] = useState(user?.username || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewImage(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    setError('');
+
+    // Validaciones
+    if (newPassword && newPassword !== confirmPassword) {
+      setError('Las contraseñas nuevas no coinciden');
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword && !currentPassword) {
+      setError('Debes ingresar tu contraseña actual para cambiarla');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const updateData = {};
+
+      // Solo incluir campos que han cambiado
+      if (username !== user.username) {
+        updateData.username = username;
+      }
+
+      if (newPassword) {
+        updateData.password = newPassword;
+      }
+
+      // Manejar imagen de perfil
+      if (selectedFile) {
+        updateData.profileImage = previewImage;
+      } else if (previewImage === null) {
+        updateData.profileImage = null;
+      }
+
+      // Solo hacer la llamada si hay algo que actualizar
+      if (Object.keys(updateData).length > 0) {
+        const result = await updateProfile(token, updateData);
+        if (result.message) {
+          // Actualizar la imagen localmente si se cambió
+          if (selectedFile) {
+            onImageUpload(selectedFile);
+          } else if (previewImage === null) {
+            setProfileImage(null);
+          }
+
+          // Notificar al componente padre sobre la actualización
+          if (onProfileUpdate) {
+            onProfileUpdate(result.user);
+          }
+
+          alert('Perfil actualizado correctamente');
+        } else {
+          setError(result.message || 'Error al actualizar el perfil');
+          setLoading(false);
+          return;
+        }
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setError('Error al actualizar el perfil');
+    }
+    setLoading(false);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setPreviewImage(null);
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 2000,
+      backdropFilter: 'blur(4px)'
+    }}>
+      <div style={{
+        backgroundColor: '#FFFFFF',
+        borderRadius: '20px',
+        padding: '32px',
+        width: '90%',
+        maxWidth: '400px',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+        border: '2px solid #E2E8F0',
+        position: 'relative'
+      }}>
+        {/* Botón cerrar */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            backgroundColor: 'transparent',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            color: '#666666',
+            padding: '4px',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.backgroundColor = '#F1F5F9';
+            e.target.style.color = '#1A365D';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.backgroundColor = 'transparent';
+            e.target.style.color = '#666666';
+          }}
+        >
+          ×
+        </button>
+
+        {/* Título */}
+        <h2 style={{
+          margin: '0 0 24px 0',
+          color: '#1A365D',
+          fontSize: '24px',
+          fontWeight: '700',
+          textAlign: 'center'
+        }}>
+          Editar Perfil
+        </h2>
+
+        {error && (
+          <div style={{
+            backgroundColor: '#FED7D7',
+            color: '#C53030',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            fontSize: '14px',
+            textAlign: 'center'
+          }}>
+            {error}
+          </div>
+        )}
+
+        {/* Vista previa de imagen */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            width: '120px',
+            height: '120px',
+            borderRadius: '50%',
+            border: '4px solid #E2E8F0',
+            overflow: 'hidden',
+            marginBottom: '16px',
+            backgroundColor: previewImage ? 'transparent' : '#F1F5F9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
+          }}>
+            {previewImage ? (
+              <img
+                src={previewImage}
+                alt="Vista previa"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            ) : (
+              <span style={{ fontSize: '48px', color: '#CBD5E1' }}>👤</span>
+            )}
+          </div>
+
+          {/* Botones de acción para imagen */}
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}>
+            <button
+              onClick={() => fileInputRef.current.click()}
+              style={{
+                backgroundColor: '#1A365D',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = '#2D3748';
+                e.target.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = '#1A365D';
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              📷 Cambiar Foto
+            </button>
+
+            {previewImage && (
+              <button
+                onClick={handleRemoveImage}
+                style={{
+                  backgroundColor: '#E53E3E',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#C53030';
+                  e.target.style.transform = 'translateY(-1px)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#E53E3E';
+                  e.target.style.transform = 'translateY(0)';
+                }}
+              >
+                🗑️ Quitar Foto
+              </button>
+            )}
+          </div>
+
+          {/* Input de archivo oculto */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+        </div>
+
+        {/* Campos de formulario */}
+        <div style={{ marginBottom: '24px' }}>
+          {/* Username */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              color: '#1A365D',
+              fontSize: '14px'
+            }}>
+              Nombre de Usuario
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #E2E8F0',
+                borderRadius: '8px',
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#1A365D'}
+              onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
+              placeholder="Ingresa tu nombre de usuario"
+            />
+          </div>
+
+          {/* Contraseña actual */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              color: '#1A365D',
+              fontSize: '14px'
+            }}>
+              Contraseña Actual (requerida para cambiar contraseña)
+            </label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #E2E8F0',
+                borderRadius: '8px',
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#1A365D'}
+              onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
+              placeholder="Ingresa tu contraseña actual"
+            />
+          </div>
+
+          {/* Nueva contraseña */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              color: '#1A365D',
+              fontSize: '14px'
+            }}>
+              Nueva Contraseña (opcional)
+            </label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #E2E8F0',
+                borderRadius: '8px',
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#1A365D'}
+              onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
+              placeholder="Deja vacío si no quieres cambiar"
+            />
+          </div>
+
+          {/* Confirmar nueva contraseña */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              color: '#1A365D',
+              fontSize: '14px'
+            }}>
+              Confirmar Nueva Contraseña
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #E2E8F0',
+                borderRadius: '8px',
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#1A365D'}
+              onBlur={(e) => e.target.style.borderColor = '#E2E8F0'}
+              placeholder="Confirma tu nueva contraseña"
+            />
+          </div>
+        </div>
+
+        {/* Botones de acción */}
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          justifyContent: 'center'
+        }}>
+          <button
+            onClick={onClose}
+            disabled={loading}
+            style={{
+              backgroundColor: '#F1F5F9',
+              color: '#64748B',
+              border: '2px solid #E2E8F0',
+              padding: '12px 24px',
+              borderRadius: '12px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              opacity: loading ? 0.6 : 1
+            }}
+            onMouseOver={(e) => {
+              if (!loading) e.target.style.backgroundColor = '#E2E8F0';
+            }}
+            onMouseOut={(e) => {
+              if (!loading) e.target.style.backgroundColor = '#F1F5F9';
+            }}
+          >
+            Cancelar
+          </button>
+
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            style={{
+              background: loading ? '#CBD5E1' : 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '12px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: loading ? 'none' : '0 4px 12px rgba(26, 54, 93, 0.3)',
+              opacity: loading ? 0.8 : 1
+            }}
+            onMouseOver={(e) => {
+              if (!loading) {
+                e.target.style.background = 'linear-gradient(135deg, #2D3748 0%, #4A5568 100%)';
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(26, 54, 93, 0.4)';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!loading) {
+                e.target.style.background = 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(26, 54, 93, 0.3)';
+              }
+            }}
+          >
+            {loading ? '💾 Guardando...' : '💾 Guardar Cambios'}
+          </button>
         </div>
       </div>
     </div>
