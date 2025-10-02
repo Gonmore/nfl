@@ -70,11 +70,10 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
       {/* Ranking Semanal */}
       <div className="card" style={{
         marginBottom: '24px',
-        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        backgroundColor: 'transparent',
         border: '3px solid #002C5F',
         borderRadius: '20px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-        backdropFilter: 'blur(10px)'
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
       }}>
         <div className="card-header" style={{
           background: 'linear-gradient(135deg, #002C5F 0%, #1A365D 100%)',

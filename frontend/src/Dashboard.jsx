@@ -692,12 +692,11 @@ export default function Dashboard({ user, token, onLogout }) {
 
           {/* Panel de Ligas - Arriba */}
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            backgroundColor: 'transparent',
             borderRadius: '20px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
             border: '3px solid #1A365D',
             overflow: 'hidden',
-            backdropFilter: 'blur(10px)',
             maxWidth: '800px',
             margin: '0 auto',
             width: '100%'
@@ -988,12 +987,11 @@ export default function Dashboard({ user, token, onLogout }) {
 
           {/* Panel de Standings NFL - Abajo */}
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            backgroundColor: 'transparent',
             borderRadius: '20px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
             border: '3px solid #1A365D',
             overflow: 'hidden',
-            backdropFilter: 'blur(10px)',
             maxWidth: '1200px',
             margin: '0 auto',
             width: '100%'
