@@ -225,8 +225,8 @@ export default function Dashboard({ user, token, onLogout }) {
                   src='/img/logo_MVPicks.png'
                   alt='CartelNFL Logo'
                   style={{
-                    width: '32px',
-                    height: '32px',
+                    width: '64px',
+                    height: '64px',
                     borderRadius: '4px'
                   }}
                 />
@@ -401,8 +401,8 @@ export default function Dashboard({ user, token, onLogout }) {
                 src='/img/logo_MVPicks.png'
                 alt='CartelNFL Logo'
                 style={{
-                  width: '28px',
-                  height: '28px',
+                  width: '64px',
+                  height: '64px',
                   borderRadius: '4px'
                 }}
               />
@@ -629,8 +629,8 @@ export default function Dashboard({ user, token, onLogout }) {
                   src='/img/logo_MVPicks.png'
                   alt='CartelNFL Logo'
                   style={{
-                    width: '50px',
-                    height: '50px',
+                    width: '64px',
+                    height: '64px',
                     cursor: 'pointer',
                     borderRadius: '8px',
                     filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
@@ -1309,8 +1309,8 @@ export default function Dashboard({ user, token, onLogout }) {
                 src='/img/logo_MVPicks.png'
                 alt='CartelNFL Logo'
                 style={{
-                  width: '50px',
-                  height: '50px',
+                  width: '64px',
+                  height: '64px',
                   cursor: 'pointer',
                   borderRadius: '8px',
                   filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
