@@ -72,8 +72,7 @@ export default function LoginRegister({ onLogin }) {
               style={{
                 width: '128px',
                 height: '128px',
-                borderRadius: '12px',
-                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))'
+                borderRadius: '12px'
               }}
             />
           </div>
