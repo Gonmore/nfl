@@ -222,7 +222,7 @@ export default function Dashboard({ user, token, onLogout }) {
                 marginBottom: '16px'
               }}>
                 <img
-                  src='../img/logo_MVPicks.png'
+                  src='/img/logo_MVPicks.png'
                   alt='CartelNFL Logo'
                   style={{
                     width: '32px',
@@ -398,7 +398,7 @@ export default function Dashboard({ user, token, onLogout }) {
               gap: '12px'
             }}>
               <img
-                src='../img/logo_MVPicks.png'
+                src='/img/logo_MVPicks.png'
                 alt='CartelNFL Logo'
                 style={{
                   width: '28px',
@@ -626,7 +626,7 @@ export default function Dashboard({ user, token, onLogout }) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <img
-                  src='../img/logo_MVPicks.png'
+                  src='/img/logo_MVPicks.png'
                   alt='CartelNFL Logo'
                   style={{
                     width: '50px',
@@ -1306,7 +1306,7 @@ export default function Dashboard({ user, token, onLogout }) {
               gap: '16px'
             }}>
               <img
-                src='../img/logo_MVPicks.png'
+                src='/img/logo_MVPicks.png'
                 alt='CartelNFL Logo'
                 style={{
                   width: '50px',
