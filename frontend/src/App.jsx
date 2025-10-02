@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import LoginRegister from './LoginRegister.jsx';
 import Dashboard from './Dashboard.jsx';
+import LoadingModal from './LoadingModal.jsx';
+import { setGlobalLoadingSetter } from './api.js';
 import './App.css';
+import './index.css';
 
 export default function App() {
   const [token, setToken] = useState(() => {
@@ -12,6 +15,12 @@ export default function App() {
     const stored = localStorage.getItem('user');
     return stored ? JSON.parse(stored) : null;
   });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Initialize global loading setter
+  useEffect(() => {
+    setGlobalLoadingSetter(setIsLoading);
+  }, []);
 
   const handleLogin = (jwt, userData) => {
     setToken(jwt);
@@ -29,10 +38,11 @@ export default function App() {
 
   return (
     <div className="container">
+      <LoadingModal isVisible={isLoading} />
       {!token ? (
-        <LoginRegister onLogin={handleLogin} />
+        <LoginRegister onLogin={handleLogin} setIsLoading={setIsLoading} />
       ) : (
-        <Dashboard user={user} token={token} onLogout={handleLogout} />
+        <Dashboard user={user} token={token} onLogout={handleLogout} setIsLoading={setIsLoading} />
       )}
     </div>
   );

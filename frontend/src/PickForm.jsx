@@ -4,7 +4,7 @@ import { teamLogos } from './teamLogos';
 
 export default function PickForm({ games, token, leagueId, week }) {
   const [picks, setPicks] = useState({});
-  const [message] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [nextWeekGames, setNextWeekGames] = useState([]);
   const [nextWeek, setNextWeek] = useState(null);
@@ -129,6 +129,14 @@ export default function PickForm({ games, token, leagueId, week }) {
 
   const handlePick = (gameId, team) => {
     setPicks({ ...picks, [gameId]: team });
+    // Limpiar mensaje de error cuando el usuario hace un pick
+    if (message) setMessage('');
+  };
+
+  // Verificar si todos los picks están completos
+  const areAllPicksComplete = () => {
+    const currentGames = isDeadlinePassed ? nextWeekGames : games;
+    return currentGames.length > 0 && currentGames.every(game => picks[game.id]);
   };
 
   const handleSubmit = async e => {
@@ -142,7 +150,7 @@ export default function PickForm({ games, token, leagueId, week }) {
     // Verificar que se hayan hecho picks para todos los partidos
     const missingPicks = currentGames.filter(game => !picks[game.id]);
     if (missingPicks.length > 0) {
-      setMessage(`Debes hacer picks para todos los partidos. Faltan ${missingPicks.length} pick(s).`);
+      setMessage(`Debes seleccionar un equipo para todos los partidos. Faltan ${missingPicks.length} pick(s).`);
       setLoading(false);
       return;
     }
@@ -187,9 +195,14 @@ export default function PickForm({ games, token, leagueId, week }) {
           {nextWeekGames.length > 0 ? (
             <form onSubmit={handleSubmit}>
               <h3 style={{
-                color: 'var(--primary-color)',
+                color: 'white',
                 textAlign: 'center',
-                marginBottom: '20px'
+                marginBottom: '20px',
+                background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
+                padding: '12px 20px',
+                borderRadius: '12px',
+                fontSize: '18px',
+                fontWeight: '700'
               }}>
                 🎯 Haz tus picks para la semana {nextWeek}
               </h3>
@@ -206,7 +219,7 @@ export default function PickForm({ games, token, leagueId, week }) {
                     flexDirection: 'column',
                     alignItems: 'center',
                     padding: '12px 10px',
-                    backgroundColor: 'rgba(240, 240, 240, 0.9)',
+                    backgroundColor: 'rgba(0, 44, 95, 0.05)',
                     borderRadius: '12px',
                     border: '2px solid rgba(0, 75, 155, 0.2)',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
@@ -256,7 +269,7 @@ export default function PickForm({ games, token, leagueId, week }) {
                       <div style={{
                         fontSize: '18px',
                         fontWeight: '600',
-                        color: '#004B9B'
+                        color: 'white'
                       }}>
                         -
                       </div>
@@ -330,56 +343,33 @@ export default function PickForm({ games, token, leagueId, week }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  style={{
-                    background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '16px 36px',
-                    borderRadius: '20px',
-                    fontSize: '18px',
-                    fontWeight: '700',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 6px 20px rgba(79, 70, 229, 0.4)',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    margin: '0 auto',
-                    opacity: loading ? 0.7 : 1,
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                  }}
-                  onMouseOver={(e) => {
-                    if (!loading) {
-                      e.target.style.transform = 'translateY(-3px) scale(1.05)';
-                      e.target.style.boxShadow = '0 10px 30px rgba(79, 70, 229, 0.6)';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (!loading) {
-                      e.target.style.transform = 'translateY(0) scale(1)';
-                      e.target.style.boxShadow = '0 6px 20px rgba(79, 70, 229, 0.4)';
-                    }
-                  }}
+                  className={`smart-submit-btn ${!areAllPicksComplete() ? 'incomplete-picks' : ''}`}
                 >
                   {loading ? (
                     <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '3px' }}></div>
+                  ) : !areAllPicksComplete() ? (
+                    '🚨'
                   ) : (
                     '⚡'
                   )}
-                  {loading ? 'Enviando...' : 'Enviar Picks'}
+                  {loading ? 'Enviando...' : !areAllPicksComplete() ? 'FALTAN PICKS' : 'Enviar Picks'}
                 </button>
 
                 {message && (
                   <div style={{
-                    marginTop: '16px',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    backgroundColor: message.includes('correctamente') ? 'var(--success-color)' : 'var(--error-color)',
-                    color: 'white',
-                    fontWeight: '500'
+                    marginTop: '20px',
+                    padding: '16px 20px',
+                    borderRadius: '12px',
+                    backgroundColor: message.includes('correctamente') ? 'var(--success-color)' : 'white',
+                    color: message.includes('correctamente') ? 'white' : '#004B9B',
+                    fontWeight: '600',
+                    fontSize: '16px',
+                    textAlign: 'center',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+                    border: message.includes('correctamente') ? 'none' : '2px solid #FFD700',
+                    animation: message.includes('correctamente') ? 'none' : 'shake 0.5s ease-in-out'
                   }}>
-                    {message.includes('correctamente') ? '✅ ' : '❌ '}{message}
+                    {message.includes('correctamente') ? '✅ ' : '🚨 '}{message}
                   </div>
                 )}
               </div>
@@ -406,7 +396,7 @@ export default function PickForm({ games, token, leagueId, week }) {
   return (
     <div className="card">
       <div className="card-header">
-        <h2 style={{ margin: 0, fontSize: '20px' }}>🎯 Haz tus picks - Semana {week}</h2>
+        <h2 style={{ margin: 0, fontSize: '20px', color: 'white' }}>🎯 Haz tus picks - Semana {week}</h2>
       </div>
       <div className="card-body">
         <form onSubmit={handleSubmit}>
@@ -422,7 +412,7 @@ export default function PickForm({ games, token, leagueId, week }) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 padding: '12px 10px',
-                backgroundColor: 'rgba(240, 240, 240, 0.9)',
+                backgroundColor: 'rgba(0, 44, 95, 0.05)',
                 borderRadius: '12px',
                 border: '2px solid rgba(0, 75, 155, 0.2)',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
@@ -472,7 +462,7 @@ export default function PickForm({ games, token, leagueId, week }) {
                   <div style={{
                     fontSize: '18px',
                     fontWeight: '600',
-                    color: '#004B9B'
+                    color: 'white'
                   }}>
                     -
                   </div>
@@ -546,56 +536,33 @@ export default function PickForm({ games, token, leagueId, week }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  style={{
-                    background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '16px 36px',
-                    borderRadius: '20px',
-                    fontSize: '18px',
-                    fontWeight: '700',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 6px 20px rgba(79, 70, 229, 0.4)',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    margin: '0 auto',
-                    opacity: loading ? 0.7 : 1,
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                  }}
-                  onMouseOver={(e) => {
-                    if (!loading) {
-                      e.target.style.transform = 'translateY(-3px) scale(1.05)';
-                      e.target.style.boxShadow = '0 10px 30px rgba(79, 70, 229, 0.6)';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (!loading) {
-                      e.target.style.transform = 'translateY(0) scale(1)';
-                      e.target.style.boxShadow = '0 6px 20px rgba(79, 70, 229, 0.4)';
-                    }
-                  }}
+                  className={`smart-submit-btn ${!areAllPicksComplete() ? 'incomplete-picks' : ''}`}
                 >
                   {loading ? (
                     <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '3px' }}></div>
+                  ) : !areAllPicksComplete() ? (
+                    '🚨'
                   ) : (
                     '⚡'
                   )}
-                  {loading ? 'Enviando...' : 'Enviar Picks'}
+                  {loading ? 'Enviando...' : !areAllPicksComplete() ? 'FALTAN PICKS' : 'Enviar Picks'}
                 </button>
 
             {message && (
               <div style={{
-                marginTop: '16px',
-                padding: '12px',
-                borderRadius: '8px',
-                backgroundColor: message.includes('correctamente') ? 'var(--success-color)' : 'var(--error-color)',
-                color: 'white',
-                fontWeight: '500'
+                marginTop: '20px',
+                padding: '16px 20px',
+                borderRadius: '12px',
+                backgroundColor: message.includes('correctamente') ? 'var(--success-color)' : 'white',
+                color: message.includes('correctamente') ? 'white' : '#004B9B',
+                fontWeight: '600',
+                fontSize: '16px',
+                textAlign: 'center',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+                border: message.includes('correctamente') ? 'none' : '2px solid #FFD700',
+                animation: message.includes('correctamente') ? 'none' : 'shake 0.5s ease-in-out'
               }}>
-                {message.includes('correctamente') ? '✅ ' : '❌ '}{message}
+                {message.includes('correctamente') ? '✅ ' : '🚨 '}{message}
               </div>
             )}
           </div>

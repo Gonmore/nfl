@@ -393,19 +393,32 @@ export default function Dashboard({ user, token, onLogout }) {
                 setSelectedLeague(null);
               }}
               style={{
-                backgroundColor: '#6C757D',
+                background: 'linear-gradient(135deg, #6C757D 0%, #5A6268 100%)',
                 color: '#FFFFFF',
                 border: 'none',
                 padding: '12px 24px',
                 borderRadius: '12px',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(108, 117, 125, 0.3)',
+                transition: 'all 0.3s ease'
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#545B62'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#6C757D'}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(108, 117, 125, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(108, 117, 125, 0.3)';
+              }}
             >
-              ← Cambiar Liga
+              <span style={{ fontSize: '16px' }}>←</span>
+              Cambiar Liga
             </button>
           </div>
         </div>
@@ -584,7 +597,7 @@ export default function Dashboard({ user, token, onLogout }) {
           <div style={{
             textAlign: 'center',
             padding: '24px',
-            background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
+            background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
             borderRadius: '16px',
             color: 'white'
           }}>
@@ -603,7 +616,7 @@ export default function Dashboard({ user, token, onLogout }) {
                 setShowGameWeekOptions(true);
               }}
               style={{
-                backgroundColor: '#6C757D',
+                background: 'linear-gradient(135deg, #6C757D 0%, #5A6268 100%)',
                 color: '#FFFFFF',
                 border: 'none',
                 padding: '12px 24px',
@@ -611,12 +624,24 @@ export default function Dashboard({ user, token, onLogout }) {
                 fontSize: '16px',
                 fontWeight: '600',
                 cursor: 'pointer',
-                marginRight: '12px'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(108, 117, 125, 0.3)',
+                transition: 'all 0.3s ease'
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#545B62'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#6C757D'}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(108, 117, 125, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(108, 117, 125, 0.3)';
+              }}
             >
-              ← Volver
+              <span style={{ fontSize: '16px' }}>←</span>
+              Volver
             </button>
             <button
               onClick={() => {
@@ -624,17 +649,29 @@ export default function Dashboard({ user, token, onLogout }) {
                 setSelectedLeague(null);
               }}
               style={{
-                backgroundColor: '#002C5F',
+                background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
                 color: '#FFFFFF',
                 border: 'none',
                 padding: '12px 24px',
                 borderRadius: '12px',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(0, 75, 155, 0.3)',
+                transition: 'all 0.3s ease'
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#001B3A'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#002C5F'}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(0, 75, 155, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(0, 75, 155, 0.3)';
+              }}
             >
               Cambiar Liga
             </button>
@@ -679,8 +716,8 @@ export default function Dashboard({ user, token, onLogout }) {
                   src='/img/logo_MVPicks.png'
                   alt='CartelNFL Logo'
                   style={{
-                    width: '64px',
-                    height: '64px',
+                    width: '86px',
+                    height: '86px',
                     cursor: 'pointer',
                     borderRadius: '8px',
                     filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
@@ -832,7 +869,7 @@ export default function Dashboard({ user, token, onLogout }) {
             width: '100%'
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
+              background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
               color: '#FFFFFF',
               padding: '12px 20px',
               borderBottom: '2px solid #4A5568'
@@ -849,7 +886,8 @@ export default function Dashboard({ user, token, onLogout }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
-                  letterSpacing: '-0.3px'
+                  letterSpacing: '-0.3px',
+                  color: 'white'
                 }}>
                   <span style={{ fontSize: '24px' }}>🏆</span>
                   Mis Ligas
@@ -1025,7 +1063,7 @@ export default function Dashboard({ user, token, onLogout }) {
                         }}
                       >
                         <div style={{
-                          background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
+                          background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
                           color: '#FFFFFF',
                           width: '40px',
                           height: '40px',
@@ -1135,7 +1173,7 @@ export default function Dashboard({ user, token, onLogout }) {
             width: '100%'
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
+              background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
               color: '#FFFFFF',
               padding: '16px 20px',
               borderBottom: '2px solid #4A5568'
@@ -1147,7 +1185,8 @@ export default function Dashboard({ user, token, onLogout }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
-                letterSpacing: '-0.3px'
+                letterSpacing: '-0.3px',
+                color: 'white'
               }}>
                 <span style={{ fontSize: '26px' }}>📊</span>
                 Standings NFL
@@ -1171,7 +1210,7 @@ export default function Dashboard({ user, token, onLogout }) {
                 }}>
                   <thead>
                     <tr style={{
-                      background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
+                      background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
                       borderBottom: '3px solid #4A5568',
                       position: 'sticky',
                       top: 0,
@@ -1486,24 +1525,34 @@ export default function Dashboard({ user, token, onLogout }) {
             <button
               onClick={() => setSelectedLeague(null)}
               style={{
-                backgroundColor: '#6C757D',
+                background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
                 color: '#FFFFFF',
                 border: 'none',
-                padding: '8px 12px',
+                padding: '4px 4px',
                 borderRadius: '12px',
                 fontSize: '12px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '4px',
-                whiteSpace: 'nowrap'
+                gap: '2px',
+                width: 'fit-content',
+                minWidth: 'auto',
+                boxShadow: '0 4px 12px rgba(0, 75, 155, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#545B62'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#6C757D'}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(0, 75, 155, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(0, 75, 155, 0.3)';
+              }}
             >
-              <span style={{ fontSize: '14px' }}>←</span>
               Cambiar Liga
+              <span style={{ fontSize: '14px' }}>←</span>
             </button>
           </div>        {loading ? (
           <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
@@ -2599,7 +2648,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
             onClick={handleSave}
             disabled={loading}
             style={{
-              background: loading ? '#CBD5E1' : 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
+              background: loading ? '#CBD5E1' : 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
               color: '#FFFFFF',
               border: 'none',
               padding: '12px 24px',
@@ -2620,7 +2669,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
             }}
             onMouseOut={(e) => {
               if (!loading) {
-                e.target.style.background = 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)';
+                e.target.style.background = 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)';
                 e.target.style.transform = 'translateY(0)';
                 e.target.style.boxShadow = '0 4px 12px rgba(26, 54, 93, 0.3)';
               }

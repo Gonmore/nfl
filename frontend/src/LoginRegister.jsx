@@ -70,8 +70,8 @@ export default function LoginRegister({ onLogin }) {
               src='/img/logo_MVPicks.png'
               alt='CartelNFL Logo'
               style={{
-                width: '64px',
-                height: '64px',
+                width: '128px',
+                height: '128px',
                 borderRadius: '12px',
                 filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))'
               }}
