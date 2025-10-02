@@ -641,8 +641,8 @@ export default function Dashboard({ user, token, onLogout }) {
                   <p style={{
                     color: '#4A5568',
                     margin: '4px 0 0 0',
-                    fontSize: '14px',
-                    fontWeight: '500'
+                    fontSize: '14.5px',
+                    fontWeight: '900'
                   }}>
                     Bienvenido, {user?.username || 'Usuario'}
                   </p>
