@@ -2,6 +2,11 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-image: url('../img/campfut_background.JPG');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 /* Remove default Vite styles that conflict with our design */
