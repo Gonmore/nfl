@@ -67,7 +67,7 @@ export default function LoginRegister({ onLogin }) {
             marginBottom: '16px'
           }}>
             <img
-              src='../img/logo.jpeg'
+              src='../img/logo_MVPicks.png'
               alt='CartelNFL Logo'
               style={{
                 width: '64px',

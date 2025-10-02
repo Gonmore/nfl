@@ -222,7 +222,7 @@ export default function Dashboard({ user, token, onLogout }) {
                 marginBottom: '16px'
               }}>
                 <img
-                  src='../img/logo.jpeg'
+                  src='../img/logo_MVPicks.png'
                   alt='CartelNFL Logo'
                   style={{
                     width: '32px',
@@ -398,7 +398,7 @@ export default function Dashboard({ user, token, onLogout }) {
               gap: '12px'
             }}>
               <img
-                src='../img/logo.jpeg'
+                src='../img/logo_MVPicks.png'
                 alt='CartelNFL Logo'
                 style={{
                   width: '28px',
@@ -626,11 +626,11 @@ export default function Dashboard({ user, token, onLogout }) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <img
-                  src='../img/logo.jpeg'
+                  src='../img/logo_MVPicks.png'
                   alt='CartelNFL Logo'
                   style={{
-                    width: '40px',
-                    height: '40px',
+                    width: '50px',
+                    height: '50px',
                     cursor: 'pointer',
                     borderRadius: '8px',
                     filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
@@ -638,15 +638,6 @@ export default function Dashboard({ user, token, onLogout }) {
                   onClick={() => setSelectedLeague(null)}
                 />
                 <div>
-                  <h1 style={{
-                    color: '#1A365D',
-                    margin: 0,
-                    fontSize: '24px',
-                    fontWeight: '800',
-                    letterSpacing: '-0.5px'
-                  }}>
-                    CartelNFL
-                  </h1>
                   <p style={{
                     color: '#4A5568',
                     margin: '4px 0 0 0',
@@ -660,11 +651,11 @@ export default function Dashboard({ user, token, onLogout }) {
               <button
                 onClick={onLogout}
                 style={{
-                  backgroundColor: '#A0AEC0',
+                  background: 'linear-gradient(135deg, #E53E3E 0%, #C53030 100%)',
                   color: '#FFFFFF',
-                  border: 'none',
-                  padding: '8px',
-                  borderRadius: '50%',
+                  border: '2px solid #E53E3E',
+                  padding: '10px',
+                  borderRadius: '12px',
                   fontSize: '16px',
                   cursor: 'pointer',
                   display: 'flex',
@@ -672,20 +663,23 @@ export default function Dashboard({ user, token, onLogout }) {
                   justifyContent: 'center',
                   width: '40px',
                   height: '40px',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                  transition: 'all 0.3s ease'
+                  boxShadow: '0 6px 20px rgba(229, 62, 62, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2)',
+                  transition: 'all 0.3s ease',
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#8FA4B3';
-                  e.target.style.transform = 'scale(1.1)';
+                  e.target.style.background = 'linear-gradient(135deg, #C53030 0%, #9B2C2C 100%)';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 8px 25px rgba(229, 62, 62, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3)';
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#A0AEC0';
-                  e.target.style.transform = 'scale(1)';
+                  e.target.style.background = 'linear-gradient(135deg, #E53E3E 0%, #C53030 100%)';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(229, 62, 62, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2)';
                 }}
                 title="Cerrar Sesión"
               >
-                <span style={{ fontSize: '18px', color: '#E53E3E' }}>⏻</span>
+                <span style={{ fontSize: '22px', fontFamily: 'Brush Script MT, cursive' }}>⏻</span>
               </button>
             </div>
           </div>
@@ -1312,11 +1306,11 @@ export default function Dashboard({ user, token, onLogout }) {
               gap: '16px'
             }}>
               <img
-                src='../img/logo.jpeg'
+                src='../img/logo_MVPicks.png'
                 alt='CartelNFL Logo'
                 style={{
-                  width: '40px',
-                  height: '40px',
+                  width: '50px',
+                  height: '50px',
                   cursor: 'pointer',
                   borderRadius: '8px',
                   filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
