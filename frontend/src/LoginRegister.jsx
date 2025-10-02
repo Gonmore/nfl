@@ -46,8 +46,7 @@ export default function LoginRegister({ onLogin }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px',
-      background: 'linear-gradient(135deg, #002C5F 0%, #003D7A 100%)'
+      padding: '20px'
     }}>
       <div style={{
         backgroundColor: '#FFFFFF',
@@ -62,10 +61,21 @@ export default function LoginRegister({ onLogin }) {
         {/* Logo y título */}
         <div style={{ marginBottom: '32px' }}>
           <div style={{
-            fontSize: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             marginBottom: '16px'
           }}>
-            🏈
+            <img
+              src='../img/logo.jpeg'
+              alt='CartelNFL Logo'
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '12px',
+                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))'
+              }}
+            />
           </div>
           <h1 style={{
             color: '#002C5F',

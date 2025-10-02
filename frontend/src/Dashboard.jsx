@@ -192,7 +192,6 @@ export default function Dashboard({ user, token, onLogout }) {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0A1929 0%, #1A365D 50%, #2D3748 100%)',
         padding: '20px',
         display: 'flex',
         alignItems: 'center',
@@ -208,28 +207,39 @@ export default function Dashboard({ user, token, onLogout }) {
           width: '100%',
           padding: '32px'
         }}>
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '32px'
-          }}>
             <div style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              color: '#1A365D',
-              marginBottom: '16px'
+              textAlign: 'center',
+              marginBottom: '32px'
             }}>
-              🏈 Jornada en Juego
-            </div>
-            <p style={{
-              color: '#4A5568',
-              fontSize: '16px',
-              margin: '0'
-            }}>
-              La semana {week} está en curso. ¿Qué deseas hacer en <strong>{selectedLeague.name}</strong>?
-            </p>
-          </div>
-
-          <div style={{
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                fontSize: '24px',
+                fontWeight: '700',
+                color: '#1A365D',
+                marginBottom: '16px'
+              }}>
+                <img
+                  src='../img/logo.jpeg'
+                  alt='CartelNFL Logo'
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '4px'
+                  }}
+                />
+                Jornada en Juego
+              </div>
+              <p style={{
+                color: '#4A5568',
+                fontSize: '16px',
+                margin: '0'
+              }}>
+                La semana {week} está en curso. ¿Qué deseas hacer en <strong>{selectedLeague.name}</strong>?
+              </p>
+            </div>          <div style={{
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
@@ -358,7 +368,6 @@ export default function Dashboard({ user, token, onLogout }) {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0A1929 0%, #1A365D 50%, #2D3748 100%)',
         padding: '20px',
         display: 'flex',
         alignItems: 'center',
@@ -388,7 +397,15 @@ export default function Dashboard({ user, token, onLogout }) {
               justifyContent: 'center',
               gap: '12px'
             }}>
-              <span style={{ fontSize: '28px' }}>📊</span>
+              <img
+                src='../img/logo.jpeg'
+                alt='CartelNFL Logo'
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '4px'
+                }}
+              />
               Mi Score - Semana {week}
             </h2>
             <p style={{ color: '#4A5568', margin: '8px 0 0 0' }}>
@@ -581,7 +598,6 @@ export default function Dashboard({ user, token, onLogout }) {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0A1929 0%, #1A365D 50%, #2D3748 100%)',
         padding: '20px'
       }}>
         <div style={{
@@ -595,6 +611,7 @@ export default function Dashboard({ user, token, onLogout }) {
           <div style={{
             gridColumn: '1 / -1',
             backgroundColor: 'rgba(255, 255, 255, 0.98)',
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(0, 44, 95, 0.1) 20px, rgba(0, 44, 95, 0.1) 21px)',
             borderRadius: '20px',
             padding: '12px 16px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
@@ -608,12 +625,18 @@ export default function Dashboard({ user, token, onLogout }) {
               gap: '16px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{
-                  fontSize: '32px',
-                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
-                }}>
-                  🏈
-                </div>
+                <img
+                  src='../img/logo.jpeg'
+                  alt='CartelNFL Logo'
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    cursor: 'pointer',
+                    borderRadius: '8px',
+                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+                  }}
+                  onClick={() => setSelectedLeague(null)}
+                />
                 <div>
                   <h1 style={{
                     color: '#1A365D',
@@ -1270,57 +1293,72 @@ export default function Dashboard({ user, token, onLogout }) {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #002C5F 0%, #003D7A 100%)',
       padding: '16px'
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '16px',
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          padding: '12px 16px',
-          borderRadius: '16px',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-          border: '2px solid #002C5F'
-        }}>
-          <h1 style={{
-            color: '#002C5F',
-            margin: 0,
-            fontSize: '18px',
+          <div style={{
             display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '8px'
+            marginBottom: '16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(0, 44, 95, 0.1) 20px, rgba(0, 44, 95, 0.1) 21px)',
+            padding: '12px 16px',
+            borderRadius: '16px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+            border: '2px solid #002C5F'
           }}>
-            <span style={{ fontSize: '20px' }}>🏈</span>
-            Liga: {selectedLeague.name}
-          </h1>
-          <button
-            onClick={() => setSelectedLeague(null)}
-            style={{
-              backgroundColor: '#6C757D',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '8px 12px',
-              borderRadius: '12px',
-              fontSize: '12px',
-              fontWeight: '600',
-              cursor: 'pointer',
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '4px',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#545B62'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#6C757D'}
-          >
-            <span style={{ fontSize: '14px' }}>←</span>
-            Cambiar Liga
-          </button>
-        </div>
-
-        {loading ? (
+              gap: '16px'
+            }}>
+              <img
+                src='../img/logo.jpeg'
+                alt='CartelNFL Logo'
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  cursor: 'pointer',
+                  borderRadius: '8px',
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+                }}
+                onClick={() => setSelectedLeague(null)}
+              />
+              <h1 style={{
+                color: '#002C5F',
+                margin: 0,
+                fontSize: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                Liga: {selectedLeague.name}
+              </h1>
+            </div>
+            <button
+              onClick={() => setSelectedLeague(null)}
+              style={{
+                backgroundColor: '#6C757D',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '8px 12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#545B62'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#6C757D'}
+            >
+              <span style={{ fontSize: '14px' }}>←</span>
+              Cambiar Liga
+            </button>
+          </div>        {loading ? (
           <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
             <div className="spinner"></div>
             <p style={{ marginTop: '16px', color: 'var(--text-secondary)' }}>

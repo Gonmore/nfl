@@ -28,14 +28,12 @@ export default function App() {
   };
 
   return (
-    <div id="root">
-      <div className="container">
-        {!token ? (
-          <LoginRegister onLogin={handleLogin} />
-        ) : (
-          <Dashboard user={user} token={token} onLogout={handleLogout} />
-        )}
-      </div>
+    <div className="container">
+      {!token ? (
+        <LoginRegister onLogin={handleLogin} />
+      ) : (
+        <Dashboard user={user} token={token} onLogout={handleLogout} />
+      )}
     </div>
   );
 }
