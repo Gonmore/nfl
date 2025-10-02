@@ -76,7 +76,7 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
       }}>
         <div className="card-header" style={{
-          background: 'linear-gradient(135deg, #002C5F 0%, #1A365D 100%)',
+          background: 'linear-gradient(135deg, #002C5F 0%, #004B9B 100%)',
           color: 'white',
           borderRadius: '17px 17px 0 0',
           padding: '20px'
@@ -190,7 +190,7 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                     <thead style={{
                       position: 'sticky',
                       top: 0,
-                      background: 'linear-gradient(135deg, #002C5F 0%, #1A365D 100%)',
+                      background: 'linear-gradient(135deg, #002C5F 0%, #004B9B 100%)',
                       color: 'white',
                       zIndex: 1
                     }}>

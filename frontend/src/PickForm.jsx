@@ -40,7 +40,7 @@ export default function PickForm({ games, token, leagueId, week }) {
     return (
       <div className="card" style={{
         backgroundColor: 'rgba(255, 255, 255, 0.98)',
-        border: '3px solid #1A365D',
+        border: '3px solid #004B9B',
         borderRadius: '20px',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
         backdropFilter: 'blur(10px)'
@@ -157,7 +157,7 @@ export default function PickForm({ games, token, leagueId, week }) {
     return (
       <div className="card" style={{
         backgroundColor: 'rgba(255, 255, 255, 0.98)',
-        border: '3px solid #1A365D',
+        border: '3px solid #004B9B',
         borderRadius: '20px',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
         backdropFilter: 'blur(10px)'
@@ -208,7 +208,7 @@ export default function PickForm({ games, token, leagueId, week }) {
                     padding: '12px 10px',
                     backgroundColor: 'rgba(240, 240, 240, 0.9)',
                     borderRadius: '12px',
-                    border: '2px solid rgba(0, 44, 95, 0.2)',
+                    border: '2px solid rgba(0, 75, 155, 0.2)',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                     gap: '4px'
                   }}>
@@ -247,8 +247,8 @@ export default function PickForm({ games, token, leagueId, week }) {
                             borderRadius: '50%',
                             objectFit: 'cover',
                             cursor: 'pointer',
-                            border: picks[game.id] === game.awayTeam ? '3px solid #002C5F' : '3px solid transparent',
-                            boxShadow: picks[game.id] === game.awayTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                            border: picks[game.id] === game.awayTeam ? '3px solid #004B9B' : '3px solid transparent',
+                            boxShadow: picks[game.id] === game.awayTeam ? '0 0 0 2px rgba(0, 75, 155, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
                             transition: 'all 0.2s ease'
                           }}
                         />
@@ -256,7 +256,7 @@ export default function PickForm({ games, token, leagueId, week }) {
                       <div style={{
                         fontSize: '18px',
                         fontWeight: '600',
-                        color: '#002C5F'
+                        color: '#004B9B'
                       }}>
                         -
                       </div>
@@ -294,8 +294,8 @@ export default function PickForm({ games, token, leagueId, week }) {
                             borderRadius: '50%',
                             objectFit: 'cover',
                             cursor: 'pointer',
-                            border: picks[game.id] === game.homeTeam ? '3px solid #002C5F' : '3px solid transparent',
-                            boxShadow: picks[game.id] === game.homeTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                            border: picks[game.id] === game.homeTeam ? '3px solid #004B9B' : '3px solid transparent',
+                            boxShadow: picks[game.id] === game.homeTeam ? '0 0 0 2px rgba(0, 75, 155, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
                             transition: 'all 0.2s ease'
                           }}
                         />
@@ -424,7 +424,7 @@ export default function PickForm({ games, token, leagueId, week }) {
                 padding: '12px 10px',
                 backgroundColor: 'rgba(240, 240, 240, 0.9)',
                 borderRadius: '12px',
-                border: '2px solid rgba(0, 44, 95, 0.2)',
+                border: '2px solid rgba(0, 75, 155, 0.2)',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                 gap: '4px'
               }}>
@@ -463,8 +463,8 @@ export default function PickForm({ games, token, leagueId, week }) {
                         borderRadius: '50%',
                         objectFit: 'cover',
                         cursor: 'pointer',
-                        border: picks[game.id] === game.awayTeam ? '3px solid #002C5F' : '3px solid transparent',
-                        boxShadow: picks[game.id] === game.awayTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        border: picks[game.id] === game.awayTeam ? '3px solid #004B9B' : '3px solid transparent',
+                        boxShadow: picks[game.id] === game.awayTeam ? '0 0 0 2px rgba(0, 75, 155, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
                         transition: 'all 0.2s ease'
                       }}
                     />
@@ -472,7 +472,7 @@ export default function PickForm({ games, token, leagueId, week }) {
                   <div style={{
                     fontSize: '18px',
                     fontWeight: '600',
-                    color: '#002C5F'
+                    color: '#004B9B'
                   }}>
                     -
                   </div>
@@ -510,8 +510,8 @@ export default function PickForm({ games, token, leagueId, week }) {
                         borderRadius: '50%',
                         objectFit: 'cover',
                         cursor: 'pointer',
-                        border: picks[game.id] === game.homeTeam ? '3px solid #002C5F' : '3px solid transparent',
-                        boxShadow: picks[game.id] === game.homeTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        border: picks[game.id] === game.homeTeam ? '3px solid #004B9B' : '3px solid transparent',
+                        boxShadow: picks[game.id] === game.homeTeam ? '0 0 0 2px rgba(0, 75, 155, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
                         transition: 'all 0.2s ease'
                       }}
                     />

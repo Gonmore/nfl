@@ -53,7 +53,7 @@ export default function LoginRegister({ onLogin }) {
         padding: '40px',
         borderRadius: '16px',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-        border: '2px solid #002C5F',
+        border: '2px solid #004B9B',
         maxWidth: '450px',
         width: '100%',
         textAlign: 'center'
@@ -78,7 +78,7 @@ export default function LoginRegister({ onLogin }) {
             />
           </div>
           <h1 style={{
-            color: '#002C5F',
+            color: '#004B9B',
             fontSize: '32px',
             fontWeight: '700',
             margin: '0 0 8px 0',
@@ -104,7 +104,7 @@ export default function LoginRegister({ onLogin }) {
                 display: 'block',
                 marginBottom: '8px',
                 fontWeight: '600',
-                color: '#002C5F',
+                color: '#004B9B',
                 fontSize: '14px'
               }}>
                 Usuario
@@ -124,11 +124,11 @@ export default function LoginRegister({ onLogin }) {
                   borderRadius: '8px',
                   fontSize: '16px',
                   backgroundColor: '#FFFFFF',
-                  color: '#002C5F',
+                  color: '#004B9B',
                   boxSizing: 'border-box',
                   transition: 'border-color 0.3s ease'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#002C5F'}
+                onFocus={(e) => e.target.style.borderColor = '#004B9B'}
                 onBlur={(e) => e.target.style.borderColor = '#DEE2E6'}
               />
             </div>
@@ -139,7 +139,7 @@ export default function LoginRegister({ onLogin }) {
               display: 'block',
               marginBottom: '8px',
               fontWeight: '600',
-              color: '#002C5F',
+              color: '#004B9B',
               fontSize: '14px'
             }}>
               Email
@@ -159,11 +159,11 @@ export default function LoginRegister({ onLogin }) {
                 borderRadius: '8px',
                 fontSize: '16px',
                 backgroundColor: '#FFFFFF',
-                color: '#002C5F',
+                color: '#004B9B',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.3s ease'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#002C5F'}
+              onFocus={(e) => e.target.style.borderColor = '#004B9B'}
               onBlur={(e) => e.target.style.borderColor = '#DEE2E6'}
             />
           </div>
@@ -173,7 +173,7 @@ export default function LoginRegister({ onLogin }) {
               display: 'block',
               marginBottom: '8px',
               fontWeight: '600',
-              color: '#002C5F',
+              color: '#004B9B',
               fontSize: '14px'
             }}>
               Contraseña
@@ -193,11 +193,11 @@ export default function LoginRegister({ onLogin }) {
                 borderRadius: '8px',
                 fontSize: '16px',
                 backgroundColor: '#FFFFFF',
-                color: '#002C5F',
+                color: '#004B9B',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.3s ease'
               }}
-              onFocus={(e) => e.target.style.borderColor = '#002C5F'}
+              onFocus={(e) => e.target.style.borderColor = '#004B9B'}
               onBlur={(e) => e.target.style.borderColor = '#DEE2E6'}
             />
           </div>
@@ -208,7 +208,7 @@ export default function LoginRegister({ onLogin }) {
             style={{
               width: '100%',
               padding: '16px',
-              backgroundColor: '#002C5F',
+              backgroundColor: '#004B9B',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
@@ -218,13 +218,13 @@ export default function LoginRegister({ onLogin }) {
               transition: 'all 0.3s ease',
               marginBottom: '16px'
             }}
-            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#001B3A')}
-            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#002C5F')}
+            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#00346C')}
+            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#004B9B')}
           >
             {loading ? (
               <div style={{
                 border: '2px solid #DEE2E6',
-                borderTop: '2px solid #002C5F',
+                borderTop: '2px solid #004B9B',
                 borderRadius: '50%',
                 width: '20px',
                 height: '20px',
@@ -266,8 +266,8 @@ export default function LoginRegister({ onLogin }) {
             disabled={loading}
             style={{
               background: 'none',
-              border: '2px solid #002C5F',
-              color: '#002C5F',
+              border: '2px solid #004B9B',
+              color: '#004B9B',
               padding: '12px 24px',
               borderRadius: '8px',
               fontSize: '14px',
@@ -276,8 +276,8 @@ export default function LoginRegister({ onLogin }) {
               transition: 'all 0.3s ease',
               width: '100%'
             }}
-            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#002C5F') && (e.target.style.color = '#FFFFFF')}
-            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = 'transparent') && (e.target.style.color = '#002C5F')}
+            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#004B9B') && (e.target.style.color = '#FFFFFF')}
+            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = 'transparent') && (e.target.style.color = '#004B9B')}
           >
             {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
           </button>

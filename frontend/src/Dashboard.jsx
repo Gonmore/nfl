@@ -249,7 +249,7 @@ export default function Dashboard({ user, token, onLogout }) {
       }}>
         <div style={{
           backgroundColor: 'rgba(255, 255, 255, 0.98)',
-          border: '3px solid #1A365D',
+          border: '3px solid #004B9B',
           borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
           backdropFilter: 'blur(10px)',
@@ -268,7 +268,7 @@ export default function Dashboard({ user, token, onLogout }) {
                 gap: '12px',
                 fontSize: '24px',
                 fontWeight: '700',
-                color: '#1A365D',
+                color: '#004B9B',
                 marginBottom: '16px'
               }}>
                 <img
@@ -425,7 +425,7 @@ export default function Dashboard({ user, token, onLogout }) {
       }}>
         <div style={{
           backgroundColor: 'rgba(255, 255, 255, 0.98)',
-          border: '3px solid #1A365D',
+          border: '3px solid #004B9B',
           borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
           backdropFilter: 'blur(10px)',
@@ -441,7 +441,7 @@ export default function Dashboard({ user, token, onLogout }) {
               margin: 0,
               fontSize: '24px',
               fontWeight: '800',
-              color: '#1A365D',
+              color: '#004B9B',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -584,7 +584,7 @@ export default function Dashboard({ user, token, onLogout }) {
           <div style={{
             textAlign: 'center',
             padding: '24px',
-            background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+            background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
             borderRadius: '16px',
             color: 'white'
           }}>
@@ -665,7 +665,7 @@ export default function Dashboard({ user, token, onLogout }) {
             borderRadius: '20px',
             padding: '12px 16px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-            border: '3px solid #1A365D',
+            border: '3px solid #004B9B',
             backdropFilter: 'blur(10px)'
           }}>
             <div style={{
@@ -706,19 +706,19 @@ export default function Dashboard({ user, token, onLogout }) {
                     width: '40px',
                     height: '40px',
                     borderRadius: '50%',
-                    backgroundColor: profileImage ? 'transparent' : '#1A365D',
-                    border: '2px solid #1A365D',
+                    backgroundColor: profileImage ? 'transparent' : '#004B9B',
+                    border: '2px solid #004B9B',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.3)',
+                    boxShadow: '0 4px 12px rgba(0, 75, 155, 0.3)',
                     transition: 'all 0.3s ease',
                     overflow: 'hidden'
                   }}
                   onMouseOver={(e) => {
                     e.target.style.transform = 'scale(1.05)';
-                    e.target.style.boxShadow = '0 6px 16px rgba(26, 54, 93, 0.4)';
+                    e.target.style.boxShadow = '0 6px 16px rgba(0, 75, 155, 0.4)';
                   }}
                   onMouseOut={(e) => {
                     e.target.style.transform = 'scale(1)';
@@ -769,7 +769,7 @@ export default function Dashboard({ user, token, onLogout }) {
                         gap: '8px',
                         fontSize: '14px',
                         fontWeight: '600',
-                        color: '#1A365D',
+                        color: '#004B9B',
                         transition: 'all 0.2s ease'
                       }}
                       onMouseOver={(e) => {
@@ -825,14 +825,14 @@ export default function Dashboard({ user, token, onLogout }) {
             backgroundColor: 'transparent',
             borderRadius: '20px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-            border: '3px solid #1A365D',
+            border: '3px solid #004B9B',
             overflow: 'hidden',
             maxWidth: '800px',
             margin: '0 auto',
             width: '100%'
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+              background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
               color: '#FFFFFF',
               padding: '12px 20px',
               borderBottom: '2px solid #4A5568'
@@ -858,7 +858,7 @@ export default function Dashboard({ user, token, onLogout }) {
                   <button
                     onClick={() => setShowCreate(true)}
                     style={{
-                      backgroundColor: '#38A169',
+                      backgroundColor: '#12B900',
                       color: '#FFFFFF',
                       border: 'none',
                       padding: '6px',
@@ -870,18 +870,18 @@ export default function Dashboard({ user, token, onLogout }) {
                       justifyContent: 'center',
                       width: '36px',
                       height: '36px',
-                      boxShadow: '0 4px 12px rgba(56, 161, 105, 0.3)',
+                      boxShadow: '0 4px 12px rgba(18, 185, 0, 0.3)',
                       transition: 'all 0.3s ease'
                     }}
                     onMouseOver={(e) => {
-                      e.target.style.backgroundColor = '#2F855A';
+                      e.target.style.backgroundColor = '#0F9900';
                       e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 6px 16px rgba(56, 161, 105, 0.4)';
+                      e.target.style.boxShadow = '0 6px 16px rgba(18, 185, 0, 0.4)';
                     }}
                     onMouseOut={(e) => {
-                      e.target.style.backgroundColor = '#38A169';
+                      e.target.style.backgroundColor = '#12B900';
                       e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 4px 12px rgba(56, 161, 105, 0.3)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(18, 185, 0, 0.3)';
                     }}
                     title="Crear Liga"
                   >
@@ -974,11 +974,11 @@ export default function Dashboard({ user, token, onLogout }) {
                     }}
                     onMouseOver={(e) => {
                       e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 6px 20px rgba(26, 54, 93, 0.4)';
+                      e.target.style.boxShadow = '0 6px 20px rgba(0, 75, 155, 0.4)';
                     }}
                     onMouseOut={(e) => {
                       e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 4px 16px rgba(26, 54, 93, 0.3)';
+                      e.target.style.boxShadow = '0 4px 16px rgba(0, 75, 155, 0.3)';
                     }}
                   >
                     <span style={{ fontSize: '16px' }}>🚀</span>
@@ -1002,7 +1002,7 @@ export default function Dashboard({ user, token, onLogout }) {
                       onMouseOver={(e) => {
                         e.target.style.transform = 'translateY(-4px)';
                         e.target.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
-                        e.target.style.borderColor = '#1A365D';
+                        e.target.style.borderColor = '#004B9B';
                       }}
                       onMouseOut={(e) => {
                         e.target.style.transform = 'translateY(0)';
@@ -1025,7 +1025,7 @@ export default function Dashboard({ user, token, onLogout }) {
                         }}
                       >
                         <div style={{
-                          background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+                          background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
                           color: '#FFFFFF',
                           width: '40px',
                           height: '40px',
@@ -1042,7 +1042,7 @@ export default function Dashboard({ user, token, onLogout }) {
                           <div style={{
                             fontSize: '15px',
                             fontWeight: '700',
-                            color: '#1A365D',
+                            color: '#004B9B',
                             marginBottom: '4px',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
@@ -1064,50 +1064,58 @@ export default function Dashboard({ user, token, onLogout }) {
                           </div>
                         </div>
                       </button>
-                      {league.isAdmin && (
-                        <div style={{
-                          padding: '0 16px 16px 16px',
-                          borderTop: '1px solid #E2E8F0'
-                        }}>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowInviteCode(league);
-                            }}
-                            style={{
-                              backgroundColor: '#38A169',
-                              color: '#FFFFFF',
-                              border: 'none',
-                              padding: '8px 16px',
-                              borderRadius: '12px',
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              width: '100%',
-                              justifyContent: 'center',
-                              boxShadow: '0 2px 8px rgba(56, 161, 105, 0.2)',
-                              transition: 'all 0.3s ease'
-                            }}
-                            onMouseOver={(e) => {
-                              e.target.style.backgroundColor = '#2F855A';
-                              e.target.style.transform = 'translateY(-1px)';
-                              e.target.style.boxShadow = '0 4px 12px rgba(56, 161, 105, 0.3)';
-                            }}
-                            onMouseOut={(e) => {
-                              e.target.style.backgroundColor = '#38A169';
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 2px 8px rgba(56, 161, 105, 0.2)';
-                            }}
-                            title="Invitar miembros"
-                          >
-                            <span style={{ fontSize: '14px' }}>📤</span>
-                            Invitar
-                          </button>
-                        </div>
-                      )}
+                      {(() => {
+                        // La liga general nunca debe mostrar botón de invitar
+                        if (league.name === 'Liga general') {
+                          return null;
+                        }
+
+                        const shouldShowButton = (league.isPublic && league.name !== 'Liga general') || league.isAdmin;
+                        return shouldShowButton ? (
+                          <div style={{
+                            padding: '0 16px 16px 16px',
+                            borderTop: '1px solid #E2E8F0'
+                          }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowInviteCode(league);
+                              }}
+                              style={{
+                                backgroundColor: '#12B900',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '8px 16px',
+                                borderRadius: '12px',
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                width: '100%',
+                                justifyContent: 'center',
+                                boxShadow: '0 2px 8px rgba(18, 185, 0, 0.2)',
+                                transition: 'all 0.3s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.target.style.backgroundColor = '#0F9900';
+                                e.target.style.transform = 'translateY(-1px)';
+                                e.target.style.boxShadow = '0 4px 12px rgba(18, 185, 0, 0.3)';
+                              }}
+                              onMouseOut={(e) => {
+                                e.target.style.backgroundColor = '#12B900';
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 2px 8px rgba(18, 185, 0, 0.2)';
+                              }}
+                              title="Invitar miembros"
+                            >
+                              <span style={{ fontSize: '14px' }}>📤</span>
+                              Invitar
+                            </button>
+                          </div>
+                        ) : null;
+                      })()}
                     </div>
                   ))}
                 </div>
@@ -1120,14 +1128,14 @@ export default function Dashboard({ user, token, onLogout }) {
             backgroundColor: 'transparent',
             borderRadius: '20px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-            border: '3px solid #1A365D',
+            border: '3px solid #004B9B',
             overflow: 'hidden',
             maxWidth: '1200px',
             margin: '0 auto',
             width: '100%'
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+              background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
               color: '#FFFFFF',
               padding: '16px 20px',
               borderBottom: '2px solid #4A5568'
@@ -1163,7 +1171,7 @@ export default function Dashboard({ user, token, onLogout }) {
                 }}>
                   <thead>
                     <tr style={{
-                      background: 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+                      background: 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
                       borderBottom: '3px solid #4A5568',
                       position: 'sticky',
                       top: 0,
@@ -1246,7 +1254,7 @@ export default function Dashboard({ user, token, onLogout }) {
                           padding: '8px 2px',
                           textAlign: 'center',
                           fontWeight: '700',
-                          color: '#1A365D',
+                          color: '#004B9B',
                           fontSize: '13px'
                         }}>
                           <div style={{
@@ -1308,8 +1316,8 @@ export default function Dashboard({ user, token, onLogout }) {
                           textAlign: 'center',
                           fontSize: '13px',
                           fontWeight: '700',
-                          color: '#38A169',
-                          backgroundColor: '#F0FFF4',
+                          color: '#12B900',
+                          backgroundColor: '#E8F5E8',
                           borderRadius: '6px',
                           margin: '0 2px'
                         }}>
@@ -1356,12 +1364,12 @@ export default function Dashboard({ user, token, onLogout }) {
                 flexWrap: 'wrap'
               }}>
                 <span style={{
-                  color: '#38A169',
+                  color: '#12B900',
                   fontWeight: '700',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
-                  backgroundColor: '#C6F6D5',
+                  backgroundColor: '#C8E6C9',
                   padding: '4px 8px',
                   borderRadius: '12px'
                 }}>
@@ -2300,7 +2308,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
         {/* Título */}
         <h2 style={{
           margin: '0 0 24px 0',
-          color: '#1A365D',
+          color: '#004B9B',
           fontSize: '24px',
           fontWeight: '700',
           textAlign: 'center'
@@ -2367,7 +2375,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
             <button
               onClick={() => fileInputRef.current.click()}
               style={{
-                backgroundColor: '#1A365D',
+                backgroundColor: '#004B9B',
                 color: '#FFFFFF',
                 border: 'none',
                 padding: '10px 16px',
@@ -2441,7 +2449,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
               display: 'block',
               marginBottom: '8px',
               fontWeight: '600',
-              color: '#1A365D',
+              color: '#004B9B',
               fontSize: '14px'
             }}>
               Nombre de Usuario
@@ -2591,7 +2599,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
             onClick={handleSave}
             disabled={loading}
             style={{
-              background: loading ? '#CBD5E1' : 'linear-gradient(135deg, #1A365D 0%, #2D3748 100%)',
+              background: loading ? '#CBD5E1' : 'linear-gradient(135deg, #004B9B 0%, #2D3748 100%)',
               color: '#FFFFFF',
               border: 'none',
               padding: '12px 24px',
@@ -2600,14 +2608,14 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
               fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: loading ? 'none' : '0 4px 12px rgba(26, 54, 93, 0.3)',
+              boxShadow: loading ? 'none' : '0 4px 12px rgba(0, 75, 155, 0.3)',
               opacity: loading ? 0.8 : 1
             }}
             onMouseOver={(e) => {
               if (!loading) {
                 e.target.style.background = 'linear-gradient(135deg, #2D3748 0%, #4A5568 100%)';
                 e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 6px 16px rgba(26, 54, 93, 0.4)';
+                e.target.style.boxShadow = '0 6px 16px rgba(0, 75, 155, 0.4)';
               }
             }}
             onMouseOut={(e) => {
