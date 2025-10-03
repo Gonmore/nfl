@@ -63,6 +63,11 @@ export default function Dashboard({ user, token, onLogout }) {
   const [userPicksWithResults, setUserPicksWithResults] = useState([]);
   const [totalPoints, setTotalPoints] = useState(0);
 
+  // Estados para la vista de liga en vivo
+  const [showLiveLeagueView, setShowLiveLeagueView] = useState(false);
+  const [selectedUserForScore, setSelectedUserForScore] = useState(null);
+  const [leagueWeeklyStats, setLeagueWeeklyStats] = useState([]);
+
   // Estados para foto de perfil
   const [profileImage, setProfileImage] = useState(user?.profileImage || null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -482,6 +487,52 @@ export default function Dashboard({ user, token, onLogout }) {
               <span style={{ fontSize: '24px' }}>🎯</span>
               Hacer Picks - Semana {week + 1}
             </button>
+
+            <button
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  // Cargar estadísticas semanales de la liga
+                  const statsResponse = await getLeagueStats(token, selectedLeague.id, week);
+                  setLeagueWeeklyStats(statsResponse.weekly || []);
+                  
+                  setShowGameWeekOptions(false);
+                  setShowLiveLeagueView(true);
+                } catch (error) {
+                  console.error('Error loading league stats:', error);
+                  showToast('Error al cargar estadísticas de la liga. Inténtalo de nuevo.', 'error');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              style={{
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '20px',
+                borderRadius: '16px',
+                fontSize: '18px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-3px)';
+                e.target.style.boxShadow = '0 10px 30px rgba(5, 150, 105, 0.6)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 6px 20px rgba(5, 150, 105, 0.4)';
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>🏆</span>
+              Ver Liga en Vivo
+            </button>
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '24px' }}>
@@ -567,7 +618,7 @@ export default function Dashboard({ user, token, onLogout }) {
                   borderRadius: '4px'
                 }}
               />
-              Mi Score - Semana {week}
+              {selectedUserForScore ? `Score de ${selectedUserForScore.username}` : 'Mi Score'} - Semana {week}
             </h2>
             <p style={{ color: '#4A5568', margin: '8px 0 0 0' }}>
               Liga: {selectedLeague.name}
@@ -719,7 +770,14 @@ export default function Dashboard({ user, token, onLogout }) {
             <button
               onClick={() => {
                 setShowScoreView(false);
-                setShowGameWeekOptions(true);
+                setSelectedUserForScore(null);
+                if (selectedUserForScore) {
+                  // Si vino desde la liga en vivo, volver ahí
+                  setShowLiveLeagueView(true);
+                } else {
+                  // Si vino desde las opciones, volver ahí
+                  setShowGameWeekOptions(true);
+                }
               }}
               style={{
                 background: 'linear-gradient(135deg, #6C757D 0%, #5A6268 100%)',
@@ -752,6 +810,308 @@ export default function Dashboard({ user, token, onLogout }) {
             <button
               onClick={() => {
                 setShowScoreView(false);
+                setSelectedLeague(null);
+              }}
+              style={{
+                background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(0, 75, 155, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(0, 75, 155, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(0, 75, 155, 0.3)';
+              }}
+            >
+              Cambiar Liga
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Vista de liga en vivo durante jornada en juego
+  if (showLiveLeagueView && selectedLeague) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        padding: windowWidth <= 400 ? '8px' : '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+          border: '3px solid #004B9B',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+          backdropFilter: 'blur(10px)',
+          maxWidth: '900px',
+          width: '100%',
+          padding: windowWidth <= 400 ? '12px' : windowWidth <= 480 ? '16px' : '32px'
+        }}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: windowWidth <= 480 ? '12px' : '24px'
+          }}>
+            <h2 style={{
+              margin: 0,
+              fontSize: windowWidth <= 400 ? '16px' : windowWidth <= 480 ? '18px' : '24px',
+              fontWeight: '800',
+              color: '#004B9B',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px'
+            }}>
+              <img
+                src='/img/logo_MVPicks.png'
+                alt='CartelNFL Logo'
+                style={{
+                  width: windowWidth <= 400 ? '40px' : windowWidth <= 480 ? '48px' : '64px',
+                  height: windowWidth <= 400 ? '40px' : windowWidth <= 480 ? '48px' : '64px',
+                  borderRadius: '4px'
+                }}
+              />
+              Liga en Vivo - Semana {week}
+            </h2>
+            <p style={{ color: '#4A5568', margin: windowWidth <= 400 ? '4px 0 0 0' : '8px 0 0 0' }}>
+              Liga: {selectedLeague.name}
+            </p>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: windowWidth <= 400 ? '10px' : '16px',
+            marginBottom: windowWidth <= 400 ? '12px' : windowWidth <= 480 ? '16px' : '24px'
+          }}>
+            {leagueWeeklyStats
+              .sort((a, b) => b.points - a.points)
+              .map((user, index) => (
+                <div
+                  key={user.userId}
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      // Cargar juegos de la semana actual
+                      const gamesResponse = await getGames(token);
+                      const weekGames = gamesResponse.games.filter(g => g.week === week);
+                      setCurrentWeekGames(weekGames);
+
+                      // Cargar picks del usuario seleccionado para esta semana con resultados
+                      const picksResponse = await getUserPicksDetails(token, selectedLeague.id, week, user.userId);
+                      setUserPicksWithResults(picksResponse.details || []);
+
+                      // Obtener el total de puntos del usuario seleccionado
+                      const userWeeklyStats = leagueWeeklyStats.find(u => u.userId === user.userId);
+                      const totalPoints = userWeeklyStats ? userWeeklyStats.points : 0;
+                      setTotalPoints(totalPoints);
+
+                      // Establecer el usuario seleccionado
+                      setSelectedUserForScore({
+                        userId: user.userId,
+                        username: user.user,
+                        profileImage: user.profileImage
+                      });
+
+                      setShowLiveLeagueView(false);
+                      setShowScoreView(true);
+                    } catch (error) {
+                      console.error('Error loading user score data:', error);
+                      showToast('Error al cargar los datos del score. Inténtalo de nuevo.', 'error');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  style={{
+                    background: index === 0
+                      ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
+                      : index === 1
+                      ? 'linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%)'
+                      : index === 2
+                      ? 'linear-gradient(135deg, #CD7F32 0%, #A0522D 100%)'
+                      : 'linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%)',
+                    borderRadius: '12px',
+                    border: '2px solid #E2E8F0',
+                    padding: windowWidth <= 400 ? '8px' : windowWidth <= 480 ? '12px' : '20px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: windowWidth <= 400 ? '8px' : '16px'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'translateY(-4px)';
+                    e.target.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
+                    e.target.style.borderColor = '#004B9B';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.08)';
+                    e.target.style.borderColor = '#E2E8F0';
+                  }}
+                >
+                  {/* Posición y medalla */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    minWidth: windowWidth <= 400 ? '60px' : '80px'
+                  }}>
+                    <div style={{
+                      width: windowWidth <= 400 ? '32px' : '40px',
+                      height: windowWidth <= 400 ? '32px' : '40px',
+                      borderRadius: '50%',
+                      backgroundColor: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#004B9B',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: windowWidth <= 400 ? '14px' : '18px',
+                      fontWeight: 'bold',
+                      color: index <= 2 ? '#000' : '#FFF',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                    }}>
+                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                    </div>
+                  </div>
+
+                  {/* Información del usuario */}
+                  <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: windowWidth <= 400 ? '4px' : '8px'
+                  }}>
+                    {/* Foto de perfil */}
+                    <div style={{
+                      width: windowWidth <= 400 ? '36px' : '50px',
+                      height: windowWidth <= 400 ? '36px' : '50px',
+                      borderRadius: '50%',
+                      backgroundColor: user.profileImage ? 'transparent' : '#004B9B',
+                      border: '2px solid #E2E8F0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      flexShrink: 0
+                    }}>
+                      {user.profileImage ? (
+                        <img
+                          src={user.profileImage}
+                          alt={user.user}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: windowWidth <= 400 ? '16px' : '20px', color: '#FFFFFF' }}>👤</span>
+                      )}
+                    </div>
+
+                    {/* Nombre de usuario y score */}
+                    <div style={{
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px'
+                    }}>
+                      {/* Nombre de usuario */}
+                      <div style={{
+                        fontSize: user.profileImage 
+                          ? (windowWidth <= 400 ? '14px' : windowWidth <= 480 ? '16px' : '18px')
+                          : (windowWidth <= 400 ? '16px' : windowWidth <= 480 ? '18px' : '20px'),
+                        fontWeight: user.profileImage ? '700' : '900',
+                        color: index <= 2 ? '#000' : '#004B9B',
+                        textShadow: user.profileImage ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.1)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        lineHeight: '1.2',
+                        textAlign: 'center'
+                      }}>
+                        {user.user}
+                      </div>
+
+                      {/* Score/Puntos */}
+                      <div style={{
+                        fontSize: windowWidth <= 400 ? '11px' : windowWidth <= 480 ? '13px' : '14px',
+                        fontWeight: '800',
+                        color: index <= 2 ? '#000' : '#12B900',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                        backgroundColor: index <= 2 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(18, 185, 0, 0.1)',
+                        padding: '0px 2px',
+                        borderRadius: '3px',
+                        display: 'inline-block',
+                        textAlign: 'center',
+                        border: index <= 2 ? '1px solid rgba(0, 0, 0, 0.2)' : '1px solid rgba(18, 185, 0, 0.3)',
+                        width: '60%',
+                        margin: '0 auto'
+                      }}>
+                        {user.points || 0} pts
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: windowWidth <= 400 ? '8px' : windowWidth <= 480 ? '16px' : '20px' }}>
+            <button
+              onClick={() => {
+                setShowLiveLeagueView(false);
+                setShowGameWeekOptions(true);
+              }}
+              style={{
+                background: 'linear-gradient(135deg, #6C757D 0%, #5A6268 100%)',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(108, 117, 125, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(108, 117, 125, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(108, 117, 125, 0.3)';
+              }}
+            >
+              <span style={{ fontSize: '16px' }}>←</span>
+              Volver
+            </button>
+            <button
+              onClick={() => {
+                setShowLiveLeagueView(false);
                 setSelectedLeague(null);
               }}
               style={{
