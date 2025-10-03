@@ -41,7 +41,7 @@ export async function loginUser({ email, password }) {
 
 export async function getGames(token) {
   console.log('Calling getGames with token:', token ? 'present' : 'null');
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/nfl/games/current`, {
       method: 'GET',
       headers: {
@@ -57,7 +57,7 @@ export async function getGames(token) {
 
 export async function getGamesByWeek(token, week) {
   console.log('Calling getGamesByWeek with token:', token ? 'present' : 'null', 'week:', week);
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/nfl/games/week/${week}`, {
       method: 'GET',
       headers: {
@@ -73,7 +73,7 @@ export async function getGamesByWeek(token, week) {
 
 export async function getStandings(token) {
   console.log('Calling getStandings with token:', token ? 'present' : 'null');
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/nfl/standings`, {
       method: 'GET',
       headers: {
@@ -89,7 +89,7 @@ export async function getStandings(token) {
 
 export async function getUserLeagues(token) {
   console.log('Calling getUserLeagues with token:', token ? 'present' : 'null');
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/leagues/user`, {
       method: 'GET',
       headers: {
@@ -104,7 +104,7 @@ export async function getUserLeagues(token) {
 }
 
 export async function createLeague(token, { name, isPublic, description }) {
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/leagues/create`, {
       method: 'POST',
       headers: {
@@ -118,7 +118,7 @@ export async function createLeague(token, { name, isPublic, description }) {
 }
 
 export async function joinLeague(token, { inviteCode }) {
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/leagues/join`, {
       method: 'POST',
       headers: {
@@ -132,7 +132,7 @@ export async function joinLeague(token, { inviteCode }) {
 }
 
 export async function makePicks(token, leagueId, picks) {
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/picks/make`, {
       method: 'POST',
       headers: {
@@ -147,7 +147,7 @@ export async function makePicks(token, leagueId, picks) {
 
 export async function getUserPicks(token, leagueId, week) {
   console.log('Calling getUserPicks with token:', token ? 'present' : 'null', 'leagueId:', leagueId, 'week:', week);
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/picks/user?leagueId=${leagueId}&week=${week}`, {
       method: 'GET',
       headers: {
@@ -163,7 +163,7 @@ export async function getUserPicks(token, leagueId, week) {
 
 export async function getLeagueStats(token, leagueId, week) {
   console.log('Calling getLeagueStats with token:', token ? 'present' : 'null', 'leagueId:', leagueId, 'week:', week);
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/stats/league?leagueId=${leagueId}&week=${week}`, {
       method: 'GET',
       headers: {
@@ -179,7 +179,7 @@ export async function getLeagueStats(token, leagueId, week) {
 
 export async function getUserPicksDetails(token, leagueId, week, userId) {
   console.log('Calling getUserPicksDetails with token:', token ? 'present' : 'null', 'leagueId:', leagueId, 'week:', week, 'userId:', userId);
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const params = new URLSearchParams({ leagueId: leagueId.toString(), week: week.toString() });
     if (userId) params.append('userId', userId.toString());
     const res = await fetch(`${API_URL}/stats/user-picks?${params}`, {
@@ -196,7 +196,7 @@ export async function getUserPicksDetails(token, leagueId, week, userId) {
 }
 
 export async function joinGeneralLeague(token) {
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/leagues/join-general`, {
       method: 'POST',
       headers: {
@@ -210,7 +210,7 @@ export async function joinGeneralLeague(token) {
 
 export async function updateProfile(token, { username, password, profileImage }) {
   console.log('Calling updateProfile with token:', token ? 'present' : 'null');
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/auth/profile`, {
       method: 'PUT',
       headers: {
@@ -275,7 +275,7 @@ export async function getGamesInitialLoad(token) {
 
 export async function recalculateScores(token, { leagueId, week, allLeagues }) {
   console.log('Calling recalculateScores with token:', token ? 'present' : 'null', 'params:', { leagueId, week, allLeagues });
-  return withLoading(async () => {
+  return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/stats/recalculate-scores`, {
       method: 'POST',
       headers: {
