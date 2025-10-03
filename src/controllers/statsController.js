@@ -302,4 +302,115 @@ const cleanDuplicates = async (req, res) => {
   }
 };
 
-module.exports = { getLeagueStats, getUserPicksDetails, calculateScores, cleanDuplicates };
+const recalculateScores = async (req, res) => {
+  try {
+    const { leagueId, week, allLeagues } = req.body;
+    const userId = req.user.id;
+
+    console.log('🔄 Iniciando recálculo de puntos...');
+    console.log('Parámetros:', { leagueId, week, allLeagues, userId });
+
+    let leaguesToProcess = [];
+    let weeksToProcess = [];
+
+    if (allLeagues) {
+      // Modo administrador: recalcular todas las ligas a las que pertenece el usuario
+      console.log('👑 Modo múltiple: procesando todas las ligas del usuario');
+      const userLeagues = await LeagueMember.findAll({
+        where: { userId },
+        attributes: ['leagueId'],
+        group: ['leagueId']
+      });
+      leaguesToProcess = userLeagues.map(l => l.leagueId);
+
+      // Obtener todas las semanas disponibles
+      const allGames = await Game.findAll({
+        attributes: ['week'],
+        group: ['week'],
+        order: [['week', 'ASC']]
+      });
+      weeksToProcess = allGames.map(g => g.week);
+
+    } else if (leagueId) {
+      // Liga específica
+      leaguesToProcess = [parseInt(leagueId)];
+
+      // Verificar que el usuario pertenece a la liga
+      const membership = await LeagueMember.findOne({
+        where: { leagueId: parseInt(leagueId), userId }
+      });
+
+      if (!membership) {
+        return res.status(403).json({
+          success: false,
+          message: 'No tienes permisos para recalcular puntos en esta liga'
+        });
+      }
+
+      if (week) {
+        // Semana específica
+        weeksToProcess = [parseInt(week)];
+      } else {
+        // Todas las semanas de la liga
+        const leagueGames = await Game.findAll({
+          attributes: ['week'],
+          group: ['week'],
+          order: [['week', 'ASC']]
+        });
+        weeksToProcess = leagueGames.map(g => g.week);
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Debes especificar leagueId o usar allLeagues=true'
+      });
+    }
+
+    console.log(`📊 Procesando ${leaguesToProcess.length} ligas y ${weeksToProcess.length} semanas`);
+
+    let totalProcessed = 0;
+    let scoresUpdated = 0;
+
+    // Procesar cada liga y semana
+    for (const currentLeagueId of leaguesToProcess) {
+      for (const currentWeek of weeksToProcess) {
+        console.log(`🔄 Recalculando liga ${currentLeagueId}, semana ${currentWeek}`);
+        await calculateScores(currentLeagueId, currentWeek);
+        totalProcessed++;
+      }
+    }
+
+    // Contar scores actualizados (aproximado)
+    const recentScores = await Score.findAll({
+      where: {
+        updatedAt: {
+          [Score.sequelize.Op.gte]: new Date(Date.now() - 60000) // Último minuto
+        }
+      }
+    });
+    scoresUpdated = recentScores.length;
+
+    console.log(`✅ Recálculo completado: ${totalProcessed} combinaciones procesadas, ~${scoresUpdated} scores actualizados`);
+
+    res.json({
+      success: true,
+      message: 'Recálculo de puntos completado exitosamente',
+      stats: {
+        leaguesProcessed: leaguesToProcess.length,
+        weeksProcessed: weeksToProcess.length,
+        combinationsProcessed: totalProcessed,
+        scoresUpdated: scoresUpdated
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error recalculando puntos:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al recalcular puntos',
+      error: error.message
+    });
+  }
+};
+
+module.exports = { getLeagueStats, getUserPicksDetails, calculateScores, cleanDuplicates, recalculateScores };

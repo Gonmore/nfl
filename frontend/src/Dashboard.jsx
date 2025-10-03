@@ -204,22 +204,22 @@ export default function Dashboard({ user, token, onLogout }) {
       setLoadingStates(prev => ({ ...prev, games: false }));
     }
 
-    // Función para recargar juegos para una semana específica
-    async function loadGamesForWeek(targetWeek) {
-      try {
-        const res = await getGames(token);
-        setGames(res.games || []);
-      } catch (err) {
-        console.error('Error al recargar juegos:', err);
-        showToast('Error al recargar juegos', 'error');
-      }
-    }
-
     // En móviles, solo cargar juegos cuando se selecciona una liga
     if (!isMobile || selectedLeague) {
       fetchGames();
     }
   }, [token, isMobile, selectedLeague]);
+
+  // Función para recargar juegos para una semana específica
+  async function loadGamesForWeek(targetWeek) {
+    try {
+      const res = await getGames(token);
+      setGames(res.games || []);
+    } catch (err) {
+      console.error('Error al recargar juegos:', err);
+      showToast('Error al recargar juegos', 'error');
+    }
+  }
 
   const handleCreateLeague = async (leagueData) => {
     try {

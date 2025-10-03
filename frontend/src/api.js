@@ -252,3 +252,20 @@ export async function wakeup() {
   console.log('wakeup response:', data);
   return data;
 }
+
+export async function recalculateScores(token, { leagueId, week, allLeagues }) {
+  console.log('Calling recalculateScores with token:', token ? 'present' : 'null', 'params:', { leagueId, week, allLeagues });
+  return withLoading(async () => {
+    const res = await fetch(`${API_URL}/stats/recalculate-scores`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ leagueId, week, allLeagues })
+    });
+    const data = await res.json();
+    console.log('recalculateScores response:', data);
+    return data;
+  });
+}
