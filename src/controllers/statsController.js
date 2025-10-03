@@ -3,6 +3,7 @@ const Game = require('../models/Game');
 const Score = require('../models/Score');
 const LeagueMember = require('../models/LeagueMember');
 const User = require('../models/User');
+const { Op } = require('sequelize');
 
 const getLeagueStats = async (req, res) => {
   try {
@@ -384,7 +385,7 @@ const recalculateScores = async (req, res) => {
     const recentScores = await Score.findAll({
       where: {
         updatedAt: {
-          [Score.sequelize.Op.gte]: new Date(Date.now() - 60000) // Último minuto
+          [Op.gte]: new Date(Date.now() - 60000) // Último minuto
         }
       }
     });
