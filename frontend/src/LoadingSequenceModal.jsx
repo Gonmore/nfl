@@ -4,7 +4,7 @@ export default function LoadingSequenceModal({ isVisible, onComplete }) {
   const [currentImage, setCurrentImage] = useState(2);
   const [loopCount, setLoopCount] = useState(0);
   const totalImages = 15;
-  const totalLoops = 2;
+  const totalLoops = 3;
   const onCompleteRef = useRef(onComplete);
   const timeoutRef = useRef(null);
 
@@ -74,7 +74,7 @@ export default function LoadingSequenceModal({ isVisible, onComplete }) {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 75, 155, 0.75)',
+      background: 'linear-gradient(180deg, rgba(0, 83, 220, 0.8) 0%, rgba(0, 20, 80, 0.95) 100%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
