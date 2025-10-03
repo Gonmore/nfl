@@ -1,5 +1,8 @@
 const axios = require('axios');
+const { Op, fn } = require('sequelize');
 const Game = require('../models/Game');
+const League = require('../models/League');
+const { calculateScores } = require('../controllers/statsController');
 
 // Obtiene y guarda todos los partidos de todas las semanas en la BD
 async function syncGamesForCurrentWeek() {
@@ -46,6 +49,9 @@ async function syncGamesForCurrentWeek() {
       console.error(`Error al sincronizar semana ${week}:`, err.message);
     }
   }
+
+  // Recalcular scores para todas las ligas y semanas donde haya partidos finalizados
+  await recalculateAllPendingScores();
 }
 
 // Obtiene standings de la NFL desde ESPN
@@ -109,7 +115,7 @@ async function getNFLStandings() {
 async function getGamesForCurrentWeek() {
   const now = new Date();
   // Buscar el partido más próximo y tomar su semana
-  const nextGame = await Game.findOne({ where: { date: { [Game.sequelize.Op.gte]: now } }, order: [['date', 'ASC']] });
+  const nextGame = await Game.findOne({ where: { date: { [Op.gte]: now } }, order: [['date', 'ASC']] });
   let week;
   if (nextGame) {
     week = nextGame.week;
@@ -120,4 +126,36 @@ async function getGamesForCurrentWeek() {
   return await Game.findAll({ where: { week } });
 }
 
-module.exports = { syncGamesForCurrentWeek, getGamesForCurrentWeek, getNFLStandings };
+// Recalcula scores para todas las ligas donde haya partidos finalizados recientemente
+async function recalculateAllPendingScores() {
+  try {
+    // Obtener todas las ligas
+    const leagues = await League.findAll();
+
+    for (const league of leagues) {
+      // Obtener todas las semanas que tienen partidos
+      const weeksWithGames = await Game.findAll({
+        attributes: [[fn('DISTINCT', Game.sequelize.col('week')), 'week']],
+        raw: true
+      });
+
+      for (const weekObj of weeksWithGames) {
+        const week = weekObj.week;
+        // Verificar si hay partidos finalizados en esta semana
+        const finishedGames = await Game.findAll({
+          where: { week, status: 'STATUS_FINAL' }
+        });
+
+        if (finishedGames.length > 0) {
+          // Recalcular scores para esta liga y semana
+          await calculateScores(league.id, week);
+          console.log(`Scores recalculados para liga ${league.id}, semana ${week}`);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error recalculando scores:', error);
+  }
+}
+
+module.exports = { syncGamesForCurrentWeek, getGamesForCurrentWeek, getNFLStandings, recalculateAllPendingScores };

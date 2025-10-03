@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
-import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, updateProfile } from './api';
+import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile } from './api';
 import { teamLogos } from './teamLogos.js';
 
 // Lazy load componentes pesados
@@ -86,7 +86,7 @@ export default function Dashboard({ user, token, onLogout }) {
     fetchLeagues();
   }, [token]);
 
-  // Obtiene standings de forma diferida (solo cuando sea necesario)
+  // Obtiene standings inmediatamente al cargar el dashboard
   useEffect(() => {
     async function fetchStandings() {
       try {
@@ -120,14 +120,12 @@ export default function Dashboard({ user, token, onLogout }) {
       }
     }
 
-    // Solo cargar standings si no estamos en móvil o si el usuario ya interactuó
-    if (!isMobile || selectedLeague) {
-      fetchStandings();
-      // Actualizar cada 15 minutos en lugar de 10 para ahorrar batería
-      const interval = setInterval(fetchStandings, 15 * 60 * 1000);
-      return () => clearInterval(interval);
-    }
-  }, [token, isMobile, selectedLeague]);
+    // Cargar standings inmediatamente al entrar al dashboard
+    fetchStandings();
+    // Actualizar cada 15 minutos en lugar de 10 para ahorrar batería
+    const interval = setInterval(fetchStandings, 15 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [token]);
 
   // Obtiene partidos (carga diferida para móviles)
   useEffect(() => {
@@ -267,8 +265,19 @@ export default function Dashboard({ user, token, onLogout }) {
 
   const handleLeagueSelect = (league) => {
     setSelectedLeague(league);
+
+    // Calcular si estamos en horario de jornada directamente (sin depender de juegos cargados)
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=domingo, 4=jueves, 1=lunes
+    const hour = now.getHours();
+
+    // Jueves después de las 20:00
+    const duringGameWeek = (dayOfWeek === 4 && hour >= 20) ||
+                           (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) ||
+                           (dayOfWeek === 1);
+
     // Mostrar opciones de jornada si estamos en horario de jornada
-    if (isDuringGameWeek) {
+    if (duringGameWeek) {
       setShowGameWeekOptions(true);
     }
   };
@@ -392,9 +401,11 @@ export default function Dashboard({ user, token, onLogout }) {
                   const picksResponse = await getUserPicksDetails(token, selectedLeague.id, week);
                   setUserPicksWithResults(picksResponse.details || []);
 
-                  // Calcular puntos totales
-                  const total = (picksResponse.details || []).reduce((sum, pick) => sum + (pick.points || 0), 0);
-                  setTotalPoints(total);
+                  // Obtener el total de puntos de la semana desde las estadísticas
+                  const statsResponse = await getLeagueStats(token, selectedLeague.id, week);
+                  const userWeeklyStats = statsResponse.weekly.find(u => u.userId === user.id);
+                  const totalPoints = userWeeklyStats ? userWeeklyStats.points : 0;
+                  setTotalPoints(totalPoints);
 
                   setShowGameWeekOptions(false);
                   setShowScoreView(true);
@@ -572,7 +583,8 @@ export default function Dashboard({ user, token, onLogout }) {
             {currentWeekGames.map(game => {
               const userPick = userPicksWithResults.find(p => p.gameId === game.id);
               const isCorrect = userPick && userPick.correct;
-              const isFinished = game.winner !== null;
+              const isFinished = game.winner !== null || game.status === 'STATUS_FINAL';
+              const isTie = game.status === 'STATUS_FINAL' && game.winner === null;
               
               return (
                 <div key={game.id} style={{
@@ -581,11 +593,11 @@ export default function Dashboard({ user, token, onLogout }) {
                   justifyContent: 'center',
                   padding: windowWidth <= 480 ? '6px' : '12px',
                   backgroundColor: isFinished 
-                    ? (isCorrect ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)')
+                    ? (isTie ? 'rgba(99, 102, 241, 0.1)' : (isCorrect ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)'))
                     : 'rgba(240, 240, 240, 0.9)',
                   borderRadius: '12px',
                   border: `2px solid ${isFinished 
-                    ? (isCorrect ? '#22C55E' : '#EF4444')
+                    ? (isTie ? '#6366F1' : (isCorrect ? '#22C55E' : '#EF4444'))
                     : 'rgba(0, 44, 95, 0.2)'}`,
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                   gap: '8px',
@@ -597,7 +609,7 @@ export default function Dashboard({ user, token, onLogout }) {
                       position: 'absolute',
                       top: '-8px',
                       right: '-8px',
-                      backgroundColor: isCorrect ? '#22C55E' : '#EF4444',
+                      backgroundColor: isTie ? '#6366F1' : (isCorrect ? '#22C55E' : '#EF4444'),
                       color: 'white',
                       borderRadius: '50%',
                       width: '24px',

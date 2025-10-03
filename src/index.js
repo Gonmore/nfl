@@ -85,22 +85,30 @@ sequelize.sync({ alter: true }).then(async () => {
     console.error('Error al sincronizar partidos automáticamente:', err.message);
   }
 
-  // Servicio de actualización periódica
+  // Servicio de actualización periódica durante la semana de NFL
   cron.schedule('*/5 * * * *', async () => {
     try {
-      // Determina el rango de actualización de la semana actual
       const now = new Date();
-      const week = await Game.max('week', { where: { date: { [Op.lte]: now } } });
-      const games = await Game.findAll({ where: { week } });
-      if (games.length === 0) return;
-      // Hora de inicio del primer partido y del último partido
-      const start = new Date(Math.min(...games.map(g => new Date(g.date).getTime())));
-      const end = new Date(Math.max(...games.map(g => new Date(g.date).getTime())));
-      // Rango de actualización: desde start hasta end + 3 horas
-      const endPlus3h = new Date(end.getTime() + 3 * 60 * 60 * 1000);
-      if (now >= start && now <= endPlus3h) {
+      const currentDay = now.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+      const currentHour = now.getHours();
+
+      // Solo sincronizar durante días de partidos: Jueves (4), Domingo (0), Lunes (1)
+      // Jueves: desde las 18:00 hasta las 23:59
+      // Domingo: desde las 13:00 hasta las 23:59
+      // Lunes: desde las 19:00 hasta las 23:59
+      let shouldSync = false;
+
+      if (currentDay === 4 && currentHour >= 18) { // Thursday after 6 PM
+        shouldSync = true;
+      } else if (currentDay === 0 && currentHour >= 13) { // Sunday after 1 PM
+        shouldSync = true;
+      } else if (currentDay === 1 && currentHour >= 19) { // Monday after 7 PM
+        shouldSync = true;
+      }
+
+      if (shouldSync) {
         await syncGamesForCurrentWeek();
-        console.log(`[${now.toISOString()}] Actualización automática de partidos semana ${week}`);
+        console.log(`[${now.toISOString()}] Actualización automática de partidos - Día: ${currentDay}, Hora: ${currentHour}`);
       }
     } catch (err) {
       console.error('Error en actualización periódica:', err.message);

@@ -9,6 +9,12 @@ const Score = sequelize.define('Score', {
   points: { type: DataTypes.INTEGER, defaultValue: 0 },
 }, {
   timestamps: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['userId', 'leagueId', 'week']
+    }
+  ]
 });
 
 module.exports = Score;

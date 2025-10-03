@@ -10,6 +10,12 @@ const Pick = sequelize.define('Pick', {
   week: { type: DataTypes.INTEGER, allowNull: false },
 }, {
   timestamps: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['userId', 'gameId', 'leagueId']
+    }
+  ]
 });
 
 module.exports = Pick;
