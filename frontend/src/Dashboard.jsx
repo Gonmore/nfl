@@ -1,16 +1,20 @@
-import React, { useEffect, useState, useRef } from 'react';
-import PickForm from './PickForm.jsx';
-import LeagueStats from './LeagueStats.jsx';
+import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, updateProfile } from './api';
 import { teamLogos } from './teamLogos.js';
 
+// Lazy load componentes pesados
+const PickForm = lazy(() => import('./PickForm.jsx'));
+const LeagueStats = lazy(() => import('./LeagueStats.jsx'));
+
 export default function Dashboard({ user, token, onLogout }) {
+  // Estados optimizados para móvil
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [leagues, setLeagues] = useState([]);
   const [selectedLeague, setSelectedLeague] = useState(null);
   const [week, setWeek] = useState(null);
+  const [currentWeek, setCurrentWeek] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -18,10 +22,37 @@ export default function Dashboard({ user, token, onLogout }) {
   const [standings, setStandings] = useState([]);
   const [previousPositions, setPreviousPositions] = useState({});
 
+  // Estados optimizados para carga progresiva
+  const [loadingStates, setLoadingStates] = useState({
+    leagues: true,
+    standings: false,
+    games: false,
+    picks: false
+  });
+
+  // Estados para notificaciones toast
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  // Función para mostrar notificaciones toast
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
+
+  // Función para ocultar toast manualmente
+  const hideToast = () => {
+    setToast({ show: false, message: '', type: 'success' });
+  };
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setWindowWidth(width);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -37,24 +68,29 @@ export default function Dashboard({ user, token, onLogout }) {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  // Obtiene ligas del usuario
+  // Obtiene ligas del usuario (carga inicial prioritaria)
   useEffect(() => {
     async function fetchLeagues() {
       try {
+        setLoadingStates(prev => ({ ...prev, leagues: true }));
         const res = await getUserLeagues(token);
         setLeagues(res.leagues || []);
+        setLoadingStates(prev => ({ ...prev, leagues: false }));
       } catch (err) {
         console.error('Error al cargar ligas:', err);
         setError('Error al cargar ligas');
+        showToast('Error al cargar ligas', 'error');
+        setLoadingStates(prev => ({ ...prev, leagues: false }));
       }
     }
     fetchLeagues();
   }, [token]);
 
-  // Obtiene standings de la NFL
+  // Obtiene standings de forma diferida (solo cuando sea necesario)
   useEffect(() => {
     async function fetchStandings() {
       try {
+        setLoadingStates(prev => ({ ...prev, standings: true }));
         const res = await getStandings(token);
         const newStandings = res.standings || [];
 
@@ -77,22 +113,29 @@ export default function Dashboard({ user, token, onLogout }) {
 
         setStandings(standingsWithChanges);
         setPreviousPositions(newPositions);
+        setLoadingStates(prev => ({ ...prev, standings: false }));
       } catch (err) {
         console.error('Error al cargar standings:', err);
+        setLoadingStates(prev => ({ ...prev, standings: false }));
       }
     }
 
-    fetchStandings();
-    // Actualizar cada 10 minutos
-    const interval = setInterval(fetchStandings, 10 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [token]);
+    // Solo cargar standings si no estamos en móvil o si el usuario ya interactuó
+    if (!isMobile || selectedLeague) {
+      fetchStandings();
+      // Actualizar cada 15 minutos en lugar de 10 para ahorrar batería
+      const interval = setInterval(fetchStandings, 15 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [token, isMobile, selectedLeague]);
 
-  // Obtiene partidos
+  // Obtiene partidos (carga diferida para móviles)
   useEffect(() => {
     async function fetchGames() {
       setLoading(true);
       setError('');
+      setLoadingStates(prev => ({ ...prev, games: true }));
+
       try {
         const res = await getGames(token);
         setGames(res.games || []);
@@ -103,42 +146,82 @@ export default function Dashboard({ user, token, onLogout }) {
           if (nextGame) {
             currentWeek = nextGame.week;
           } else {
+            // Si no hay juegos futuros, usar la semana más alta disponible
             currentWeek = Math.max(...res.games.map(g => g.week));
           }
         }
+
+        // Si no hay juegos disponibles, intentar determinar la semana actual
+        // basándonos en la fecha límite típica (jueves 20:00)
+        if (!currentWeek) {
+          const dayOfWeek = now.getDay(); // 0=domingo, 4=jueves, 1=lunes
+          const hour = now.getHours();
+
+          // Si estamos en jueves después de las 20:00, o viernes, sábado, domingo, lunes
+          // entonces estamos en jornada de la semana actual
+          if ((dayOfWeek === 4 && hour >= 20) ||
+              dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0 || dayOfWeek === 1) {
+            // Estimar la semana actual basándonos en la fecha
+            // Esto es una aproximación - en producción debería venir del backend
+            const startOfSeason = new Date('2024-09-05'); // Aproximado
+            const diffTime = Math.abs(now - startOfSeason);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            currentWeek = Math.ceil(diffDays / 7);
+          }
+        }
+
         setWeek(currentWeek);
+        setCurrentWeek(currentWeek);
 
         // Detectar si estamos en horario de jornada
         if (res.games && res.games.length > 0) {
-          const filteredGames = res.games.filter(g => g.week === currentWeek);
-          const deadline = filteredGames.length > 0 ? new Date(Math.min(...filteredGames.map(g => new Date(g.date).getTime()))) : null;
-          
+          const currentWeekGames = res.games.filter(g => g.week === currentWeek);
+          const deadline = currentWeekGames.length > 0 ? new Date(Math.min(...currentWeekGames.map(g => new Date(g.date).getTime()))) : null;
+
           if (deadline) {
             const dayOfWeek = now.getDay(); // 0=domingo, 4=jueves, 1=lunes
             const hour = now.getHours();
-            
+
             // Jueves después de las 20:00
-            const duringGameWeek = (dayOfWeek === 4 && hour >= 20) || 
-                                   (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) || 
+            const duringGameWeek = (dayOfWeek === 4 && hour >= 20) ||
+                                   (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) ||
                                    (dayOfWeek === 1);
-            
+
             const isDeadlinePassed = deadline && now > deadline;
-            
+
             setIsDuringGameWeek(duringGameWeek);
           }
         }
       } catch (err) {
         setError('Error al cargar juegos');
+        showToast('Error al cargar juegos', 'error');
       }
+
       setLoading(false);
+      setLoadingStates(prev => ({ ...prev, games: false }));
     }
-    fetchGames();
-  }, [token]);
+
+    // Función para recargar juegos para una semana específica
+    async function loadGamesForWeek(targetWeek) {
+      try {
+        const res = await getGames(token);
+        setGames(res.games || []);
+      } catch (err) {
+        console.error('Error al recargar juegos:', err);
+        showToast('Error al recargar juegos', 'error');
+      }
+    }
+
+    // En móviles, solo cargar juegos cuando se selecciona una liga
+    if (!isMobile || selectedLeague) {
+      fetchGames();
+    }
+  }, [token, isMobile, selectedLeague]);
 
   const handleCreateLeague = async (leagueData) => {
     try {
       const res = await createLeague(token, leagueData);
-      alert(res.message);
+      showToast(res.message, 'success');
       if (res.league) {
         // Recargar ligas para mostrar la nueva
         const resLeagues = await getUserLeagues(token);
@@ -147,7 +230,7 @@ export default function Dashboard({ user, token, onLogout }) {
         return res.league;
       }
     } catch (err) {
-      alert('Error al crear liga');
+      showToast('Error al crear liga', 'error');
       throw err;
     }
   };
@@ -155,7 +238,7 @@ export default function Dashboard({ user, token, onLogout }) {
   const handleJoinLeague = async (joinData) => {
     try {
       const res = await joinLeague(token, joinData);
-      alert(res.message);
+      showToast(res.message, 'success');
       if (res.message.includes('correctamente')) {
         // Recargar ligas
         const resLeagues = await getUserLeagues(token);
@@ -163,14 +246,14 @@ export default function Dashboard({ user, token, onLogout }) {
         setShowJoinModal(false); // Cerrar modal
       }
     } catch (err) {
-      alert('Error al unirse a liga');
+      showToast('Error al unirse a liga', 'error');
     }
   };
 
   const handleJoinGeneralLeague = async () => {
     try {
       const res = await joinGeneralLeague(token);
-      alert(res.message);
+      showToast(res.message, 'success');
       if (res.message.includes('correctamente')) {
         // Recargar ligas
         const resLeagues = await getUserLeagues(token);
@@ -178,7 +261,7 @@ export default function Dashboard({ user, token, onLogout }) {
       }
     } catch (err) {
       console.error('Error joining general league:', err);
-      alert('Error al unirse a Liga General.');
+      showToast('Error al unirse a Liga General.', 'error');
     }
   };
 
@@ -238,7 +321,7 @@ export default function Dashboard({ user, token, onLogout }) {
   };
 
   // Modal de opciones de jornada
-  if (showGameWeekOptions && selectedLeague) {
+  if (showGameWeekOptions && selectedLeague && week === currentWeek) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -317,7 +400,7 @@ export default function Dashboard({ user, token, onLogout }) {
                   setShowScoreView(true);
                 } catch (error) {
                   console.error('Error loading score data:', error);
-                  alert('Error al cargar los datos del score. Inténtalo de nuevo.');
+                  showToast('Error al cargar los datos del score. Inténtalo de nuevo.', 'error');
                 } finally {
                   setLoading(false);
                 }
@@ -354,7 +437,11 @@ export default function Dashboard({ user, token, onLogout }) {
             <button
               onClick={() => {
                 setShowGameWeekOptions(false);
-                // Continuar con la vista normal de picks
+                // Cuando se elige hacer picks de la siguiente semana, incrementar la semana y recargar juegos
+                const nextWeek = week + 1;
+                setWeek(nextWeek);
+                // Recargar juegos para incluir la nueva semana
+                loadGamesForWeek(nextWeek);
               }}
               style={{
                 background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
@@ -444,15 +531,15 @@ export default function Dashboard({ user, token, onLogout }) {
           backdropFilter: 'blur(10px)',
           maxWidth: '800px',
           width: '100%',
-          padding: '32px'
+          padding: windowWidth <= 480 ? '16px' : '32px'
         }}>
           <div style={{
             textAlign: 'center',
-            marginBottom: '24px'
+            marginBottom: windowWidth <= 480 ? '12px' : '24px'
           }}>
             <h2 style={{
               margin: 0,
-              fontSize: '24px',
+              fontSize: windowWidth <= 480 ? '18px' : '24px',
               fontWeight: '800',
               color: '#004B9B',
               display: 'flex',
@@ -464,8 +551,8 @@ export default function Dashboard({ user, token, onLogout }) {
                 src='/img/logo_MVPicks.png'
                 alt='CartelNFL Logo'
                 style={{
-                  width: '64px',
-                  height: '64px',
+                  width: windowWidth <= 480 ? '48px' : '64px',
+                  height: windowWidth <= 480 ? '48px' : '64px',
                   borderRadius: '4px'
                 }}
               />
@@ -478,9 +565,9 @@ export default function Dashboard({ user, token, onLogout }) {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '16px',
-            marginBottom: '32px'
+            gridTemplateColumns: windowWidth <= 359 ? '1fr' : windowWidth <= 480 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: windowWidth <= 480 ? '6px' : '8px',
+            marginBottom: windowWidth <= 480 ? '12px' : '16px'
           }}>
             {currentWeekGames.map(game => {
               const userPick = userPicksWithResults.find(p => p.gameId === game.id);
@@ -492,7 +579,7 @@ export default function Dashboard({ user, token, onLogout }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '12px',
+                  padding: windowWidth <= 480 ? '6px' : '12px',
                   backgroundColor: isFinished 
                     ? (isCorrect ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)')
                     : 'rgba(240, 240, 240, 0.9)',
@@ -526,6 +613,12 @@ export default function Dashboard({ user, token, onLogout }) {
                     </div>
                   )}
 
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: windowWidth <= 480 ? '4px' : '8px'
+                }}>
                   <div style={{
                     position: 'relative',
                     display: 'flex',
@@ -533,8 +626,8 @@ export default function Dashboard({ user, token, onLogout }) {
                     justifyContent: 'center',
                     backgroundColor: 'white',
                     borderRadius: '50%',
-                    width: '40px',
-                    height: '40px',
+                    width: windowWidth <= 480 ? '34px' : '40px',
+                    height: windowWidth <= 480 ? '34px' : '40px',
                     border: userPick && userPick.pick === game.awayTeam ? '3px solid #002C5F' : '3px solid transparent',
                     boxShadow: userPick && userPick.pick === game.awayTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
                     opacity: userPick && userPick.pick === game.awayTeam ? 1 : 0.6
@@ -543,8 +636,8 @@ export default function Dashboard({ user, token, onLogout }) {
                       src={teamLogos[game.awayTeam]}
                       alt={game.awayTeam}
                       style={{
-                        width: '36px',
-                        height: '36px',
+                        width: windowWidth <= 480 ? '30px' : '36px',
+                        height: windowWidth <= 480 ? '30px' : '36px',
                         borderRadius: '50%',
                         objectFit: 'cover'
                       }}
@@ -555,7 +648,7 @@ export default function Dashboard({ user, token, onLogout }) {
                   </div>
 
                   <div style={{
-                    fontSize: '16px',
+                    fontSize: windowWidth <= 480 ? '12px' : '16px',
                     fontWeight: '600',
                     color: '#002C5F'
                   }}>
@@ -569,8 +662,8 @@ export default function Dashboard({ user, token, onLogout }) {
                     justifyContent: 'center',
                     backgroundColor: 'white',
                     borderRadius: '50%',
-                    width: '40px',
-                    height: '40px',
+                    width: windowWidth <= 480 ? '34px' : '40px',
+                    height: windowWidth <= 480 ? '34px' : '40px',
                     border: userPick && userPick.pick === game.homeTeam ? '3px solid #002C5F' : '3px solid transparent',
                     boxShadow: userPick && userPick.pick === game.homeTeam ? '0 0 0 2px rgba(0, 44, 95, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.15)',
                     opacity: userPick && userPick.pick === game.homeTeam ? 1 : 0.6
@@ -579,8 +672,8 @@ export default function Dashboard({ user, token, onLogout }) {
                       src={teamLogos[game.homeTeam]}
                       alt={game.homeTeam}
                       style={{
-                        width: '36px',
-                        height: '36px',
+                        width: windowWidth <= 480 ? '30px' : '36px',
+                        height: windowWidth <= 480 ? '30px' : '36px',
                         borderRadius: '50%',
                         objectFit: 'cover'
                       }}
@@ -590,13 +683,14 @@ export default function Dashboard({ user, token, onLogout }) {
                     />
                   </div>
                 </div>
+                </div>
               );
             })}
           </div>
 
           <div style={{
             textAlign: 'center',
-            padding: '24px',
+            padding: windowWidth <= 480 ? '16px' : '24px',
             background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
             borderRadius: '16px',
             color: 'white'
@@ -604,12 +698,12 @@ export default function Dashboard({ user, token, onLogout }) {
             <div style={{ fontSize: '18px', marginBottom: '8px', opacity: 0.9 }}>
               Puntos Totales - Semana {week}
             </div>
-            <div style={{ fontSize: '48px', fontWeight: '900', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
+            <div style={{ fontSize: windowWidth <= 480 ? '36px' : '48px', fontWeight: '900', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
               {totalPoints}
             </div>
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <div style={{ textAlign: 'center', marginTop: windowWidth <= 480 ? '16px' : '20px' }}>
             <button
               onClick={() => {
                 setShowScoreView(false);
@@ -1573,7 +1667,7 @@ export default function Dashboard({ user, token, onLogout }) {
             </div>
           </div>
         ) : (
-          <PickForm games={filteredGames} token={token} leagueId={selectedLeague.id} week={week} />
+          <PickForm games={filteredGames} token={token} leagueId={selectedLeague.id} week={week} currentWeek={currentWeek} />
         )}
 
         {selectedLeague && week ? (
@@ -2086,7 +2180,7 @@ function JoinLeagueModal({ onJoin, onClose }) {
 function InviteCodeModal({ league, onClose }) {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(league.inviteCode);
-    alert('✅ Código copiado al portapapeles!');
+    showToast('✅ Código copiado al portapapeles!', 'success');
   };
 
   return (
@@ -2276,7 +2370,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
             onProfileUpdate(result.user);
           }
 
-          alert('Perfil actualizado correctamente');
+          showToast('Perfil actualizado correctamente', 'success');
         } else {
           setError(result.message || 'Error al actualizar el perfil');
           setLoading(false);

@@ -76,15 +76,6 @@ export default function LoginRegister({ onLogin }) {
               }}
             />
           </div>
-          <h1 style={{
-            color: '#004B9B',
-            fontSize: '32px',
-            fontWeight: '700',
-            margin: '0 0 8px 0',
-            textAlign: 'center'
-          }}>
-            CartelNFL
-          </h1>
           <p style={{
             color: '#666666',
             fontSize: '16px',
