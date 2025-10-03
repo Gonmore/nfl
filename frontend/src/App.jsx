@@ -91,7 +91,7 @@ export default function App() {
     localStorage.setItem('user', JSON.stringify(userData));
     setShowLogin(false);
     // Immediately show loading sequence without delay
-    setTimeout(() => setShowLoadingSequence(true), 100);
+    setShowLoadingSequence(true);
   };
 
   const handleLogout = () => {
@@ -105,6 +105,7 @@ export default function App() {
 
   const handleLoadingSequenceComplete = () => {
     setShowLoadingSequence(false);
+    setIsLoading(false); // Ensure no global loading is active
   };
 
   return (

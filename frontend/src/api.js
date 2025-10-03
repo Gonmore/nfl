@@ -8,22 +8,9 @@ export const setGlobalLoadingSetter = (setter) => {
   globalSetIsLoading = setter;
 };
 
-// Wrapper function for API calls with loading state
-const withLoading = async (apiCall) => {
-  if (globalSetIsLoading) {
-    globalSetIsLoading(true);
-  }
-  try {
-    const result = await apiCall();
-    return result;
-  } finally {
-    if (globalSetIsLoading) {
-      // Add a small delay to ensure smooth transition
-      setTimeout(() => {
-        globalSetIsLoading(false);
-      }, 300);
-    }
-  }
+// Wrapper function for API calls without loading state (for initial dashboard load)
+const withoutLoading = async (apiCall) => {
+  return await apiCall();
 };
 
 export async function registerUser({ username, email, password }) {
@@ -238,17 +225,52 @@ export async function updateProfile(token, { username, password, profileImage })
   });
 }
 
-export async function wakeup() {
-  console.log('Calling wakeup');
-  const res = await fetch(`${API_URL}/auth/wakeup`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
+export async function getUserLeaguesInitialLoad(token) {
+  console.log('Calling getUserLeaguesInitialLoad with token:', token ? 'present' : 'null');
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/leagues/user`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    console.log('getUserLeaguesInitialLoad response:', data);
+    return data;
   });
-  const data = await res.json();
-  console.log('wakeup response:', data);
-  return data;
+}
+
+export async function getStandingsInitialLoad(token) {
+  console.log('Calling getStandingsInitialLoad with token:', token ? 'present' : 'null');
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/nfl/standings`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    console.log('getStandingsInitialLoad response:', data);
+    return data;
+  });
+}
+
+export async function getGamesInitialLoad(token) {
+  console.log('Calling getGamesInitialLoad with token:', token ? 'present' : 'null');
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/nfl/games/current`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    console.log('getGamesInitialLoad response:', data);
+    return data;
+  });
 }
 
 export async function recalculateScores(token, { leagueId, week, allLeagues }) {

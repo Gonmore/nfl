@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
-import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile } from './api';
+import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile, getUserLeaguesInitialLoad, getStandingsInitialLoad, getGamesInitialLoad } from './api';
 import { teamLogos } from './teamLogos.js';
 
 // Lazy load componentes pesados
@@ -78,7 +78,7 @@ export default function Dashboard({ user, token, onLogout }) {
     async function fetchLeagues() {
       try {
         setLoadingStates(prev => ({ ...prev, leagues: true }));
-        const res = await getUserLeagues(token);
+        const res = await getUserLeaguesInitialLoad(token);
         setLeagues(res.leagues || []);
         setLoadingStates(prev => ({ ...prev, leagues: false }));
       } catch (err) {
@@ -96,7 +96,7 @@ export default function Dashboard({ user, token, onLogout }) {
     async function fetchStandings() {
       try {
         setLoadingStates(prev => ({ ...prev, standings: true }));
-        const res = await getStandings(token);
+        const res = await getStandingsInitialLoad(token);
         const newStandings = res.standings || [];
 
         // Calcular cambios de posición
@@ -140,7 +140,7 @@ export default function Dashboard({ user, token, onLogout }) {
       setLoadingStates(prev => ({ ...prev, games: true }));
 
       try {
-        const res = await getGames(token);
+        const res = await getGamesInitialLoad(token);
         setGames(res.games || []);
         const now = new Date();
         let currentWeek = null;
@@ -213,7 +213,7 @@ export default function Dashboard({ user, token, onLogout }) {
   // Función para recargar juegos para una semana específica
   async function loadGamesForWeek(targetWeek) {
     try {
-      const res = await getGames(token);
+      const res = await getGamesInitialLoad(token);
       setGames(res.games || []);
     } catch (err) {
       console.error('Error al recargar juegos:', err);
