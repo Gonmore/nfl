@@ -86,7 +86,9 @@ async function calculateScores(leagueId, week) {
   // Get all games for the week to find the last one
   const games = await Game.findAll({ where: { week }, order: [['date', 'DESC']] });
   console.log(`[calculateScores] Found ${games.length} games for week ${week}`);
-  const lastGameDate = games[0]?.date;
+  const lastGameUtc = games[0]?.date;
+  const boliviaOffset = -4; // GMT-4
+  const lastGameDate = lastGameUtc ? new Date(new Date(lastGameUtc).getTime() + (boliviaOffset * 60 * 60 * 1000)) : null;
   console.log(`[calculateScores] Last game date: ${lastGameDate}`);
 
   // Get all picks for the league and week
@@ -108,8 +110,11 @@ async function calculateScores(leagueId, week) {
 
     // Only process finished games (STATUS_FINAL)
     if (pick.Game?.status === 'STATUS_FINAL') {
-      const gameDate = new Date(pick.Game.date);
-      const day = gameDate.getDay(); // 0=Sun, 1=Mon, 4=Thu
+      // Ajustar la fecha a zona horaria de Bolivia (GMT-4)
+      const utcDate = new Date(pick.Game.date);
+      const boliviaOffset = -4; // GMT-4
+      const localDate = new Date(utcDate.getTime() + (boliviaOffset * 60 * 60 * 1000));
+      const day = localDate.getDay(); // 0=Sun, 1=Mon, 4=Thu, 5=Fri
       let points = 0;
 
       console.log(`[calculateScores] Game ${pick.gameId} - Date: ${gameDate}, Day: ${day}, Last game date: ${lastGameDate}`);
@@ -122,10 +127,12 @@ async function calculateScores(leagueId, week) {
         // Normal game with winner - award points based on day
         if (day === 4) { // Thursday
           points = 1;
+        } else if (day === 5) { // Friday
+          points = 1; // Same as Thursday
         } else if (day === 0) { // Sunday
           // Check if it's the last (featured) game of Sunday
-          const pickGameTime = new Date(pick.Game.date).getTime();
-          const lastGameTime = lastGameDate ? new Date(lastGameDate).getTime() : null;
+          const pickGameTime = localDate.getTime();
+          const lastGameTime = lastGameDate ? lastGameDate.getTime() : null;
           if (pickGameTime === lastGameTime) {
             points = 3; // Featured Sunday game
           } else {
@@ -133,6 +140,9 @@ async function calculateScores(leagueId, week) {
           }
         } else if (day === 1) { // Monday
           points = 3;
+        } else {
+          // Default case for any other day (Saturday, etc.)
+          points = 1;
         }
         console.log(`[calculateScores] Correct pick for user ${userId}, day ${day}, awarding ${points} points`);
       } else {
@@ -173,13 +183,18 @@ const getUserPicksDetails = async (req, res) => {
       include: [Game]
     });
 
-    // Get the last game date for the week
+    // Get the last game date for the week (en zona horaria local)
     const games = await Game.findAll({ where: { week }, order: [['date', 'DESC']] });
-    const lastGameDate = games[0]?.date;
+    const lastGameUtc = games[0]?.date;
+    const boliviaOffset = -4; // GMT-4
+    const lastGameDate = lastGameUtc ? new Date(new Date(lastGameUtc).getTime() + (boliviaOffset * 60 * 60 * 1000)) : null;
 
     const details = picks.map(pick => {
-      const gameDate = new Date(pick.Game.date);
-      const day = gameDate.getDay();
+      // Ajustar la fecha a zona horaria de Bolivia (GMT-4)
+      const utcDate = new Date(pick.Game.date);
+      const boliviaOffset = -4; // GMT-4
+      const localDate = new Date(utcDate.getTime() + (boliviaOffset * 60 * 60 * 1000));
+      const day = localDate.getDay();
       let points = 0;
       let correct = false;
 
@@ -194,14 +209,19 @@ const getUserPicksDetails = async (req, res) => {
           correct = true;
           if (day === 4) { // Thursday
             points = 1;
+          } else if (day === 5) { // Friday
+            points = 1; // Same as Thursday
           } else if (day === 0) { // Sunday
-            if (new Date(pick.Game.date).getTime() === new Date(lastGameDate).getTime()) {
+            if (localDate.getTime() === lastGameDate?.getTime()) {
               points = 3; // Featured Sunday game
             } else {
               points = 2; // Regular Sunday games
             }
           } else if (day === 1) { // Monday
             points = 3;
+          } else {
+            // Default case for any other day (Saturday, etc.)
+            points = 1;
           }
         }
       }
