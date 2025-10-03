@@ -74,38 +74,45 @@ export default function LoadingSequenceModal({ isVisible, onComplete }) {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 75, 155, 0.9)',
+      backgroundColor: 'rgba(0, 75, 155, 0.75)',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 9999,
       backdropFilter: 'blur(2px)'
     }}>
       <div style={{
-        textAlign: 'center',
-        padding: '32px',
-        background: 'rgba(255, 255, 255, 0.95)',
-        borderRadius: '16px',
-        boxShadow: '0 8px 32px rgba(0, 75, 155, 0.4)',
-        border: '2px solid rgba(0, 75, 155, 0.3)',
-        minWidth: '180px',
-        minHeight: '120px'
+        background: 'white',
+        borderRadius: '8px',
+        padding: '4px',
+        display: 'inline-block'
       }}>
         <img
           src={`/img/carga/${currentImage}.png`}
           alt={`Loading ${currentImage}`}
           style={{
-            maxWidth: '70%',
-            maxHeight: '60vh',
+            maxWidth: '80%',
+            maxHeight: '25vh',
             objectFit: 'contain',
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
-            marginBottom: '20px'
+            borderRadius: '8px',
+            display: 'block'
           }}
           onError={(e) => {
             console.error(`Failed to load image ${currentImage}.png`);
           }}
         />
+      </div>
+      <div style={{
+        marginTop: '12px',
+        color: 'white',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        textTransform: 'uppercase',
+        letterSpacing: '1px'
+      }}>
+        CARGANDO...
       </div>
     </div>
   );
