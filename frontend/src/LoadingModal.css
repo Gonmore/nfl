@@ -23,25 +23,8 @@
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 44, 95, 0.4);
   border: 2px solid rgba(0, 75, 155, 0.3);
-  min-width: 200px;
-  min-height: 200px;
-}
-
-.loading-spinner {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  animation: spin-logo 2s linear infinite;
-  margin-bottom: 16px;
-}
-
-.loading-logo {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid rgba(0, 75, 155, 0.3);
-  box-shadow: 0 4px 16px rgba(0, 44, 95, 0.3);
+  min-width: 180px;
+  min-height: 120px;
 }
 
 .loading-text {
@@ -52,18 +35,6 @@
   letter-spacing: 1px;
   text-align: center;
   animation: pulse-text 1.5s ease-in-out infinite;
-}
-
-@keyframes spin-logo {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(180deg) scale(1.1);
-  }
-  100% {
-    transform: rotate(360deg) scale(1);
-  }
 }
 
 @keyframes pulse-text {
@@ -81,14 +52,8 @@
 @media (max-width: 767px) {
   .loading-modal-content {
     padding: 24px;
-    min-width: 160px;
-    min-height: 160px;
-  }
-
-  .loading-spinner {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 12px;
+    min-width: 140px;
+    min-height: 100px;
   }
 
   .loading-text {

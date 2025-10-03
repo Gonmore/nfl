@@ -239,3 +239,16 @@ export async function updateProfile(token, { username, password, profileImage })
     return data;
   });
 }
+
+export async function wakeup() {
+  console.log('Calling wakeup');
+  const res = await fetch(`${API_URL}/auth/wakeup`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  const data = await res.json();
+  console.log('wakeup response:', data);
+  return data;
+}

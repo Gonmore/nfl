@@ -88,4 +88,12 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, updateProfile };
+const wakeup = async (req, res) => {
+  try {
+    return res.json({ message: 'Backend is awake!' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error waking up backend.', error });
+  }
+};
+
+module.exports = { register, login, updateProfile, wakeup };
