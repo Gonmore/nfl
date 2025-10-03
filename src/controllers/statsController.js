@@ -117,7 +117,7 @@ async function calculateScores(leagueId, week) {
       const day = localDate.getDay(); // 0=Sun, 1=Mon, 4=Thu, 5=Fri
       let points = 0;
 
-      console.log(`[calculateScores] Game ${pick.gameId} - Date: ${gameDate}, Day: ${day}, Last game date: ${lastGameDate}`);
+      console.log(`[calculateScores] Game ${pick.gameId} - Date: ${localDate}, Day: ${day}, Last game date: ${lastGameDate}`);
 
       if (pick.Game.winner === null) {
         // Tie game - everyone gets 1 point
