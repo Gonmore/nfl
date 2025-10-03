@@ -1287,204 +1287,244 @@ export default function Dashboard({ user, token, onLogout }) {
               </h2>
             </div>
             <div style={{ padding: '20px' }}>
-              <div style={{
-                maxHeight: '400px',
-                overflowY: 'auto',
-                overflowX: 'auto',
-                borderRadius: '16px',
-                border: '2px solid #E2E8F0',
-                backgroundColor: '#FFFFFF'
-              }}>
-                <table style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  margin: 0,
-                  fontSize: '14px',
-                  minWidth: '100%'
+              {loadingStates.standings ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '40px 20px',
+                  backgroundColor: '#F8FAFC',
+                  borderRadius: '16px',
+                  border: '2px solid #E2E8F0'
                 }}>
-                  <thead>
-                    <tr style={{
-                      background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
-                      borderBottom: '3px solid #4A5568',
-                      position: 'sticky',
-                      top: 0,
-                      zIndex: 1
-                    }}>
-                      <th style={{
-                        padding: '8px 2px',
-                        textAlign: 'center',
-                        fontWeight: '800',
-                        color: '#FFFFFF',
-                        width: '15%',
-                        fontSize: '12px',
-                        letterSpacing: '0.5px'
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: '4px solid #E2E8F0',
+                    borderTop: '4px solid #004B9B',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    marginBottom: '16px'
+                  }}></div>
+                  <p style={{
+                    margin: 0,
+                    color: '#4A5568',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    textAlign: 'center'
+                  }}>
+                    Cargando standings de la NFL...
+                  </p>
+                  <p style={{
+                    margin: '8px 0 0 0',
+                    color: '#718096',
+                    fontSize: '14px',
+                    textAlign: 'center'
+                  }}>
+                    🔄 Se actualizan automáticamente cada 10 minutos
+                  </p>
+                </div>
+              ) : (
+                <div style={{
+                  maxHeight: '400px',
+                  overflowY: 'auto',
+                  overflowX: 'auto',
+                  borderRadius: '16px',
+                  border: '2px solid #E2E8F0',
+                  backgroundColor: '#FFFFFF'
+                }}>
+                  <table style={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    margin: 0,
+                    fontSize: '14px',
+                    minWidth: '100%'
+                  }}>
+                    <thead>
+                      <tr style={{
+                        background: 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
+                        borderBottom: '3px solid #4A5568',
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 1
                       }}>
-                        POS
-                      </th>
-                      <th style={{
-                        padding: '8px 2px',
-                        textAlign: 'center',
-                        fontWeight: '800',
-                        color: '#FFFFFF',
-                        width: '25%',
-                        fontSize: '12px',
-                        letterSpacing: '0.5px'
-                      }}>
-                        TEAM
-                      </th>
-                      <th style={{
-                        padding: '8px 2px',
-                        textAlign: 'center',
-                        fontWeight: '800',
-                        color: '#FFFFFF',
-                        width: '20%',
-                        fontSize: '12px',
-                        letterSpacing: '0.5px'
-                      }}>
-                        W
-                      </th>
-                      <th style={{
-                        padding: '8px 2px',
-                        textAlign: 'center',
-                        fontWeight: '800',
-                        color: '#FFFFFF',
-                        width: '20%',
-                        fontSize: '12px',
-                        letterSpacing: '0.5px'
-                      }}>
-                        L
-                      </th>
-                      <th style={{
-                        padding: '8px 2px',
-                        textAlign: 'center',
-                        fontWeight: '800',
-                        color: '#FFFFFF',
-                        width: '20%',
-                        fontSize: '12px',
-                        letterSpacing: '0.5px'
-                      }}>
-                        T
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {standings.map((team, index) => (
-                      <tr key={team.id} style={{
-                        borderBottom: index < standings.length - 1 ? '1px solid #E2E8F0' : 'none',
-                        transition: 'all 0.2s ease',
-                        backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#F8FAFC'
-                      }}
-                      onMouseOver={(e) => {
-                        e.target.closest('tr').style.backgroundColor = '#EDF2F7';
-                        e.target.closest('tr').style.transform = 'scale(1.01)';
-                      }}
-                      onMouseOut={(e) => {
-                        e.target.closest('tr').style.backgroundColor = index % 2 === 0 ? '#FFFFFF' : '#F8FAFC';
-                        e.target.closest('tr').style.transform = 'scale(1)';
-                      }}
-                      >
-                        <td style={{
+                        <th style={{
                           padding: '8px 2px',
                           textAlign: 'center',
-                          fontWeight: '700',
-                          color: '#004B9B',
-                          fontSize: '13px'
+                          fontWeight: '800',
+                          color: '#FFFFFF',
+                          width: '15%',
+                          fontSize: '12px',
+                          letterSpacing: '0.5px'
                         }}>
-                          <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '1px'
-                          }}>
-                            <span style={{ fontSize: '14px', fontWeight: '800' }}>
-                              {team.position}
-                            </span>
-                            {team.change !== 0 && (
-                              <span style={{
-                                fontSize: '10px',
-                                color: team.change > 0 ? '#38A169' : '#E53E3E',
-                                fontWeight: '700',
-                                backgroundColor: team.change > 0 ? '#C6F6D5' : '#FED7D7',
-                                padding: '1px 4px',
-                                borderRadius: '6px',
-                                minWidth: '16px',
-                                textAlign: 'center'
-                              }}>
-                                {team.change > 0 ? '↑' : '↓'}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td style={{ padding: '8px 2px' }}>
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
+                          POS
+                        </th>
+                        <th style={{
+                          padding: '8px 2px',
+                          textAlign: 'center',
+                          fontWeight: '800',
+                          color: '#FFFFFF',
+                          width: '25%',
+                          fontSize: '12px',
+                          letterSpacing: '0.5px'
+                        }}>
+                          TEAM
+                        </th>
+                        <th style={{
+                          padding: '8px 2px',
+                          textAlign: 'center',
+                          fontWeight: '800',
+                          color: '#FFFFFF',
+                          width: '20%',
+                          fontSize: '12px',
+                          letterSpacing: '0.5px'
+                        }}>
+                          W
+                        </th>
+                        <th style={{
+                          padding: '8px 2px',
+                          textAlign: 'center',
+                          fontWeight: '800',
+                          color: '#FFFFFF',
+                          width: '20%',
+                          fontSize: '12px',
+                          letterSpacing: '0.5px'
+                        }}>
+                          L
+                        </th>
+                        <th style={{
+                          padding: '8px 2px',
+                          textAlign: 'center',
+                          fontWeight: '800',
+                          color: '#FFFFFF',
+                          width: '20%',
+                          fontSize: '12px',
+                          letterSpacing: '0.5px'
+                        }}>
+                          T
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {standings.map((team, index) => (
+                        <tr key={team.id} style={{
+                          borderBottom: index < standings.length - 1 ? '1px solid #E2E8F0' : 'none',
+                          transition: 'all 0.2s ease',
+                          backgroundColor: index % 2 === 0 ? '#FFFFFF' : '#F8FAFC'
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.closest('tr').style.backgroundColor = '#EDF2F7';
+                          e.target.closest('tr').style.transform = 'scale(1.01)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.closest('tr').style.backgroundColor = index % 2 === 0 ? '#FFFFFF' : '#F8FAFC';
+                          e.target.closest('tr').style.transform = 'scale(1)';
+                        }}
+                        >
+                          <td style={{
+                            padding: '8px 2px',
+                            textAlign: 'center',
+                            fontWeight: '700',
+                            color: '#004B9B',
+                            fontSize: '13px'
                           }}>
                             <div style={{
-                              width: '24px',
-                              height: '24px',
-                              borderRadius: '4px',
-                              overflow: 'hidden',
-                              border: '1px solid #E2E8F0',
-                              flexShrink: 0
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '1px'
                             }}>
-                              <img
-                                src={team.logo}
-                                alt={team.abbreviation}
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'contain'
-                                }}
-                                onError={(e) => {
-                                  e.target.src = `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation.toLowerCase()}.png`;
-                                }}
-                              />
+                              <span style={{ fontSize: '14px', fontWeight: '800' }}>
+                                {team.position}
+                              </span>
+                              {team.change !== 0 && (
+                                <span style={{
+                                  fontSize: '10px',
+                                  color: team.change > 0 ? '#38A169' : '#E53E3E',
+                                  fontWeight: '700',
+                                  backgroundColor: team.change > 0 ? '#C6F6D5' : '#FED7D7',
+                                  padding: '1px 4px',
+                                  borderRadius: '6px',
+                                  minWidth: '16px',
+                                  textAlign: 'center'
+                                }}>
+                                  {team.change > 0 ? '↑' : '↓'}
+                                </span>
+                              )}
                             </div>
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '8px 2px',
-                          textAlign: 'center',
-                          fontSize: '13px',
-                          fontWeight: '700',
-                          color: '#12B900',
-                          backgroundColor: '#E8F5E8',
-                          borderRadius: '6px',
-                          margin: '0 2px'
-                        }}>
-                          {team.wins}
-                        </td>
-                        <td style={{
-                          padding: '8px 2px',
-                          textAlign: 'center',
-                          fontSize: '13px',
-                          fontWeight: '700',
-                          color: '#E53E3E',
-                          backgroundColor: '#FFF5F5',
-                          borderRadius: '6px',
-                          margin: '0 2px'
-                        }}>
-                          {team.losses}
-                        </td>
-                        <td style={{
-                          padding: '8px 2px',
-                          textAlign: 'center',
-                          fontSize: '13px',
-                          fontWeight: '700',
-                          color: '#718096',
-                          backgroundColor: '#F7FAFC',
-                          borderRadius: '6px',
-                          margin: '0 2px'
-                        }}>
-                          {team.ties}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          </td>
+                          <td style={{ padding: '8px 2px' }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <div style={{
+                                width: '24px',
+                                height: '24px',
+                                borderRadius: '4px',
+                                overflow: 'hidden',
+                                border: '1px solid #E2E8F0',
+                                flexShrink: 0
+                              }}>
+                                <img
+                                  src={team.logo}
+                                  alt={team.abbreviation}
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain'
+                                  }}
+                                  onError={(e) => {
+                                    e.target.src = `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbreviation.toLowerCase()}.png`;
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '8px 2px',
+                            textAlign: 'center',
+                            fontSize: '13px',
+                            fontWeight: '700',
+                            color: '#12B900',
+                            backgroundColor: '#E8F5E8',
+                            borderRadius: '6px',
+                            margin: '0 2px'
+                          }}>
+                            {team.wins}
+                          </td>
+                          <td style={{
+                            padding: '8px 2px',
+                            textAlign: 'center',
+                            fontSize: '13px',
+                            fontWeight: '700',
+                            color: '#E53E3E',
+                            backgroundColor: '#FFF5F5',
+                            borderRadius: '6px',
+                            margin: '0 2px'
+                          }}>
+                            {team.losses}
+                          </td>
+                          <td style={{
+                            padding: '8px 2px',
+                            textAlign: 'center',
+                            fontSize: '13px',
+                            fontWeight: '700',
+                            color: '#718096',
+                            backgroundColor: '#F7FAFC',
+                            borderRadius: '6px',
+                            margin: '0 2px'
+                          }}>
+                            {team.ties}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
               <div style={{
                 marginTop: '16px',
                 fontSize: '12px',
