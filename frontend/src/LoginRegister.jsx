@@ -6,6 +6,7 @@ export default function LoginRegister({ onLogin }) {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [justRegistered, setJustRegistered] = useState(false);
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,8 +28,24 @@ export default function LoginRegister({ onLogin }) {
       } else {
         const res = await registerUser(form);
         if (res.message === 'Usuario registrado correctamente.') {
-          setIsLogin(true);
-          setForm({ username: '', email: '', password: '' });
+          // Auto-login after successful registration
+          setJustRegistered(true);
+          setLoading(true);
+          setError('');
+          try {
+            const loginRes = await loginUser({ email: form.email, password: form.password });
+            if (loginRes.token) {
+              onLogin(loginRes.token, loginRes.user);
+            } else {
+              setError(loginRes.message || 'Error al iniciar sesión después del registro');
+              setJustRegistered(false);
+            }
+          } catch (loginErr) {
+            setError('Error de conexión después del registro. Intenta iniciar sesión manualmente.');
+            setJustRegistered(false);
+          } finally {
+            setLoading(false);
+          }
         } else {
           setError(res.message || 'Error al registrarse');
         }
@@ -82,7 +99,7 @@ export default function LoginRegister({ onLogin }) {
             margin: 0,
             textAlign: 'center'
           }}>
-            {isLogin ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta'}
+            {isLogin ? 'Inicia sesión en tu cuenta' : (justRegistered ? 'Iniciando sesión automáticamente...' : 'Crea tu cuenta')}
           </p>
         </div>
 
@@ -106,7 +123,7 @@ export default function LoginRegister({ onLogin }) {
                 value={form.username}
                 onChange={handleChange}
                 required
-                disabled={loading}
+                disabled={loading || justRegistered}
                 style={{
                   width: '100%',
                   padding: '14px 16px',
@@ -141,7 +158,7 @@ export default function LoginRegister({ onLogin }) {
               value={form.email}
               onChange={handleChange}
               required
-              disabled={loading}
+              disabled={loading || justRegistered}
               style={{
                 width: '100%',
                 padding: '14px 16px',
@@ -175,7 +192,7 @@ export default function LoginRegister({ onLogin }) {
               value={form.password}
               onChange={handleChange}
               required
-              disabled={loading}
+              disabled={loading || justRegistered}
               style={{
                 width: '100%',
                 padding: '14px 16px',
@@ -194,7 +211,7 @@ export default function LoginRegister({ onLogin }) {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || justRegistered}
             style={{
               width: '100%',
               padding: '16px',
@@ -208,8 +225,8 @@ export default function LoginRegister({ onLogin }) {
               transition: 'all 0.3s ease',
               marginBottom: '16px'
             }}
-            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#00346C')}
-            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = '#004B9B')}
+            onMouseOver={(e) => !(loading || justRegistered) && (e.target.style.backgroundColor = '#00346C')}
+            onMouseOut={(e) => !(loading || justRegistered) && (e.target.style.backgroundColor = '#004B9B')}
           >
             {loading ? (
               <div style={{
@@ -223,7 +240,7 @@ export default function LoginRegister({ onLogin }) {
                 marginRight: '8px'
               }}></div>
             ) : null}
-            {loading ? 'Cargando...' : (isLogin ? 'Iniciar sesión' : 'Registrarse')}
+            {loading ? 'Cargando...' : (isLogin ? 'Iniciar sesión' : (justRegistered ? 'Iniciando sesión...' : 'Registrarse'))}
           </button>
 
           {error && (
@@ -252,8 +269,9 @@ export default function LoginRegister({ onLogin }) {
               setIsLogin(!isLogin);
               setError('');
               setForm({ username: '', email: '', password: '' });
+              setJustRegistered(false);
             }}
-            disabled={loading}
+            disabled={loading || justRegistered}
             style={{
               background: 'none',
               border: '2px solid #004B9B',
@@ -266,8 +284,8 @@ export default function LoginRegister({ onLogin }) {
               transition: 'all 0.3s ease',
               width: '100%'
             }}
-            onMouseOver={(e) => !loading && (e.target.style.backgroundColor = '#004B9B') && (e.target.style.color = '#FFFFFF')}
-            onMouseOut={(e) => !loading && (e.target.style.backgroundColor = 'transparent') && (e.target.style.color = '#004B9B')}
+            onMouseOver={(e) => !(loading || justRegistered) && (e.target.style.backgroundColor = '#004B9B') && (e.target.style.color = '#FFFFFF')}
+            onMouseOut={(e) => !(loading || justRegistered) && (e.target.style.backgroundColor = 'transparent') && (e.target.style.color = '#004B9B')}
           >
             {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
           </button>

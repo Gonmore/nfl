@@ -28,30 +28,28 @@ const withLoading = async (apiCall) => {
 
 export async function registerUser({ username, email, password }) {
   console.log('Calling registerUser with:', { username, email, password: '***' });
-  return withLoading(async () => {
-    const res = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
-    });
-    const data = await res.json();
-    console.log('registerUser response:', data);
-    return data;
+  // Don't use withLoading for register - we show LoadingSequenceModal instead
+  const res = await fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, email, password })
   });
+  const data = await res.json();
+  console.log('registerUser response:', data);
+  return data;
 }
 
 export async function loginUser({ email, password }) {
   console.log('Calling loginUser with:', { email, password: '***' });
-  return withLoading(async () => {
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
-    console.log('loginUser response:', data);
-    return data;
+  // Don't use withLoading for login - we show LoadingSequenceModal instead
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
   });
+  const data = await res.json();
+  console.log('loginUser response:', data);
+  return data;
 }
 
 export async function getGames(token) {

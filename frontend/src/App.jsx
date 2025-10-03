@@ -90,7 +90,8 @@ export default function App() {
     localStorage.setItem('jwt', jwt);
     localStorage.setItem('user', JSON.stringify(userData));
     setShowLogin(false);
-    setShowLoadingSequence(true);
+    // Immediately show loading sequence without delay
+    setTimeout(() => setShowLoadingSequence(true), 100);
   };
 
   const handleLogout = () => {
