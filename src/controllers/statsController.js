@@ -81,11 +81,13 @@ async function calculateScores(leagueId, week) {
   }
 
   console.log(`[calculateScores] Found ${finishedGames.length} finished games, recalculating scores for league ${leagueId}, week ${week}`);
+  console.log(`[calculateScores] Finished games IDs: ${finishedGames.map(g => g.id).join(', ')}`);
 
   // Get all games for the week to find the last one
   const games = await Game.findAll({ where: { week }, order: [['date', 'DESC']] });
   console.log(`[calculateScores] Found ${games.length} games for week ${week}`);
   const lastGameDate = games[0]?.date;
+  console.log(`[calculateScores] Last game date: ${lastGameDate}`);
 
   // Get all picks for the league and week
   const picks = await Pick.findAll({
@@ -102,13 +104,15 @@ async function calculateScores(leagueId, week) {
     const userId = pick.userId;
     if (!userScores[userId]) userScores[userId] = 0;
 
-    console.log(`[calculateScores] Processing pick for user ${userId}: game ${pick.gameId}, status: ${pick.Game.status}, winner: ${pick.Game.winner}`);
+    console.log(`[calculateScores] Processing pick for user ${userId}: game ${pick.gameId}, pick: ${pick.pick}, status: ${pick.Game?.status}, winner: ${pick.Game?.winner}, date: ${pick.Game?.date}`);
 
     // Only process finished games (STATUS_FINAL)
-    if (pick.Game.status === 'STATUS_FINAL') {
+    if (pick.Game?.status === 'STATUS_FINAL') {
       const gameDate = new Date(pick.Game.date);
       const day = gameDate.getDay(); // 0=Sun, 1=Mon, 4=Thu
       let points = 0;
+
+      console.log(`[calculateScores] Game ${pick.gameId} - Date: ${gameDate}, Day: ${day}, Last game date: ${lastGameDate}`);
 
       if (pick.Game.winner === null) {
         // Tie game - everyone gets 1 point
@@ -120,7 +124,9 @@ async function calculateScores(leagueId, week) {
           points = 1;
         } else if (day === 0) { // Sunday
           // Check if it's the last (featured) game of Sunday
-          if (pick.Game.date.getTime() === lastGameDate?.getTime()) {
+          const pickGameTime = new Date(pick.Game.date).getTime();
+          const lastGameTime = lastGameDate ? new Date(lastGameDate).getTime() : null;
+          if (pickGameTime === lastGameTime) {
             points = 3; // Featured Sunday game
           } else {
             points = 2; // Regular Sunday games
@@ -129,11 +135,13 @@ async function calculateScores(leagueId, week) {
           points = 3;
         }
         console.log(`[calculateScores] Correct pick for user ${userId}, day ${day}, awarding ${points} points`);
+      } else {
+        console.log(`[calculateScores] Wrong pick for user ${userId}: picked ${pick.pick}, winner was ${pick.Game.winner}`);
       }
 
       userScores[userId] += points;
     } else {
-      console.log(`[calculateScores] Game not finished for user ${userId}: status ${pick.Game.status}`);
+      console.log(`[calculateScores] Game not finished for user ${userId}: status ${pick.Game?.status}`);
     }
   }
 
@@ -187,7 +195,7 @@ const getUserPicksDetails = async (req, res) => {
           if (day === 4) { // Thursday
             points = 1;
           } else if (day === 0) { // Sunday
-            if (pick.Game.date.getTime() === lastGameDate?.getTime()) {
+            if (new Date(pick.Game.date).getTime() === new Date(lastGameDate).getTime()) {
               points = 3; // Featured Sunday game
             } else {
               points = 2; // Regular Sunday games
@@ -310,6 +318,39 @@ const recalculateScores = async (req, res) => {
 
     console.log('🔄 Iniciando recálculo de puntos...');
     console.log('Parámetros:', { leagueId, week, allLeagues, userId });
+
+    // Debug: Check specific game 65
+    if (leagueId == 1) {
+      const game65 = await Game.findByPk(65);
+      if (game65) {
+        console.log('🎯 Game 65 details:', {
+          id: game65.id,
+          week: game65.week,
+          status: game65.status,
+          winner: game65.winner,
+          date: game65.date,
+          homeTeam: game65.homeTeam,
+          awayTeam: game65.awayTeam
+        });
+
+        // Check if user 2 has a pick for game 65
+        const user2Pick = await Pick.findOne({
+          where: { userId: 2, gameId: 65, leagueId: 1 },
+          include: [Game]
+        });
+        if (user2Pick) {
+          console.log('🎯 User 2 pick for game 65:', {
+            pick: user2Pick.pick,
+            gameWinner: user2Pick.Game?.winner,
+            isCorrect: user2Pick.pick === user2Pick.Game?.winner
+          });
+        } else {
+          console.log('🎯 User 2 has no pick for game 65');
+        }
+      } else {
+        console.log('🎯 Game 65 not found');
+      }
+    }
 
     let leaguesToProcess = [];
     let weeksToProcess = [];
