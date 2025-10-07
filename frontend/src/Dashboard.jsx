@@ -68,6 +68,7 @@ export default function Dashboard({ user, token, onLogout }) {
   const [showLiveLeagueView, setShowLiveLeagueView] = useState(false);
   const [selectedUserForScore, setSelectedUserForScore] = useState(null);
   const [leagueWeeklyStats, setLeagueWeeklyStats] = useState([]);
+  const [scoreViewWeek, setScoreViewWeek] = useState(week); // Nueva variable para navegación de semanas en score
 
   // Estados para foto de perfil
   const [profileImage, setProfileImage] = useState(user?.profileImage || null);
@@ -406,6 +407,9 @@ export default function Dashboard({ user, token, onLogout }) {
                 onClick={async () => {
                   setLoading(true);
                   try {
+                    // Inicializar scoreViewWeek
+                    setScoreViewWeek(week);
+                    
                     // Cargar juegos de la semana actual
                     const gamesResponse = await getGames(token);
                     const weekGames = gamesResponse.games.filter(g => g.week === week);
@@ -665,7 +669,8 @@ export default function Dashboard({ user, token, onLogout }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '12px'
+              gap: '12px',
+              flexWrap: 'wrap'
             }}>
               <img
                 src='/img/logo_MVPicks.png'
@@ -676,7 +681,93 @@ export default function Dashboard({ user, token, onLogout }) {
                   borderRadius: '4px'
                 }}
               />
-              {selectedUserForScore ? `Score de ${selectedUserForScore.username}` : 'Mi Score'} - Semana {week}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <span>{selectedUserForScore ? `Score de ${selectedUserForScore.username}` : 'Mi Score'}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    onClick={async () => {
+                      if (scoreViewWeek > 1) {
+                        const newWeek = scoreViewWeek - 1;
+                        setScoreViewWeek(newWeek);
+                        setLoading(true);
+                        try {
+                          const gamesResponse = await getGames(token);
+                          const weekGames = gamesResponse.games.filter(g => g.week === newWeek);
+                          setCurrentWeekGames(weekGames);
+
+                          const userId = selectedUserForScore ? selectedUserForScore.userId : user.id;
+                          const picksResponse = await getUserPicksDetails(token, selectedLeague.id, newWeek, userId);
+                          setUserPicksWithResults(picksResponse.details || []);
+
+                          const totalPts = picksResponse.details.reduce((sum, detail) => sum + detail.points, 0);
+                          setTotalPoints(totalPts);
+                        } catch (error) {
+                          console.error('Error loading week data:', error);
+                        } finally {
+                          setLoading(false);
+                        }
+                      }
+                    }}
+                    disabled={scoreViewWeek <= 1}
+                    style={{
+                      background: scoreViewWeek <= 1 ? '#ccc' : 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: scoreViewWeek <= 1 ? 'not-allowed' : 'pointer',
+                      opacity: scoreViewWeek <= 1 ? 0.5 : 1
+                    }}
+                  >
+                    ←
+                  </button>
+                  <span style={{ fontSize: windowWidth <= 480 ? '16px' : '18px', fontWeight: '700' }}>
+                    Semana {scoreViewWeek}
+                  </span>
+                  <button
+                    onClick={async () => {
+                      const maxWeek = isDuringGameWeek ? week : (week > 1 ? week - 1 : week);
+                      if (scoreViewWeek < maxWeek) {
+                        const newWeek = scoreViewWeek + 1;
+                        setScoreViewWeek(newWeek);
+                        setLoading(true);
+                        try {
+                          const gamesResponse = await getGames(token);
+                          const weekGames = gamesResponse.games.filter(g => g.week === newWeek);
+                          setCurrentWeekGames(weekGames);
+
+                          const userId = selectedUserForScore ? selectedUserForScore.userId : user.id;
+                          const picksResponse = await getUserPicksDetails(token, selectedLeague.id, newWeek, userId);
+                          setUserPicksWithResults(picksResponse.details || []);
+
+                          const totalPts = picksResponse.details.reduce((sum, detail) => sum + detail.points, 0);
+                          setTotalPoints(totalPts);
+                        } catch (error) {
+                          console.error('Error loading week data:', error);
+                        } finally {
+                          setLoading(false);
+                        }
+                      }
+                    }}
+                    disabled={scoreViewWeek >= (isDuringGameWeek ? week : (week > 1 ? week - 1 : week))}
+                    style={{
+                      background: scoreViewWeek >= (isDuringGameWeek ? week : (week > 1 ? week - 1 : week)) ? '#ccc' : 'linear-gradient(135deg, #004B9B 0%, #0066CC 100%)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: scoreViewWeek >= (isDuringGameWeek ? week : (week > 1 ? week - 1 : week)) ? 'not-allowed' : 'pointer',
+                      opacity: scoreViewWeek >= (isDuringGameWeek ? week : (week > 1 ? week - 1 : week)) ? 0.5 : 1
+                    }}
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
             </h2>
             <p style={{ color: '#4A5568', margin: '8px 0 0 0' }}>
               Liga: {selectedLeague.name}
@@ -817,7 +908,7 @@ export default function Dashboard({ user, token, onLogout }) {
             color: 'white'
           }}>
             <div style={{ fontSize: '18px', marginBottom: '8px', opacity: 0.9 }}>
-              Puntos Totales - Semana {week}
+              Puntos Totales - Semana {scoreViewWeek}
             </div>
             <div style={{ fontSize: windowWidth <= 480 ? '36px' : '48px', fontWeight: '900', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
               {totalPoints}
@@ -946,12 +1037,50 @@ export default function Dashboard({ user, token, onLogout }) {
                   borderRadius: '4px'
                 }}
               />
-              Liga en Vivo - Semana {week}
+              Liga en Vivo - Hasta Semana {isDuringGameWeek ? week : (week > 1 ? week - 1 : week)}
             </h2>
             <p style={{ color: '#4A5568', margin: windowWidth <= 400 ? '4px 0 0 0' : '8px 0 0 0' }}>
               Liga: {selectedLeague.name}
             </p>
           </div>
+
+          {/* Botón Agregar Usuario (solo para admins de ligas privadas) */}
+          {selectedLeague && selectedLeague.isAdmin && selectedLeague.name !== 'Liga general' && !selectedLeague.isPublic && (
+            <div style={{ marginBottom: windowWidth <= 400 ? '12px' : '16px', textAlign: 'center' }}>
+              <button
+                onClick={() => {
+                  setShowAddUserWizard(true);
+                  setShowLiveLeagueView(false);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: windowWidth <= 400 ? '10px 16px' : '12px 24px',
+                  borderRadius: '12px',
+                  fontSize: windowWidth <= 400 ? '14px' : '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(139, 92, 246, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
+                }}
+              >
+                <span style={{ fontSize: '18px' }}>➕</span>
+                Agregar Usuario con Picks
+              </button>
+            </div>
+          )}
 
           <div style={{
             display: 'flex',
@@ -967,19 +1096,22 @@ export default function Dashboard({ user, token, onLogout }) {
                   onClick={async () => {
                     setLoading(true);
                     try {
-                      // Cargar juegos de la semana actual
+                      // Determinar la semana a mostrar (última semana completada)
+                      const displayWeek = isDuringGameWeek ? week : (week > 1 ? week - 1 : week);
+                      setScoreViewWeek(displayWeek);
+                      
+                      // Cargar juegos de la semana a mostrar
                       const gamesResponse = await getGames(token);
-                      const weekGames = gamesResponse.games.filter(g => g.week === week);
+                      const weekGames = gamesResponse.games.filter(g => g.week === displayWeek);
                       setCurrentWeekGames(weekGames);
 
                       // Cargar picks del usuario seleccionado para esta semana con resultados
-                      const picksResponse = await getUserPicksDetails(token, selectedLeague.id, week, user.userId);
+                      const picksResponse = await getUserPicksDetails(token, selectedLeague.id, displayWeek, user.userId);
                       setUserPicksWithResults(picksResponse.details || []);
 
                       // Obtener el total de puntos del usuario seleccionado
-                      const userWeeklyStats = leagueWeeklyStats.find(u => u.userId === user.userId);
-                      const totalPoints = userWeeklyStats ? userWeeklyStats.points : 0;
-                      setTotalPoints(totalPoints);
+                      const totalPts = picksResponse.details.reduce((sum, detail) => sum + detail.points, 0);
+                      setTotalPoints(totalPts);
 
                       // Establecer el usuario seleccionado
                       setSelectedUserForScore({
@@ -2033,6 +2165,19 @@ export default function Dashboard({ user, token, onLogout }) {
               user={user}
               token={token}
               onProfileUpdate={handleProfileUpdate}
+            />
+          )}
+
+          {showAddUserWizard && (
+            <AddUserWizard
+              league={selectedLeague}
+              onClose={() => {
+                setShowAddUserWizard(false);
+                setShowLiveLeagueView(true);
+              }}
+              token={token}
+              currentWeek={isDuringGameWeek ? week : (week > 1 ? week - 1 : week)}
+              showToast={showToast}
             />
           )}
         </div>
