@@ -74,4 +74,29 @@ const getGamesByWeek = async (req, res) => {
   }
 };
 
-module.exports = { syncGames, getGames, getGamesByWeek };
+// Obtiene todos los juegos hasta una semana específica
+const getAllGamesUntilWeek = async (req, res) => {
+  try {
+    const { week } = req.query;
+    
+    if (!week) {
+      return res.status(400).json({ message: 'Parámetro week es requerido.' });
+    }
+
+    const games = await Game.findAll({
+      where: {
+        week: {
+          [Op.lte]: parseInt(week)
+        }
+      },
+      order: [['week', 'ASC'], ['date', 'ASC']]
+    });
+
+    return res.json({ games });
+  } catch (error) {
+    console.error('[DEBUG] Error en getAllGamesUntilWeek:', error);
+    return res.status(500).json({ message: 'Error al obtener partidos.', error });
+  }
+};
+
+module.exports = { syncGames, getGames, getGamesByWeek, getAllGamesUntilWeek };

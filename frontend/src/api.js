@@ -302,3 +302,100 @@ export async function wakeup() {
   console.log('wakeup response:', data);
   return data;
 }
+
+export async function checkUserExists(token, email) {
+  console.log('Calling checkUserExists with email:', email);
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/auth/check-user?email=${encodeURIComponent(email)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    console.log('checkUserExists response:', data);
+    return data;
+  });
+}
+
+export async function createInvitationWithPicks(token, { email, leagueId, picks }) {
+  console.log('Calling createInvitationWithPicks with:', { email, leagueId, picksCount: Object.keys(picks).length });
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/leagues/create-invitation-with-picks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ email, leagueId, picks })
+    });
+    const data = await res.json();
+    console.log('createInvitationWithPicks response:', data);
+    return data;
+  });
+}
+
+export async function validateInvitationToken(token) {
+  console.log('Calling validateInvitationToken');
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/auth/validate-invitation/${token}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await res.json();
+    console.log('validateInvitationToken response:', data);
+    return data;
+  });
+}
+
+export async function registerWithInvitation({ invitationToken, username, password }) {
+  console.log('Calling registerWithInvitation');
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/auth/register-with-invitation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ invitationToken, username, password })
+    });
+    const data = await res.json();
+    console.log('registerWithInvitation response:', data);
+    return data;
+  });
+}
+
+export async function addUserWithPicks(token, { email, leagueId, picks }) {
+  console.log('Calling addUserWithPicks with:', { email, leagueId, picksCount: Object.keys(picks).length });
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/leagues/add-user-with-picks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ email, leagueId, picks })
+    });
+    const data = await res.json();
+    console.log('addUserWithPicks response:', data);
+    return data;
+  });
+}
+
+export async function getAllGamesUntilWeek(token, week) {
+  console.log('Calling getAllGamesUntilWeek with week:', week);
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/nfl/games/all-until-week?week=${week}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    console.log('getAllGamesUntilWeek response:', data);
+    return data;
+  });
+}

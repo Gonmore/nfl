@@ -7,6 +7,7 @@ const LeagueMember = require('./LeagueMember');
 const Game = require('./Game');
 const Pick = require('./Pick');
 const Score = require('./Score');
+const InvitationToken = require('./InvitationToken');
 
 // Definir asociaciones
 User.hasMany(LeagueMember, { foreignKey: 'userId' });
@@ -32,4 +33,7 @@ Score.belongsTo(User, { foreignKey: 'userId' });
 League.hasMany(Score, { foreignKey: 'leagueId' });
 Score.belongsTo(League, { foreignKey: 'leagueId' });
 
-module.exports = { sequelize, User, League, LeagueMember, Game, Pick, Score };
+League.hasMany(InvitationToken, { foreignKey: 'leagueId' });
+InvitationToken.belongsTo(League, { foreignKey: 'leagueId' });
+
+module.exports = { sequelize, User, League, LeagueMember, Game, Pick, Score, InvitationToken };

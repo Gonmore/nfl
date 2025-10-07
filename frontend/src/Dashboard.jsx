@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile, getUserLeaguesInitialLoad, getStandingsInitialLoad, getGamesInitialLoad } from './api';
 import { teamLogos } from './teamLogos.js';
+import AddUserWizard from './components/AddUserWizard.jsx';
 
 // Lazy load componentes pesados
 const PickForm = lazy(() => import('./PickForm.jsx'));
@@ -72,6 +73,9 @@ export default function Dashboard({ user, token, onLogout }) {
   const [profileImage, setProfileImage] = useState(user?.profileImage || null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  
+  // Estado para el wizard de agregar usuario
+  const [showAddUserWizard, setShowAddUserWizard] = useState(false);
 
   // Obtiene ligas del usuario (carga inicial prioritaria)
   useEffect(() => {
@@ -276,15 +280,15 @@ export default function Dashboard({ user, token, onLogout }) {
     const dayOfWeek = now.getDay(); // 0=domingo, 4=jueves, 1=lunes
     const hour = now.getHours();
 
-    // Jueves después de las 20:00
+    // Jueves después de las 20:00 o viernes, sábado, domingo, lunes
     const duringGameWeek = (dayOfWeek === 4 && hour >= 20) ||
                            (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) ||
                            (dayOfWeek === 1);
 
-    // Mostrar opciones de jornada si estamos en horario de jornada
-    if (duringGameWeek) {
-      setShowGameWeekOptions(true);
-    }
+    setIsDuringGameWeek(duringGameWeek);
+    
+    // Siempre mostrar opciones de jornada (durante y fuera de juego)
+    setShowGameWeekOptions(true);
   };
 
   const filteredGames = games.filter(g => g.week === week);
@@ -377,14 +381,17 @@ export default function Dashboard({ user, token, onLogout }) {
                     borderRadius: '4px'
                   }}
                 />
-                Jornada en Juego
+                {isDuringGameWeek ? 'Jornada en Juego' : 'Menú de Liga'}
               </div>
               <p style={{
                 color: '#4A5568',
                 fontSize: '16px',
                 margin: '0'
               }}>
-                La semana {week} está en curso. ¿Qué deseas hacer en <strong>{selectedLeague.name}</strong>?
+                {isDuringGameWeek 
+                  ? `La semana ${week} está en curso. ¿Qué deseas hacer en ${selectedLeague.name}?`
+                  : `Explora las opciones disponibles en ${selectedLeague.name}`
+                }
               </p>
             </div>          <div style={{
             display: 'flex',
@@ -393,68 +400,117 @@ export default function Dashboard({ user, token, onLogout }) {
             maxWidth: '400px',
             margin: '0 auto'
           }}>
-            <button
-              onClick={async () => {
-                setLoading(true);
-                try {
-                  // Cargar juegos de la semana actual
-                  const gamesResponse = await getGames(token);
-                  const weekGames = gamesResponse.games.filter(g => g.week === week);
-                  setCurrentWeekGames(weekGames);
+            {/* Botón de Score o Estadísticas según el estado */}
+            {isDuringGameWeek ? (
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    // Cargar juegos de la semana actual
+                    const gamesResponse = await getGames(token);
+                    const weekGames = gamesResponse.games.filter(g => g.week === week);
+                    setCurrentWeekGames(weekGames);
 
-                  // Cargar picks del usuario para esta semana con resultados
-                  const picksResponse = await getUserPicksDetails(token, selectedLeague.id, week);
-                  setUserPicksWithResults(picksResponse.details || []);
+                    // Cargar picks del usuario para esta semana con resultados
+                    const picksResponse = await getUserPicksDetails(token, selectedLeague.id, week);
+                    setUserPicksWithResults(picksResponse.details || []);
 
-                  // Obtener el total de puntos de la semana desde las estadísticas
-                  const statsResponse = await getLeagueStats(token, selectedLeague.id, week);
-                  const userWeeklyStats = statsResponse.weekly.find(u => u.userId === user.id);
-                  const totalPoints = userWeeklyStats ? userWeeklyStats.points : 0;
-                  setTotalPoints(totalPoints);
+                    // Obtener el total de puntos de la semana desde las estadísticas
+                    const statsResponse = await getLeagueStats(token, selectedLeague.id, week);
+                    const userWeeklyStats = statsResponse.weekly.find(u => u.userId === user.id);
+                    const totalPoints = userWeeklyStats ? userWeeklyStats.points : 0;
+                    setTotalPoints(totalPoints);
 
-                  setShowGameWeekOptions(false);
-                  setShowScoreView(true);
-                } catch (error) {
-                  console.error('Error loading score data:', error);
-                  showToast('Error al cargar los datos del score. Inténtalo de nuevo.', 'error');
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              style={{
-                background: 'linear-gradient(135deg, #38A169 0%, #2F855A 100%)',
-                color: 'white',
-                border: 'none',
-                padding: '20px',
-                borderRadius: '16px',
-                fontSize: '18px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '12px',
-                boxShadow: '0 6px 20px rgba(56, 161, 105, 0.4)',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-3px)';
-                e.target.style.boxShadow = '0 10px 30px rgba(56, 161, 105, 0.6)';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 6px 20px rgba(56, 161, 105, 0.4)';
-              }}
-            >
-              <span style={{ fontSize: '24px' }}>📊</span>
-              Ver mi Score - Semana {week}
-            </button>
+                    setShowGameWeekOptions(false);
+                    setShowScoreView(true);
+                  } catch (error) {
+                    console.error('Error loading score data:', error);
+                    showToast('Error al cargar los datos del score. Inténtalo de nuevo.', 'error');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #38A169 0%, #2F855A 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '20px',
+                  borderRadius: '16px',
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  boxShadow: '0 6px 20px rgba(56, 161, 105, 0.4)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-3px)';
+                  e.target.style.boxShadow = '0 10px 30px rgba(56, 161, 105, 0.6)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(56, 161, 105, 0.4)';
+                }}
+              >
+                <span style={{ fontSize: '24px' }}>📊</span>
+                Ver mi Score - Semana {week}
+              </button>
+            ) : (
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    // Cargar estadísticas totales de la liga hasta la fecha
+                    const statsResponse = await getLeagueStats(token, selectedLeague.id, currentWeek);
+                    setLeagueWeeklyStats(statsResponse.total || []);
+                    
+                    setShowGameWeekOptions(false);
+                    setShowLiveLeagueView(true);
+                  } catch (error) {
+                    console.error('Error loading league stats:', error);
+                    showToast('Error al cargar estadísticas de la liga. Inténtalo de nuevo.', 'error');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #38A169 0%, #2F855A 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '20px',
+                  borderRadius: '16px',
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  boxShadow: '0 6px 20px rgba(56, 161, 105, 0.4)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-3px)';
+                  e.target.style.boxShadow = '0 10px 30px rgba(56, 161, 105, 0.6)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(56, 161, 105, 0.4)';
+                }}
+              >
+                <span style={{ fontSize: '24px' }}>📈</span>
+                Ver Estadísticas de Liga
+              </button>
+            )}
 
             <button
               onClick={() => {
                 setShowGameWeekOptions(false);
                 // Cuando se elige hacer picks de la siguiente semana, incrementar la semana y recargar juegos
-                const nextWeek = week + 1;
+                const nextWeek = isDuringGameWeek ? week + 1 : week;
                 setWeek(nextWeek);
                 // Recargar juegos para incluir la nueva semana
                 loadGamesForWeek(nextWeek);
@@ -485,54 +541,56 @@ export default function Dashboard({ user, token, onLogout }) {
               }}
             >
               <span style={{ fontSize: '24px' }}>🎯</span>
-              Hacer Picks - Semana {week + 1}
+              Hacer Picks - Semana {isDuringGameWeek ? week + 1 : week}
             </button>
 
-            <button
-              onClick={async () => {
-                setLoading(true);
-                try {
-                  // Cargar estadísticas semanales de la liga
-                  const statsResponse = await getLeagueStats(token, selectedLeague.id, week);
-                  setLeagueWeeklyStats(statsResponse.weekly || []);
-                  
-                  setShowGameWeekOptions(false);
-                  setShowLiveLeagueView(true);
-                } catch (error) {
-                  console.error('Error loading league stats:', error);
-                  showToast('Error al cargar estadísticas de la liga. Inténtalo de nuevo.', 'error');
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              style={{
-                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                color: 'white',
-                border: 'none',
-                padding: '20px',
-                borderRadius: '16px',
-                fontSize: '18px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '12px',
-                boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-3px)';
-                e.target.style.boxShadow = '0 10px 30px rgba(5, 150, 105, 0.6)';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 6px 20px rgba(5, 150, 105, 0.4)';
-              }}
-            >
-              <span style={{ fontSize: '24px' }}>🏆</span>
-              Ver Liga en Vivo
-            </button>
+            {isDuringGameWeek && (
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    // Cargar estadísticas semanales de la liga
+                    const statsResponse = await getLeagueStats(token, selectedLeague.id, week);
+                    setLeagueWeeklyStats(statsResponse.weekly || []);
+                    
+                    setShowGameWeekOptions(false);
+                    setShowLiveLeagueView(true);
+                  } catch (error) {
+                    console.error('Error loading league stats:', error);
+                    showToast('Error al cargar estadísticas de la liga. Inténtalo de nuevo.', 'error');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '20px',
+                  borderRadius: '16px',
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-3px)';
+                  e.target.style.boxShadow = '0 10px 30px rgba(5, 150, 105, 0.6)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(5, 150, 105, 0.4)';
+                }}
+              >
+                <span style={{ fontSize: '24px' }}>🏆</span>
+                Ver Liga en Vivo
+              </button>
+            )}
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '24px' }}>

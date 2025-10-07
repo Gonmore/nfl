@@ -1,6 +1,10 @@
 const League = require('../models/League');
 const LeagueMember = require('../models/LeagueMember');
 const User = require('../models/User');
+const Pick = require('../models/Pick');
+const Game = require('../models/Game');
+const InvitationToken = require('../models/InvitationToken');
+const crypto = require('crypto');
 
 // Función para generar código único de 8 caracteres
 const generateInviteCode = () => {
@@ -129,4 +133,142 @@ const joinGeneralLeague = async (req, res) => {
   }
 };
 
-module.exports = { createLeague, joinLeague, getLeagueMembers, getUserLeagues, joinGeneralLeague };
+// Agregar usuario con picks pasados (solo para admin de liga)
+const addUserWithPicks = async (req, res) => {
+  try {
+    const { email, leagueId, picks } = req.body;
+    const adminId = req.user.id;
+
+    if (!email || !leagueId || !picks) {
+      return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+    }
+
+    // Verificar que la liga existe y el usuario es admin
+    const league = await League.findByPk(leagueId);
+    if (!league) {
+      return res.status(404).json({ message: 'Liga no encontrada.' });
+    }
+
+    if (league.adminId !== adminId) {
+      return res.status(403).json({ message: 'Solo el administrador de la liga puede agregar usuarios.' });
+    }
+
+    // Verificar que el usuario existe
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado con ese email.' });
+    }
+
+    // Verificar que el usuario no está ya en la liga
+    const exists = await LeagueMember.findOne({
+      where: { userId: user.id, leagueId }
+    });
+    if (exists) {
+      return res.status(409).json({ message: 'El usuario ya es miembro de esta liga.' });
+    }
+
+    // Agregar usuario a la liga
+    await LeagueMember.create({ userId: user.id, leagueId });
+
+    // Agregar los picks para cada semana
+    for (const [week, weekPicks] of Object.entries(picks)) {
+      for (const pick of weekPicks) {
+        // Verificar que el juego existe
+        const game = await Game.findByPk(pick.gameId);
+        if (!game) {
+          console.warn(`Game ${pick.gameId} not found for week ${week}`);
+          continue;
+        }
+
+        // Crear el pick
+        await Pick.create({
+          userId: user.id,
+          leagueId,
+          gameId: pick.gameId,
+          week: parseInt(week),
+          pick: pick.pick
+        });
+      }
+    }
+
+    return res.status(201).json({
+      message: 'Usuario agregado exitosamente con sus picks pasados.',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Error adding user with picks:', error);
+    return res.status(500).json({ message: 'Error al agregar usuario con picks.', error: error.message });
+  }
+};
+
+// Crear invitación con picks (solo para admin de liga)
+const createInvitationWithPicks = async (req, res) => {
+  try {
+    const { email, leagueId, picks } = req.body;
+    const adminId = req.user.id;
+
+    if (!email || !leagueId || !picks) {
+      return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+    }
+
+    // Verificar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Formato de email inválido.' });
+    }
+
+    // Verificar que la liga existe y el usuario es admin
+    const league = await League.findByPk(leagueId);
+    if (!league) {
+      return res.status(404).json({ message: 'Liga no encontrada.' });
+    }
+
+    if (league.adminId !== adminId) {
+      return res.status(403).json({ message: 'Solo el administrador de la liga puede crear invitaciones.' });
+    }
+
+    // Verificar que el email no está ya registrado y es miembro de la liga
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      const exists = await LeagueMember.findOne({
+        where: { userId: existingUser.id, leagueId }
+      });
+      if (exists) {
+        return res.status(409).json({ message: 'Este usuario ya es miembro de esta liga.' });
+      }
+    }
+
+    // Generar token único
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // Calcular fecha de expiración (7 días)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    // Crear la invitación
+    const invitation = await InvitationToken.create({
+      token,
+      email,
+      leagueId,
+      picksData: picks,
+      expiresAt,
+      used: false
+    });
+
+    return res.status(201).json({
+      message: 'Invitación creada exitosamente.',
+      token: invitation.token,
+      email: invitation.email,
+      expiresAt: invitation.expiresAt
+    });
+  } catch (error) {
+    console.error('Error creating invitation with picks:', error);
+    return res.status(500).json({ message: 'Error al crear invitación.', error: error.message });
+  }
+};
+
+module.exports = { createLeague, joinLeague, getLeagueMembers, getUserLeagues, joinGeneralLeague, addUserWithPicks, createInvitationWithPicks };
