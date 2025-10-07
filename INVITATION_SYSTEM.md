@@ -84,8 +84,8 @@ CREATE TABLE invitation_tokens (
   id SERIAL PRIMARY KEY,
   token VARCHAR UNIQUE NOT NULL,
   email VARCHAR NOT NULL,
-  leagueId INTEGER REFERENCES leagues(id),
-  picksData JSONB NOT NULL,
+  leagueId INTEGER NOT NULL,
+  picksData JSONB NOT NULL DEFAULT '{}',
   expiresAt TIMESTAMP NOT NULL,
   used BOOLEAN DEFAULT FALSE,
   createdAt TIMESTAMP DEFAULT NOW(),
@@ -96,6 +96,8 @@ CREATE INDEX idx_invitation_token ON invitation_tokens(token);
 CREATE INDEX idx_invitation_email ON invitation_tokens(email);
 CREATE INDEX idx_invitation_league ON invitation_tokens(leagueId);
 ```
+
+**Nota:** No se incluye foreign key constraint en la definición de Sequelize para evitar problemas de orden durante `sequelize.sync()`. La integridad referencial se maneja a nivel de aplicación.
 
 ---
 
@@ -293,7 +295,7 @@ CREATE TABLE invitation_tokens (
   id SERIAL PRIMARY KEY,
   token VARCHAR(255) UNIQUE NOT NULL,
   email VARCHAR(255) NOT NULL,
-  "leagueId" INTEGER NOT NULL REFERENCES leagues(id),
+  "leagueId" INTEGER NOT NULL,
   "picksData" JSONB NOT NULL DEFAULT '{}',
   "expiresAt" TIMESTAMP NOT NULL,
   used BOOLEAN NOT NULL DEFAULT FALSE,
@@ -305,6 +307,8 @@ CREATE INDEX idx_invitation_token ON invitation_tokens(token);
 CREATE INDEX idx_invitation_email ON invitation_tokens(email);
 CREATE INDEX idx_invitation_league ON invitation_tokens("leagueId");
 ```
+
+**Nota:** No se incluye foreign key constraint para evitar problemas de orden durante `sequelize.sync()`. La integridad referencial se maneja a nivel de aplicación mediante validaciones en los controladores.
 
 ---
 
