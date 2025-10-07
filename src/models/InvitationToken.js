@@ -18,11 +18,8 @@ const InvitationToken = sequelize.define('InvitationToken', {
   },
   leagueId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'leagues',
-      key: 'id'
-    }
+    allowNull: false
+    // No incluir references aquí para evitar problemas de orden en sync
   },
   picksData: {
     type: DataTypes.JSONB,

@@ -19,11 +19,8 @@ module.exports = {
       },
       leagueId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'leagues',
-          key: 'id'
-        }
+        allowNull: false
+        // No incluir foreign key constraint aquí
       },
       picksData: {
         type: DataTypes.JSONB,
