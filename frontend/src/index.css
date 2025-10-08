@@ -46,7 +46,11 @@ body {
   padding: 0 !important;
   min-width: 320px !important;
   min-height: 100vh !important;
-  background: var(--primary-color) !important;
+  background-image: url('../img/campfut_background.JPG') !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
   color: var(--text-primary) !important;
 }
 

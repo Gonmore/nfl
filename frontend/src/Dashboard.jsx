@@ -1441,10 +1441,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
                     profileImage={profileImage}
                     favoriteTeam={user?.favoriteTeam}
                     username={user?.username}
-                    size={40}
-                    style={{
-                      boxShadow: '0 4px 12px rgba(0, 75, 155, 0.3)'
-                    }}
+                    size={56}
                   />
                 </div>
 
@@ -2947,7 +2944,7 @@ function AvatarWithTeamLogo({
         height: '100%',
         borderRadius: '50%',
         backgroundColor: profileImage ? 'transparent' : '#004B9B',
-        border: '2px solid #E2E8F0',
+        border: 'none',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
@@ -2985,12 +2982,12 @@ function AvatarWithTeamLogo({
           width: logoSize,
           height: logoSize,
           borderRadius: '50%',
-          backgroundColor: '#FFFFFF',
-          border: '2px solid #004B9B',
+          backgroundColor: 'white',
+          border: '2px solid white',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
           overflow: 'hidden'
         }}>
           <img
