@@ -344,8 +344,15 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
     // Actualizar el estado local del usuario
     setUser(updatedUser);
     
-    // Actualizar localStorage
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    // Actualizar localStorage (sin la imagen base64 para evitar QuotaExceededError)
+    const userDataToStore = {
+      id: updatedUser.id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      favoriteTeam: updatedUser.favoriteTeam
+      // NO guardamos profileImage porque es base64 y llena el localStorage
+    };
+    localStorage.setItem('user', JSON.stringify(userDataToStore));
     
     // Actualizar la imagen de perfil si cambió
     if (updatedUser.profileImage !== undefined) {
@@ -2164,7 +2171,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
             />
           )}
 
-          {showProfileModal && (
+          {showProfileModal && user && (
             <ProfileModal
               onClose={() => setShowProfileModal(false)}
               profileImage={profileImage}

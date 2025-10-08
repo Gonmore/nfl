@@ -105,7 +105,17 @@ export default function App() {
     setToken(jwt);
     setUser(userData);
     localStorage.setItem('jwt', jwt);
-    localStorage.setItem('user', JSON.stringify(userData));
+    
+    // Solo guardar datos básicos del usuario, NO la imagen (profileImage es muy grande)
+    const userDataToStore = {
+      id: userData.id,
+      username: userData.username,
+      email: userData.email,
+      favoriteTeam: userData.favoriteTeam
+      // NO guardamos profileImage porque es base64 y llena el localStorage
+    };
+    localStorage.setItem('user', JSON.stringify(userDataToStore));
+    
     setShowLogin(false);
     setInvitationToken(null);
     // Immediately show loading sequence without delay

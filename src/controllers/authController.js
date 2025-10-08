@@ -44,7 +44,16 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Contraseña incorrecta.' });
     }
     const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    return res.json({ token, user: { id: user.id, username: user.username, email: user.email, profileImage: user.profileImage } });
+    return res.json({ 
+      token, 
+      user: { 
+        id: user.id, 
+        username: user.username, 
+        email: user.email, 
+        profileImage: user.profileImage,
+        favoriteTeam: user.favoriteTeam
+      } 
+    });
   } catch (error) {
     return res.status(500).json({ message: 'Error en el login.', error });
   }
@@ -258,7 +267,8 @@ const registerWithInvitation = async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        profileImage: user.profileImage
+        profileImage: user.profileImage,
+        favoriteTeam: user.favoriteTeam
       }
     });
   } catch (error) {
