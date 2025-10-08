@@ -23,8 +23,10 @@ export default function LoginRegister({ onLogin }) {
         const res = await loginUser({ email: form.email, password: form.password });
         if (res.token) {
           onLogin(res.token, res.user);
+          // No resetear loading aquí - el LoadingSequenceModal se encargará
         } else {
           setError(res.message || 'Error al iniciar sesión');
+          setLoading(false);
         }
       } else {
         const res = await registerUser(form);
@@ -37,27 +39,26 @@ export default function LoginRegister({ onLogin }) {
             const loginRes = await loginUser({ email: form.email, password: form.password });
             if (loginRes.token) {
               onLogin(loginRes.token, loginRes.user);
+              // No resetear loading aquí - el LoadingSequenceModal se encargará
             } else {
               setError(loginRes.message || 'Error al iniciar sesión después del registro');
               setJustRegistered(false);
+              setLoading(false);
             }
           } catch (loginErr) {
             setError('Error de conexión después del registro. Intenta iniciar sesión manualmente.');
             setJustRegistered(false);
-          } finally {
             setLoading(false);
           }
         } else {
           setError(res.message || 'Error al registrarse');
+          setLoading(false);
         }
       }
     } catch (err) {
+      console.error('Login/Register error:', err);
       setError('Error de conexión. Verifica tu conexión a internet.');
-    } finally {
-      // Solo resetear loading para registro, mantener para login
-      if (!isLogin) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 

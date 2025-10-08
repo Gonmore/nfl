@@ -208,7 +208,7 @@ export async function joinGeneralLeague(token) {
   });
 }
 
-export async function updateProfile(token, { username, password, profileImage }) {
+export async function updateProfile(token, { username, password, profileImage, favoriteTeam }) {
   console.log('Calling updateProfile with token:', token ? 'present' : 'null');
   return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/auth/profile`, {
@@ -217,7 +217,7 @@ export async function updateProfile(token, { username, password, profileImage })
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ username, password, profileImage })
+      body: JSON.stringify({ username, password, profileImage, favoriteTeam })
     });
     const data = await res.json();
     console.log('updateProfile response:', data);

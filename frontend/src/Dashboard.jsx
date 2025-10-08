@@ -7,8 +7,9 @@ import AddUserWizard from './components/AddUserWizard.jsx';
 const PickForm = lazy(() => import('./PickForm.jsx'));
 const LeagueStats = lazy(() => import('./LeagueStats.jsx'));
 
-export default function Dashboard({ user, token, onLogout }) {
+export default function Dashboard({ user: userProp, token, onLogout }) {
   // Estados optimizados para móvil
+  const [user, setUser] = useState(userProp);
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -75,8 +76,16 @@ export default function Dashboard({ user, token, onLogout }) {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   
-  // Estado para el wizard de agregar usuario
+  // Estados para el wizard de agregar usuario
   const [showAddUserWizard, setShowAddUserWizard] = useState(false);
+
+  // Sincronizar user cuando cambia la prop
+  useEffect(() => {
+    if (userProp) {
+      setUser(userProp);
+      setProfileImage(userProp.profileImage || null);
+    }
+  }, [userProp]);
 
   // Obtiene ligas del usuario (carga inicial prioritaria)
   useEffect(() => {
@@ -332,8 +341,13 @@ export default function Dashboard({ user, token, onLogout }) {
 
   // Función para manejar actualización del perfil
   const handleProfileUpdate = (updatedUser) => {
-    // Aquí podrías actualizar el estado del usuario si es necesario
-    // Por ahora, solo aseguramos que la imagen se actualice correctamente
+    // Actualizar el estado local del usuario
+    setUser(updatedUser);
+    
+    // Actualizar localStorage
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Actualizar la imagen de perfil si cambió
     if (updatedUser.profileImage !== undefined) {
       setProfileImage(updatedUser.profileImage);
     }
