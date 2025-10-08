@@ -396,7 +396,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
               }}>
                 <img
                   src='/img/logo_MVPicks.png'
-                  alt='CartelNFL Logo'
+                  alt='MVPicks Logo'
                   style={{
                     width: '64px',
                     height: '64px',
@@ -700,7 +700,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
             }}>
               <img
                 src='/img/logo_MVPicks.png'
-                alt='CartelNFL Logo'
+                alt='MVPicks Logo'
                 style={{
                   width: windowWidth <= 480 ? '48px' : '64px',
                   height: windowWidth <= 480 ? '48px' : '64px',
@@ -1076,7 +1076,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
             }}>
               <img
                 src='/img/logo_MVPicks.png'
-                alt='CartelNFL Logo'
+                alt='MVPicks Logo'
                 style={{
                   width: windowWidth <= 400 ? '40px' : windowWidth <= 480 ? '48px' : '64px',
                   height: windowWidth <= 400 ? '40px' : windowWidth <= 480 ? '48px' : '64px',
@@ -1400,7 +1400,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <img
                   src='/img/logo_MVPicks.png'
-                  alt='CartelNFL Logo'
+                  alt='MVPicks Logo'
                   style={{
                     width: '86px',
                     height: '86px',
@@ -2225,7 +2225,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
             }}>
               <img
                 src='/img/logo_MVPicks.png'
-                alt='CartelNFL Logo'
+                alt='MVPicks Logo'
                 style={{
                   width: '64px',
                   height: '64px',

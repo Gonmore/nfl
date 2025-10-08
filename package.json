@@ -1,7 +1,7 @@
 {
-  "name": "cartelnfl-backend",
+  "name": "mvpicks-backend",
   "version": "1.0.0",
-  "description": "Backend para CartelNFL, juego de picks NFL con ligas privadas.",
+  "description": "Backend para MVPicks, juego de picks NFL con ligas privadas.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

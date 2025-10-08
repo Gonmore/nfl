@@ -49,7 +49,7 @@ Para que todo el mundo pueda acceder al frontend:
    ```
 
 2. **Si tienes un dominio, configura Nginx como reverse proxy (opcional):**
-   Crea un archivo de configuración en `/etc/nginx/sites-available/cartelnfl`:
+   Crea un archivo de configuración en `/etc/nginx/sites-available/mvpicks`:
    ```
    server {
        listen 80;
@@ -81,4 +81,4 @@ Para que todo el mundo pueda acceder al frontend:
 - El frontend ahora usa `/api` para las llamadas al backend, que nginx redirige a `backend:3000`.
 - Asegúrate de que el archivo `.env` tenga las variables correctas para tu base de datos.
 - Para producción, cambia las credenciales por defecto de PostgreSQL.
-- Se crea automáticamente un usuario admin con email `admin@cartelnfl.com` y password `admin123` al iniciar por primera vez.
+- Se crea automáticamente un usuario admin con email `admin@mvpicks.com` y password `admin123` al iniciar por primera vez.

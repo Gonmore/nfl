@@ -90,7 +90,7 @@ export default function LoginRegister({ onLogin }) {
           }}>
             <img
               src='/img/logo_MVPicks.png'
-              alt='CartelNFL Logo'
+              alt='MVPicks Logo'
               style={{
                 width: '128px',
                 height: '128px',

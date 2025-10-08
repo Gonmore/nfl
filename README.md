@@ -1,4 +1,4 @@
-# CartelNFL Backend
+# MVPicks Backend
 
 API para el juego de picks NFL con ligas privadas.
 

@@ -2,7 +2,7 @@
 
 ## Resumen de Cambios
 
-Se han implementado 3 mejoras principales en la aplicación CartelNFL:
+Se han implementado 3 mejoras principales en la aplicación MVPicks:
 
 ---
 

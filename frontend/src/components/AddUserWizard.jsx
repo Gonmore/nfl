@@ -531,7 +531,7 @@ export default function AddUserWizard({ league, onClose, token, currentWeek, sho
     };
 
     const handleShareWhatsApp = () => {
-      const message = `¡Hola! Te invito a unirte a la liga "${league.name}" en CartelNFL.\n\n⚠️ IMPORTANTE: Debes registrarte usando el correo: ${userEmail}\n\nUsa este link para registrarte y tus picks ya estarán configurados:\n${invitationLink}`;
+      const message = `¡Hola! Te invito a unirte a la liga "${league.name}" en MVPicks.\n\n⚠️ IMPORTANTE: Debes registrarte usando el correo: ${userEmail}\n\nUsa este link para registrarte y tus picks ya estarán configurados:\n${invitationLink}`;
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     };

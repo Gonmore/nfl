@@ -14,7 +14,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
 app.get('/', (req, res) => {
-  res.send('CartelNFL Backend funcionando');
+  res.send('MVPicks Backend funcionando');
 });
 
 
@@ -58,12 +58,12 @@ const bcrypt = require('bcryptjs');
 
 sequelize.sync({ alter: true }).then(async () => {
   // Crear usuario admin si no existe
-  let adminUser = await User.findOne({ where: { email: 'admin@cartelnfl.com' } });
+  let adminUser = await User.findOne({ where: { email: 'admin@mvpicks.com' } });
   if (!adminUser) {
     const hashedPassword = await bcrypt.hash('admin123', 10);
     adminUser = await User.create({
       username: 'admin',
-      email: 'admin@cartelnfl.com',
+      email: 'admin@mvpicks.com',
       password: hashedPassword
     });
     console.log('Usuario admin creado.');
@@ -116,6 +116,6 @@ sequelize.sync({ alter: true }).then(async () => {
   });
 
   app.listen(PORT, () => {
-    console.log(`Servidor CartelNFL escuchando en puerto ${PORT}`);
+    console.log(`Servidor MVPicks escuchando en puerto ${PORT}`);
   });
 });
