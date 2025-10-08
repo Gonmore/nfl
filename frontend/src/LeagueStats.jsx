@@ -2,6 +2,81 @@ import React, { useEffect, useState } from 'react';
 import { getLeagueStats, getUserPicksDetails } from './api';
 import { teamLogos } from './teamLogos';
 
+// Reusable Avatar component with team logo
+const AvatarWithTeamLogo = ({ profileImage, favoriteTeam, username, size = 32, teamLogoSize = null, showInitial = true, style = {} }) => {
+  const logoSize = teamLogoSize || Math.round(size * 0.35);
+  const initial = username ? username.charAt(0).toUpperCase() : '?';
+
+  return (
+    <div style={{
+      position: 'relative',
+      width: `${size}px`,
+      height: `${size}px`,
+      display: 'inline-block',
+      ...style
+    }}>
+      {/* Main avatar */}
+      {profileImage ? (
+        <img
+          src={profileImage}
+          alt={username}
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            border: '2px solid #002C5F',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          }}
+        />
+      ) : showInitial ? (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: '50%',
+          backgroundColor: '#002C5F',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: `${size * 0.5}px`,
+          fontWeight: '700',
+          border: '2px solid #002C5F',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+        }}>
+          {initial}
+        </div>
+      ) : null}
+      
+      {/* Team logo badge */}
+      {favoriteTeam && teamLogos[favoriteTeam] && (
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          width: `${logoSize}px`,
+          height: `${logoSize}px`,
+          borderRadius: '50%',
+          border: '2px solid white',
+          overflow: 'hidden',
+          backgroundColor: 'white',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+        }}>
+          <img
+            src={teamLogos[favoriteTeam]}
+            alt={favoriteTeam}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function LeagueStats({ token, leagueId, week: initialWeek }) {
   const [weeklyStats, setWeeklyStats] = useState([]);
   const [totalStats, setTotalStats] = useState([]);
@@ -291,17 +366,11 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                               alignItems: 'center',
                               gap: '8px'
                             }}>
-                              <img
-                                src={user.profileImage || '/default-avatar.svg'}
-                                alt={user.user}
-                                style={{
-                                  width: '32px',
-                                  height: '32px',
-                                  borderRadius: '50%',
-                                  objectFit: 'cover',
-                                  border: '2px solid #002C5F',
-                                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                                }}
+                              <AvatarWithTeamLogo
+                                profileImage={user.profileImage}
+                                favoriteTeam={user.favoriteTeam}
+                                username={user.user}
+                                size={32}
                               />
                               <span>{user.user}</span>
                             </div>

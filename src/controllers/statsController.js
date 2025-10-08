@@ -32,6 +32,7 @@ const getLeagueStats = async (req, res) => {
       userId: m.userId,
       user: m.User.username,
       profileImage: m.User.profileImage,
+      favoriteTeam: m.User.favoriteTeam,
       points: weeklyScoresMap[m.userId] || 0
     })).sort((a, b) => b.points - a.points);
 
@@ -43,7 +44,7 @@ const getLeagueStats = async (req, res) => {
         'userId',
         [Score.sequelize.fn('SUM', Score.sequelize.col('points')), 'totalPoints']
       ],
-      group: ['userId', 'User.id', 'User.username', 'User.email']
+      group: ['userId', 'User.id', 'User.username', 'User.email', 'User.favoriteTeam', 'User.profileImage']
     });
 
     console.log('totalScoresRaw:', totalScoresRaw.map(s => s.dataValues));
@@ -57,6 +58,7 @@ const getLeagueStats = async (req, res) => {
       userId: m.userId,
       user: m.User.username,
       profileImage: m.User.profileImage,
+      favoriteTeam: m.User.favoriteTeam,
       points: totalScoresMap[m.userId] || 0
     })).sort((a, b) => b.points - a.points);
 

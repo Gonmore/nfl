@@ -1215,33 +1215,17 @@ export default function Dashboard({ user, token, onLogout }) {
                     alignItems: 'center',
                     gap: windowWidth <= 400 ? '4px' : '8px'
                   }}>
-                    {/* Foto de perfil */}
-                    <div style={{
-                      width: windowWidth <= 400 ? '36px' : '50px',
-                      height: windowWidth <= 400 ? '36px' : '50px',
-                      borderRadius: '50%',
-                      backgroundColor: user.profileImage ? 'transparent' : '#004B9B',
-                      border: '2px solid #E2E8F0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      overflow: 'hidden',
-                      flexShrink: 0
-                    }}>
-                      {user.profileImage ? (
-                        <img
-                          src={user.profileImage}
-                          alt={user.user}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover'
-                          }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: windowWidth <= 400 ? '16px' : '20px', color: '#FFFFFF' }}>👤</span>
-                      )}
-                    </div>
+                    {/* Foto de perfil con logo de equipo */}
+                    <AvatarWithTeamLogo
+                      profileImage={user.profileImage}
+                      favoriteTeam={user.favoriteTeam}
+                      username={user.user}
+                      size={windowWidth <= 400 ? 36 : 50}
+                      showInitial={false}
+                      style={{
+                        flexShrink: 0
+                      }}
+                    />
 
                     {/* Nombre de usuario y score */}
                     <div style={{
@@ -1421,42 +1405,26 @@ export default function Dashboard({ user, token, onLogout }) {
                 <div
                   onClick={handleProfileClick}
                   style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    backgroundColor: profileImage ? 'transparent' : '#004B9B',
-                    border: '2px solid #004B9B',
                     cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(0, 75, 155, 0.3)',
-                    transition: 'all 0.3s ease',
-                    overflow: 'hidden'
+                    transition: 'all 0.3s ease'
                   }}
                   onMouseOver={(e) => {
-                    e.target.style.transform = 'scale(1.05)';
-                    e.target.style.boxShadow = '0 6px 16px rgba(0, 75, 155, 0.4)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
                   }}
                   onMouseOut={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 4px 12px rgba(26, 54, 93, 0.3)';
+                    e.currentTarget.style.transform = 'scale(1)';
                   }}
                   title="Perfil"
                 >
-                  {profileImage ? (
-                    <img
-                      src={profileImage}
-                      alt="Foto de perfil"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                    />
-                  ) : (
-                    <span style={{ fontSize: '18px', color: '#FFFFFF' }}>👤</span>
-                  )}
+                  <AvatarWithTeamLogo
+                    profileImage={profileImage}
+                    favoriteTeam={user?.favoriteTeam}
+                    username={user?.username}
+                    size={40}
+                    style={{
+                      boxShadow: '0 4px 12px rgba(0, 75, 155, 0.3)'
+                    }}
+                  />
                 </div>
 
                 {/* Dropdown del perfil */}
@@ -2934,6 +2902,87 @@ function InviteCodeModal({ league, onClose }) {
           </ul>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Componente reutilizable de Avatar con Logo de Equipo
+function AvatarWithTeamLogo({ 
+  profileImage, 
+  favoriteTeam, 
+  username, 
+  size = 40, 
+  teamLogoSize = null,
+  showInitial = true,
+  style = {}
+}) {
+  const logoSize = teamLogoSize || Math.floor(size * 0.35);
+  
+  return (
+    <div style={{ position: 'relative', width: size, height: size, ...style }}>
+      {/* Avatar principal */}
+      <div style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '50%',
+        backgroundColor: profileImage ? 'transparent' : '#004B9B',
+        border: '2px solid #E2E8F0',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        {profileImage ? (
+          <img
+            src={profileImage}
+            alt={username || 'Avatar'}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        ) : showInitial ? (
+          <span style={{ 
+            fontSize: `${size * 0.45}px`, 
+            color: '#FFFFFF',
+            fontWeight: '700'
+          }}>
+            {username ? username.charAt(0).toUpperCase() : '👤'}
+          </span>
+        ) : (
+          <span style={{ fontSize: `${size * 0.45}px`, color: '#FFFFFF' }}>👤</span>
+        )}
+      </div>
+      
+      {/* Logo del equipo favorito */}
+      {favoriteTeam && teamLogos[favoriteTeam] && (
+        <div style={{
+          position: 'absolute',
+          bottom: '-2px',
+          right: '-2px',
+          width: logoSize,
+          height: logoSize,
+          borderRadius: '50%',
+          backgroundColor: '#FFFFFF',
+          border: '2px solid #004B9B',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+          overflow: 'hidden'
+        }}>
+          <img
+            src={teamLogos[favoriteTeam]}
+            alt={favoriteTeam}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
