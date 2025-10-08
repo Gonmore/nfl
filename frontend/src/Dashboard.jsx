@@ -409,20 +409,25 @@ export default function Dashboard({ user, token, onLogout }) {
                   try {
                     // Inicializar scoreViewWeek
                     setScoreViewWeek(week);
+                    console.log('📊 Opening score view for week:', week);
                     
                     // Cargar juegos de la semana actual
                     const gamesResponse = await getGames(token);
+                    console.log('🎮 All games:', gamesResponse.games.length);
                     const weekGames = gamesResponse.games.filter(g => g.week === week);
+                    console.log('🎮 Week games:', weekGames.length, 'for week', week);
                     setCurrentWeekGames(weekGames);
 
                     // Cargar picks del usuario para esta semana con resultados
                     const picksResponse = await getUserPicksDetails(token, selectedLeague.id, week);
+                    console.log('🎯 User picks response:', picksResponse);
                     setUserPicksWithResults(picksResponse.details || []);
 
                     // Obtener el total de puntos de la semana desde las estadísticas
                     const statsResponse = await getLeagueStats(token, selectedLeague.id, week);
                     const userWeeklyStats = statsResponse.weekly.find(u => u.userId === user.id);
                     const totalPoints = userWeeklyStats ? userWeeklyStats.points : 0;
+                    console.log('📈 Total points for week', week, ':', totalPoints);
                     setTotalPoints(totalPoints);
 
                     setShowGameWeekOptions(false);
@@ -688,18 +693,23 @@ export default function Dashboard({ user, token, onLogout }) {
                     onClick={async () => {
                       if (scoreViewWeek > 1) {
                         const newWeek = scoreViewWeek - 1;
+                        console.log('⬅️ Navigating to previous week:', newWeek);
                         setScoreViewWeek(newWeek);
                         setLoading(true);
                         try {
                           const gamesResponse = await getGames(token);
+                          console.log('🎮 Total games:', gamesResponse.games.length);
                           const weekGames = gamesResponse.games.filter(g => g.week === newWeek);
+                          console.log('🎮 Games for week', newWeek, ':', weekGames.length);
                           setCurrentWeekGames(weekGames);
 
                           const userId = selectedUserForScore ? selectedUserForScore.userId : user.id;
                           const picksResponse = await getUserPicksDetails(token, selectedLeague.id, newWeek, userId);
+                          console.log('🎯 Picks for week', newWeek, ':', picksResponse.details?.length || 0);
                           setUserPicksWithResults(picksResponse.details || []);
 
                           const totalPts = picksResponse.details.reduce((sum, detail) => sum + detail.points, 0);
+                          console.log('📈 Total points:', totalPts);
                           setTotalPoints(totalPts);
                         } catch (error) {
                           console.error('Error loading week data:', error);
@@ -731,18 +741,23 @@ export default function Dashboard({ user, token, onLogout }) {
                       const maxWeek = isDuringGameWeek ? week : (week > 1 ? week - 1 : week);
                       if (scoreViewWeek < maxWeek) {
                         const newWeek = scoreViewWeek + 1;
+                        console.log('➡️ Navigating to next week:', newWeek);
                         setScoreViewWeek(newWeek);
                         setLoading(true);
                         try {
                           const gamesResponse = await getGames(token);
+                          console.log('🎮 Total games:', gamesResponse.games.length);
                           const weekGames = gamesResponse.games.filter(g => g.week === newWeek);
+                          console.log('🎮 Games for week', newWeek, ':', weekGames.length);
                           setCurrentWeekGames(weekGames);
 
                           const userId = selectedUserForScore ? selectedUserForScore.userId : user.id;
                           const picksResponse = await getUserPicksDetails(token, selectedLeague.id, newWeek, userId);
+                          console.log('🎯 Picks for week', newWeek, ':', picksResponse.details?.length || 0);
                           setUserPicksWithResults(picksResponse.details || []);
 
                           const totalPts = picksResponse.details.reduce((sum, detail) => sum + detail.points, 0);
+                          console.log('📈 Total points:', totalPts);
                           setTotalPoints(totalPts);
                         } catch (error) {
                           console.error('Error loading week data:', error);
@@ -780,7 +795,17 @@ export default function Dashboard({ user, token, onLogout }) {
             gap: windowWidth <= 480 ? '6px' : '8px',
             marginBottom: windowWidth <= 480 ? '12px' : '16px'
           }}>
-            {currentWeekGames.map(game => {
+            {currentWeekGames.length === 0 ? (
+              <div style={{
+                gridColumn: '1 / -1',
+                textAlign: 'center',
+                padding: '32px',
+                color: '#718096',
+                fontSize: '16px'
+              }}>
+                No hay partidos disponibles para esta semana
+              </div>
+            ) : currentWeekGames.map(game => {
               const userPick = userPicksWithResults.find(p => p.gameId === game.id);
               const isCorrect = userPick && userPick.correct;
               const isFinished = game.winner !== null || game.status === 'STATUS_FINAL';
