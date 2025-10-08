@@ -2167,21 +2167,24 @@ export default function Dashboard({ user, token, onLogout }) {
               onProfileUpdate={handleProfileUpdate}
             />
           )}
-
-          {showAddUserWizard && (
-            <AddUserWizard
-              league={selectedLeague}
-              onClose={() => {
-                setShowAddUserWizard(false);
-                setShowLiveLeagueView(true);
-              }}
-              token={token}
-              currentWeek={isDuringGameWeek ? week : (week > 1 ? week - 1 : week)}
-              showToast={showToast}
-            />
-          )}
         </div>
       </div>
+    );
+  }
+
+  // Vista del Wizard de Agregar Usuario
+  if (showAddUserWizard && selectedLeague) {
+    return (
+      <AddUserWizard
+        league={selectedLeague}
+        onClose={() => {
+          setShowAddUserWizard(false);
+          setShowLiveLeagueView(true);
+        }}
+        token={token}
+        currentWeek={isDuringGameWeek ? week : (week > 1 ? week - 1 : week)}
+        showToast={showToast}
+      />
     );
   }
 
