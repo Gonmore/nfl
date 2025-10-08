@@ -79,6 +79,72 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
   // Estados para el wizard de agregar usuario
   const [showAddUserWizard, setShowAddUserWizard] = useState(false);
 
+  // Manejar navegación con botón atrás de Android/navegador
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state) {
+        // Restaurar el estado desde el historial
+        if (event.state.view === 'leagues') {
+          setSelectedLeague(null);
+          setShowGameWeekOptions(false);
+          setShowScoreView(false);
+          setShowLiveLeagueView(false);
+          setShowAddUserWizard(false);
+          setShowProfileModal(false);
+        } else if (event.state.view === 'leagueMenu') {
+          // Restaurar menú de liga
+          if (event.state.leagueId && selectedLeague?.id !== event.state.leagueId) {
+            const league = leagues.find(l => l.id === event.state.leagueId);
+            if (league) setSelectedLeague(league);
+          }
+          setShowGameWeekOptions(true);
+          setShowScoreView(false);
+          setShowLiveLeagueView(false);
+          setShowAddUserWizard(false);
+          setShowProfileModal(false);
+        } else if (event.state.view === 'pickForm') {
+          setShowGameWeekOptions(false);
+          setShowScoreView(false);
+          setShowLiveLeagueView(false);
+          setShowAddUserWizard(false);
+          setShowProfileModal(false);
+          if (event.state.week) setWeek(event.state.week);
+        } else if (event.state.view === 'liveLeague') {
+          setShowLiveLeagueView(true);
+          setShowGameWeekOptions(false);
+          setShowScoreView(false);
+          setShowAddUserWizard(false);
+          setShowProfileModal(false);
+          if (event.state.week) setWeek(event.state.week);
+        } else if (event.state.view === 'scoreView') {
+          setShowScoreView(true);
+          setShowLiveLeagueView(false);
+          setShowGameWeekOptions(false);
+          setShowAddUserWizard(false);
+          setShowProfileModal(false);
+          if (event.state.week) setScoreViewWeek(event.state.week);
+        }
+      } else {
+        // Si no hay estado, volver a la lista de ligas
+        setSelectedLeague(null);
+        setShowGameWeekOptions(false);
+        setShowScoreView(false);
+        setShowLiveLeagueView(false);
+        setShowAddUserWizard(false);
+        setShowProfileModal(false);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Inicializar el estado del historial
+    if (!window.history.state) {
+      window.history.replaceState({ view: 'leagues' }, '', '');
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [leagues, selectedLeague]);
+
   // Sincronizar user cuando cambia la prop
   useEffect(() => {
     if (userProp) {
@@ -299,6 +365,9 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
     
     // Siempre mostrar opciones de jornada (durante y fuera de juego)
     setShowGameWeekOptions(true);
+    
+    // Empujar estado al historial para navegación con botón atrás
+    window.history.pushState({ view: 'leagueMenu', leagueId: league.id }, '', '');
   };
 
   const filteredGames = games.filter(g => g.week === week);
@@ -358,6 +427,11 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
     if (updatedUser.profileImage !== undefined) {
       setProfileImage(updatedUser.profileImage);
     }
+  };
+
+  // Función helper para navegar atrás usando el historial del navegador
+  const handleGoBack = () => {
+    window.history.back();
   };
 
   // Modal de opciones de jornada
@@ -453,6 +527,9 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
 
                     setShowGameWeekOptions(false);
                     setShowScoreView(true);
+                    
+                    // Empujar estado al historial
+                    window.history.pushState({ view: 'scoreView', week }, '', '');
                   } catch (error) {
                     console.error('Error loading score data:', error);
                     showToast('Error al cargar los datos del score. Inténtalo de nuevo.', 'error');
@@ -499,6 +576,9 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
                     
                     setShowGameWeekOptions(false);
                     setShowLiveLeagueView(true);
+                    
+                    // Empujar estado al historial
+                    window.history.pushState({ view: 'liveLeague', week: currentWeek }, '', '');
                   } catch (error) {
                     console.error('Error loading league stats:', error);
                     showToast('Error al cargar estadísticas de la liga. Inténtalo de nuevo.', 'error');
@@ -544,6 +624,9 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
                 setWeek(nextWeek);
                 // Recargar juegos para incluir la nueva semana
                 loadGamesForWeek(nextWeek);
+                
+                // Empujar estado al historial
+                window.history.pushState({ view: 'pickForm', week: nextWeek }, '', '');
               }}
               style={{
                 background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
@@ -585,6 +668,9 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
                     
                     setShowGameWeekOptions(false);
                     setShowLiveLeagueView(true);
+                    
+                    // Empujar estado al historial
+                    window.history.pushState({ view: 'liveLeague', week }, '', '');
                   } catch (error) {
                     console.error('Error loading league stats:', error);
                     showToast('Error al cargar estadísticas de la liga. Inténtalo de nuevo.', 'error');
