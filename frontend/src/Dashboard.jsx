@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
-import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile, getUserLeaguesInitialLoad, getStandingsInitialLoad, getGamesInitialLoad } from './api';
+import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile, getUserLeaguesInitialLoad, getStandingsInitialLoad, getGamesInitialLoad, getAllGamesUntilWeek } from './api';
 import { teamLogos } from './teamLogos.js';
 import AddUserWizard from './components/AddUserWizard.jsx';
 
@@ -412,7 +412,7 @@ export default function Dashboard({ user, token, onLogout }) {
                     console.log('📊 Opening score view for week:', week);
                     
                     // Cargar juegos de la semana actual
-                    const gamesResponse = await getGames(token);
+                    const gamesResponse = await getAllGamesUntilWeek(token, week);
                     console.log('🎮 All games:', gamesResponse.games.length);
                     const weekGames = gamesResponse.games.filter(g => g.week === week);
                     console.log('🎮 Week games:', weekGames.length, 'for week', week);
@@ -697,7 +697,7 @@ export default function Dashboard({ user, token, onLogout }) {
                         setScoreViewWeek(newWeek);
                         setLoading(true);
                         try {
-                          const gamesResponse = await getGames(token);
+                          const gamesResponse = await getAllGamesUntilWeek(token, week);
                           console.log('🎮 Total games:', gamesResponse.games.length);
                           const weekGames = gamesResponse.games.filter(g => g.week === newWeek);
                           console.log('🎮 Games for week', newWeek, ':', weekGames.length);
@@ -745,7 +745,7 @@ export default function Dashboard({ user, token, onLogout }) {
                         setScoreViewWeek(newWeek);
                         setLoading(true);
                         try {
-                          const gamesResponse = await getGames(token);
+                          const gamesResponse = await getAllGamesUntilWeek(token, week);
                           console.log('🎮 Total games:', gamesResponse.games.length);
                           const weekGames = gamesResponse.games.filter(g => g.week === newWeek);
                           console.log('🎮 Games for week', newWeek, ':', weekGames.length);
@@ -1126,7 +1126,7 @@ export default function Dashboard({ user, token, onLogout }) {
                       setScoreViewWeek(displayWeek);
                       
                       // Cargar juegos de la semana a mostrar
-                      const gamesResponse = await getGames(token);
+                      const gamesResponse = await getAllGamesUntilWeek(token, week);
                       const weekGames = gamesResponse.games.filter(g => g.week === displayWeek);
                       setCurrentWeekGames(weekGames);
 
