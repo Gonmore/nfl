@@ -531,7 +531,7 @@ export default function AddUserWizard({ league, onClose, token, currentWeek, sho
     };
 
     const handleShareWhatsApp = () => {
-      const message = `¡Hola! Te invito a unirte a la liga "${league.name}" en CartelNFL. Usa este link para registrarte y tus picks ya estarán configurados: ${invitationLink}`;
+      const message = `¡Hola! Te invito a unirte a la liga "${league.name}" en CartelNFL.\n\n⚠️ IMPORTANTE: Debes registrarte usando el correo: ${userEmail}\n\nUsa este link para registrarte y tus picks ya estarán configurados:\n${invitationLink}`;
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     };
@@ -567,7 +567,36 @@ export default function AddUserWizard({ league, onClose, token, currentWeek, sho
             textAlign: 'center',
             lineHeight: '1.6'
           }}>
-            Comparte este link con <strong>{userEmail}</strong>. Cuando se registre usando este link, automáticamente tendrá acceso a la liga con todos sus picks configurados.
+            Comparte este link con el usuario. 
+          </p>
+          
+          <div style={{
+            backgroundColor: '#FFF5E1',
+            border: '2px solid #FFB020',
+            borderRadius: '8px',
+            padding: '12px',
+            marginBottom: '16px'
+          }}>
+            <p style={{
+              margin: 0,
+              fontSize: '14px',
+              color: '#8B5A00',
+              textAlign: 'center',
+              fontWeight: '600'
+            }}>
+              ⚠️ El usuario debe registrarse con el correo:<br/>
+              <span style={{ color: '#004B9B', fontSize: '15px' }}>{userEmail}</span>
+            </p>
+          </div>
+
+          <p style={{
+            margin: '0 0 16px 0',
+            fontSize: '14px',
+            color: '#718096',
+            textAlign: 'center',
+            lineHeight: '1.5'
+          }}>
+            Cuando se registre, automáticamente tendrá acceso a la liga con todos sus picks configurados.
           </p>
 
           <div style={{
