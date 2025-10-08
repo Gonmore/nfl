@@ -87,11 +87,11 @@ export default function AddUserWizard({ league, onClose, token, currentWeek, sho
         picks: weekPicks
       });
 
-      if (response.invitationToken) {
+      if (response.token) {
         const baseUrl = window.location.origin;
-        const link = `${baseUrl}/register-invitation/${response.invitationToken}`;
+        const link = `${baseUrl}/register-invitation/${response.token}`;
         setInvitationLink(link);
-        setInvitationToken(response.invitationToken);
+        setInvitationToken(response.token);
         setStep(4); // Mostrar el link generado
         showToast('Invitación generada exitosamente', 'success');
       }
