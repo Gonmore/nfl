@@ -2190,6 +2190,7 @@ export default function Dashboard({ user, token, onLogout }) {
               user={user}
               token={token}
               onProfileUpdate={handleProfileUpdate}
+              showToast={showToast}
             />
           )}
         </div>
@@ -2938,16 +2939,22 @@ function InviteCodeModal({ league, onClose }) {
 }
 
 // Componente modal para editar perfil
-function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onProfileUpdate }) {
+function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onProfileUpdate, showToast }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(profileImage);
   const [username, setUsername] = useState(user?.username || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [favoriteTeam, setFavoriteTeam] = useState(user?.favoriteTeam || '');
+  const [showTeamSelector, setShowTeamSelector] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+
+  // Lista de equipos NFL
+  const nflTeams = Object.keys(teamLogos).sort();
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
@@ -2990,6 +2997,11 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
         updateData.password = newPassword;
       }
 
+      // Equipo favorito
+      if (favoriteTeam !== user.favoriteTeam) {
+        updateData.favoriteTeam = favoriteTeam;
+      }
+
       // Manejar imagen de perfil
       if (selectedFile) {
         updateData.profileImage = previewImage;
@@ -3013,7 +3025,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
             onProfileUpdate(result.user);
           }
 
-          showToast('Perfil actualizado correctamente', 'success');
+          showToast('✅ Perfil actualizado correctamente', 'success');
         } else {
           setError(result.message || 'Error al actualizar el perfil');
           setLoading(false);
@@ -3025,6 +3037,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
     } catch (error) {
       console.error('Error updating profile:', error);
       setError('Error al actualizar el perfil');
+      showToast('❌ Error al actualizar el perfil', 'error');
     }
     setLoading(false);
   };
@@ -3046,14 +3059,18 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 2000,
-      backdropFilter: 'blur(4px)'
+      backdropFilter: 'blur(4px)',
+      padding: '20px',
+      overflow: 'auto'
     }}>
       <div style={{
         backgroundColor: '#FFFFFF',
         borderRadius: '20px',
         padding: '32px',
         width: '90%',
-        maxWidth: '400px',
+        maxWidth: '500px',
+        maxHeight: '90vh',
+        overflowY: 'auto',
         boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
         border: '2px solid #E2E8F0',
         position: 'relative'
@@ -3116,7 +3133,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
           </div>
         )}
 
-        {/* Vista previa de imagen */}
+        {/* Vista previa de imagen con logo de equipo */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -3124,39 +3141,75 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
           marginBottom: '24px'
         }}>
           <div style={{
+            position: 'relative',
             width: '120px',
             height: '120px',
-            borderRadius: '50%',
-            border: '4px solid #E2E8F0',
-            overflow: 'hidden',
-            marginBottom: '16px',
-            backgroundColor: previewImage ? 'transparent' : '#F1F5F9',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
+            marginBottom: '16px'
           }}>
-            {previewImage ? (
-              <img
-                src={previewImage}
-                alt="Vista previa"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            ) : (
-              <span style={{ fontSize: '48px', color: '#CBD5E1' }}>👤</span>
+            <div style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: '50%',
+              border: '4px solid #E2E8F0',
+              overflow: 'hidden',
+              backgroundColor: previewImage ? 'transparent' : '#F1F5F9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
+            }}>
+              {previewImage ? (
+                <img
+                  src={previewImage}
+                  alt="Vista previa"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              ) : (
+                <span style={{ fontSize: '48px', color: '#CBD5E1' }}>👤</span>
+              )}
+            </div>
+            
+            {/* Logo del equipo favorito en la esquina */}
+            {favoriteTeam && (
+              <div style={{
+                position: 'absolute',
+                bottom: '0',
+                right: '0',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: '#FFFFFF',
+                border: '3px solid #004B9B',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                overflow: 'hidden'
+              }}>
+                <img
+                  src={teamLogos[favoriteTeam]}
+                  alt={favoriteTeam}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              </div>
             )}
           </div>
 
           {/* Botones de acción para imagen */}
           <div style={{
             display: 'flex',
-            gap: '12px',
+            gap: '8px',
             flexWrap: 'wrap',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            marginBottom: '12px'
           }}>
             <button
               onClick={() => fileInputRef.current.click()}
@@ -3164,9 +3217,9 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
                 backgroundColor: '#004B9B',
                 color: '#FFFFFF',
                 border: 'none',
-                padding: '10px 16px',
+                padding: '8px 14px',
                 borderRadius: '8px',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
@@ -3175,15 +3228,43 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
                 gap: '6px'
               }}
               onMouseOver={(e) => {
-                e.target.style.backgroundColor = '#2D3748';
+                e.target.style.backgroundColor = '#003875';
                 e.target.style.transform = 'translateY(-1px)';
               }}
               onMouseOut={(e) => {
-                e.target.style.backgroundColor = '#1A365D';
+                e.target.style.backgroundColor = '#004B9B';
                 e.target.style.transform = 'translateY(0)';
               }}
             >
-              📷 Cambiar Foto
+              �️ Galería
+            </button>
+
+            <button
+              onClick={() => cameraInputRef.current.click()}
+              style={{
+                backgroundColor: '#10B981',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = '#059669';
+                e.target.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = '#10B981';
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              📷 Cámara
             </button>
 
             {previewImage && (
@@ -3193,9 +3274,9 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
                   backgroundColor: '#E53E3E',
                   color: '#FFFFFF',
                   border: 'none',
-                  padding: '10px 16px',
+                  padding: '8px 14px',
                   borderRadius: '8px',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
@@ -3217,7 +3298,7 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
             )}
           </div>
 
-          {/* Input de archivo oculto */}
+          {/* Inputs de archivo ocultos */}
           <input
             ref={fileInputRef}
             type="file"
@@ -3225,6 +3306,114 @@ function ProfileModal({ onClose, profileImage, onImageUpload, user, token, onPro
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+
+          {/* Selector de equipo favorito */}
+          <div style={{
+            marginTop: '16px',
+            padding: '12px',
+            backgroundColor: '#F7FAFC',
+            borderRadius: '8px',
+            border: '2px dashed #CBD5E1'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px'
+            }}>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#004B9B' }}>
+                🏈 Equipo Favorito
+              </span>
+              {favoriteTeam && (
+                <span style={{ fontSize: '11px', color: '#10B981', fontWeight: '600' }}>
+                  ⭐ +10 pts si va al Super Bowl
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setShowTeamSelector(!showTeamSelector)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                backgroundColor: '#FFFFFF',
+                border: '2px solid #E2E8F0',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: favoriteTeam ? '#004B9B' : '#718096',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.borderColor = '#004B9B'}
+              onMouseOut={(e) => e.target.style.borderColor = '#E2E8F0'}
+            >
+              <span>{favoriteTeam || 'Seleccionar equipo'}</span>
+              <span>{showTeamSelector ? '▲' : '▼'}</span>
+            </button>
+
+            {showTeamSelector && (
+              <div style={{
+                maxHeight: '200px',
+                overflowY: 'auto',
+                marginTop: '8px',
+                backgroundColor: '#FFFFFF',
+                border: '2px solid #E2E8F0',
+                borderRadius: '8px',
+                padding: '4px'
+              }}>
+                {nflTeams.map(team => (
+                  <div
+                    key={team}
+                    onClick={() => {
+                      setFavoriteTeam(team);
+                      setShowTeamSelector(false);
+                    }}
+                    style={{
+                      padding: '10px',
+                      cursor: 'pointer',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      backgroundColor: favoriteTeam === team ? '#EBF8FF' : 'transparent',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#F7FAFC'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = favoriteTeam === team ? '#EBF8FF' : 'transparent'}
+                  >
+                    <img
+                      src={teamLogos[team]}
+                      alt={team}
+                      style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '50%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                    <span style={{
+                      fontSize: '13px',
+                      fontWeight: favoriteTeam === team ? '600' : '400',
+                      color: favoriteTeam === team ? '#004B9B' : '#2D3748'
+                    }}>
+                      {team}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Campos de formulario */}

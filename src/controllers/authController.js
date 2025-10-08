@@ -52,7 +52,7 @@ const login = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { username, password, profileImage } = req.body;
+    const { username, password, profileImage, favoriteTeam } = req.body;
     const userId = req.user.id;
 
     const user = await User.findByPk(userId);
@@ -73,6 +73,7 @@ const updateProfile = async (req, res) => {
     if (username) updateData.username = username;
     if (password) updateData.password = await bcrypt.hash(password, 10);
     if (profileImage !== undefined) updateData.profileImage = profileImage;
+    if (favoriteTeam !== undefined) updateData.favoriteTeam = favoriteTeam;
 
     await user.update(updateData);
 
@@ -82,7 +83,8 @@ const updateProfile = async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        profileImage: user.profileImage
+        profileImage: user.profileImage,
+        favoriteTeam: user.favoriteTeam
       }
     });
   } catch (error) {
