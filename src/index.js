@@ -57,8 +57,17 @@ const User = require('./models/User');
 const bcrypt = require('bcryptjs');
 
 sequelize.sync({ alter: true }).then(async () => {
-  // Crear usuario admin si no existe
-  let adminUser = await User.findOne({ where: { email: 'admin@mvpicks.com' } });
+  // Crear usuario admin si no existe (buscar por username o emails antiguos/nuevos)
+  let adminUser = await User.findOne({ 
+    where: { 
+      [sequelize.Sequelize.Op.or]: [
+        { username: 'admin' },
+        { email: 'admin@mvpicks.com' },
+        { email: 'admin@cartelnfl.com' }
+      ]
+    } 
+  });
+  
   if (!adminUser) {
     const hashedPassword = await bcrypt.hash('admin123', 10);
     adminUser = await User.create({
@@ -67,6 +76,13 @@ sequelize.sync({ alter: true }).then(async () => {
       password: hashedPassword
     });
     console.log('Usuario admin creado.');
+  } else {
+    console.log('Usuario admin ya existe:', adminUser.email);
+    // Actualizar email si tiene el antiguo
+    if (adminUser.email === 'admin@cartelnfl.com') {
+      await adminUser.update({ email: 'admin@mvpicks.com' });
+      console.log('Email del admin actualizado a admin@mvpicks.com');
+    }
   }
 
   // Crear liga pública "Liga general" si no existe
