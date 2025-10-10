@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "MVPicks",
+    "slug": "mvpicks-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#002C5F"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mvpicks.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.mvpicks.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "95b7ebf9-98cb-444c-8ae2-5921120bb6c2"
+      }
+    }
+  }
+}
