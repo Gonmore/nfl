@@ -194,7 +194,7 @@ export default function LeagueDetailScreen({ route, navigation }: any) {
                           profileImage={user.profileImage}
                           favoriteTeam={user.favoriteTeam}
                           username={user.user}
-                          size={32}
+                          size={50}
                         />
                         <Text style={styles.playerName}>{user.user}</Text>
                       </View>
@@ -450,15 +450,15 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 16, // Aumentado de 12 a 16 para dar más espacio al avatar
     paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
   rankBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40, // Aumentado de 32 a 40
+    height: 40, // Aumentado de 32 a 40
+    borderRadius: 20, // Aumentado de 16 a 20
     backgroundColor: '#002C5F',
     justifyContent: 'center',
     alignItems: 'center',
@@ -476,12 +476,12 @@ const styles = StyleSheet.create({
   rankText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 16, // Aumentado de 14 a 16
   },
   podiumRankText: {
     color: '#002C5F',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 16, // Aumentado de 14 a 16
   },
   userInfoCell: {
     flexDirection: 'row',
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   playerName: {
-    marginLeft: 8,
+    marginLeft: 12, // Aumentado de 8 a 12 para dar más espacio
     fontSize: 16,
     color: '#333',
     fontWeight: '600',
