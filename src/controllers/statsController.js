@@ -132,21 +132,22 @@ async function calculateScores(leagueId, week) {
         } else if (day === 5) { // Friday
           points = 1; // Same as Thursday
         } else if (day === 0) { // Sunday
-          // Check if it's the last (featured) game of Sunday
-          const pickGameTime = localDate.getTime();
-          const lastGameTime = lastGameDate ? lastGameDate.getTime() : null;
-          if (pickGameTime === lastGameTime) {
-            points = 3; // Featured Sunday game
+          // El último partido del domingo es después de las 20:00 (8 PM) y vale 3 puntos
+          const gameHour = localDate.getHours();
+          if (gameHour >= 20) {
+            points = 3; // Último partido del domingo (después de las 20:00)
           } else {
-            points = 2; // Regular Sunday games
+            points = 2; // Partidos regulares del domingo
           }
         } else if (day === 1) { // Monday
-          points = 3;
+          points = 3; // Todos los partidos de lunes valen 3 puntos
+        } else if (day === 6) { // Saturday
+          points = 1;
         } else {
-          // Default case for any other day (Saturday, etc.)
+          // Default case for any other day
           points = 1;
         }
-        console.log(`[calculateScores] Correct pick for user ${userId}, day ${day}, awarding ${points} points`);
+        console.log(`[calculateScores] Correct pick for user ${userId}, day ${day}, hour ${localDate.getHours()}, awarding ${points} points`);
       } else {
         console.log(`[calculateScores] Wrong pick for user ${userId}: picked ${pick.pick}, winner was ${pick.Game.winner}`);
       }
@@ -214,15 +215,19 @@ const getUserPicksDetails = async (req, res) => {
           } else if (day === 5) { // Friday
             points = 1; // Same as Thursday
           } else if (day === 0) { // Sunday
-            if (localDate.getTime() === lastGameDate?.getTime()) {
-              points = 3; // Featured Sunday game
+            // El último partido del domingo es después de las 20:00 (8 PM) y vale 3 puntos
+            const gameHour = localDate.getHours();
+            if (gameHour >= 20) {
+              points = 3; // Último partido del domingo (después de las 20:00)
             } else {
-              points = 2; // Regular Sunday games
+              points = 2; // Partidos regulares del domingo
             }
           } else if (day === 1) { // Monday
-            points = 3;
+            points = 3; // Todos los partidos de lunes valen 3 puntos
+          } else if (day === 6) { // Saturday
+            points = 1;
           } else {
-            // Default case for any other day (Saturday, etc.)
+            // Default case for any other day
             points = 1;
           }
         }

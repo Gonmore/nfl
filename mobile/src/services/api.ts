@@ -49,6 +49,11 @@ export const updateProfile = async (data: {
   return response.data;
 };
 
+export const getProfile = async () => {
+  const response = await api.get('/auth/profile');
+  return response.data;
+};
+
 export const checkUserExists = async (email: string) => {
   const response = await api.get(`/auth/check-user?email=${encodeURIComponent(email)}`);
   return response.data;

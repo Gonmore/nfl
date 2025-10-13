@@ -225,6 +225,22 @@ export async function updateProfile(token, { username, password, profileImage, f
   });
 }
 
+export async function getProfile(token) {
+  console.log('Calling getProfile with token:', token ? 'present' : 'null');
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/auth/profile`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    console.log('getProfile response:', data);
+    return data;
+  });
+}
+
 export async function getUserLeaguesInitialLoad(token) {
   console.log('Calling getUserLeaguesInitialLoad with token:', token ? 'present' : 'null');
   return withoutLoading(async () => {

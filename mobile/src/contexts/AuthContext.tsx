@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loginUser, registerUser, updateProfile } from '../services/api';
+import { AppState, AppStateStatus } from 'react-native';
+import { loginUser, registerUser, updateProfile, getProfile } from '../services/api';
 import { User } from '../types/api.types';
 
 interface AuthContextType {
@@ -11,6 +12,7 @@ interface AuthContextType {
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUserProfile: (data: any) => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +25,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     loadUser();
   }, []);
+
+  useEffect(() => {
+    // Refrescar el perfil cuando la app vuelve a estar activa
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      subscription.remove();
+    };
+  }, [isAuthenticated]);
+
+  const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+    if (nextAppState === 'active' && isAuthenticated) {
+      // La app volvió a estar activa, refrescar perfil
+      await refreshProfile();
+    }
+  };
 
   const loadUser = async () => {
     try {
@@ -69,9 +86,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(response.user);
   };
 
+  const refreshProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwt');
+      if (!token) return;
+      
+      const response = await getProfile();
+      if (response.user) {
+        await AsyncStorage.setItem('user', JSON.stringify(response.user));
+        setUser(response.user);
+      }
+    } catch (error) {
+      console.error('Error refreshing profile:', error);
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, isLoading, login, register, logout, updateUserProfile }}
+      value={{ user, isAuthenticated, isLoading, login, register, logout, updateUserProfile, refreshProfile }}
     >
       {children}
     </AuthContext.Provider>

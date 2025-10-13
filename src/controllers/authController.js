@@ -101,6 +101,32 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'username', 'email', 'profileImage', 'favoriteTeam']
+    });
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    return res.json({
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        profileImage: user.profileImage,
+        favoriteTeam: user.favoriteTeam
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al obtener el perfil.', error });
+  }
+};
+
 const wakeup = async (req, res) => {
   try {
     return res.json({ message: 'Backend is awake!' });
@@ -277,4 +303,4 @@ const registerWithInvitation = async (req, res) => {
   }
 };
 
-module.exports = { register, login, updateProfile, wakeup, checkUserExists, validateInvitationToken, registerWithInvitation };
+module.exports = { register, login, updateProfile, getProfile, wakeup, checkUserExists, validateInvitationToken, registerWithInvitation };

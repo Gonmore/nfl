@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
-import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile, getUserLeaguesInitialLoad, getStandingsInitialLoad, getGamesInitialLoad, getAllGamesUntilWeek } from './api';
+import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile, getProfile, getUserLeaguesInitialLoad, getStandingsInitialLoad, getGamesInitialLoad, getAllGamesUntilWeek } from './api';
 import { teamLogos } from './teamLogos.js';
 import AddUserWizard from './components/AddUserWizard.jsx';
 
@@ -152,6 +152,24 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
       setProfileImage(userProp.profileImage || null);
     }
   }, [userProp]);
+
+  // Refrescar perfil del usuario al iniciar el Dashboard
+  useEffect(() => {
+    async function refreshProfile() {
+      try {
+        const res = await getProfile(token);
+        if (res.user) {
+          setUser(res.user);
+          setProfileImage(res.user.profileImage || null);
+          // También actualizar en localStorage
+          localStorage.setItem('user', JSON.stringify(res.user));
+        }
+      } catch (err) {
+        console.error('Error al refrescar perfil:', err);
+      }
+    }
+    refreshProfile();
+  }, [token]);
 
   // Obtiene ligas del usuario (carga inicial prioritaria)
   useEffect(() => {
