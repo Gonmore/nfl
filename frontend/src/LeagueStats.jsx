@@ -4,7 +4,7 @@ import { teamLogos } from './teamLogos';
 
 // Reusable Avatar component with team logo
 const AvatarWithTeamLogo = ({ profileImage, favoriteTeam, username, size = 32, teamLogoSize = null, showInitial = true, style = {} }) => {
-  const logoSize = teamLogoSize || Math.round(size * 0.35);
+  const logoSize = teamLogoSize || Math.round(size * 0.48); // Aumentado de 0.35 a 0.48 para mejor visibilidad
   const initial = username ? username.charAt(0).toUpperCase() : '?';
 
   return (
@@ -370,7 +370,7 @@ export default function LeagueStats({ token, leagueId, week: initialWeek }) {
                                 profileImage={user.profileImage}
                                 favoriteTeam={user.favoriteTeam}
                                 username={user.user}
-                                size={32}
+                                size={50}
                               />
                               <span>{user.user}</span>
                             </div>

@@ -153,7 +153,7 @@ export const AvatarWithTeamLogo: React.FC<AvatarWithTeamLogoProps> = ({
         </View>
       )}
       {teamLogoUrl && (
-        <View style={[styles.teamLogoBadge, { width: size * 0.35, height: size * 0.35, bottom: -2, right: -2 }]}>
+        <View style={[styles.teamLogoBadge, { width: size * 0.48, height: size * 0.48, bottom: -2, right: -2 }]}>
           <Image
             source={{ uri: teamLogoUrl }}
             style={styles.teamLogoImage}

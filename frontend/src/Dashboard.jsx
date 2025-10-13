@@ -3038,7 +3038,7 @@ function AvatarWithTeamLogo({
   showInitial = true,
   style = {}
 }) {
-  const logoSize = teamLogoSize || Math.floor(size * 0.35);
+  const logoSize = teamLogoSize || Math.floor(size * 0.48); // Aumentado de 0.35 a 0.48 para mejor visibilidad
   
   return (
     <div style={{ position: 'relative', width: size, height: size, ...style }}>
