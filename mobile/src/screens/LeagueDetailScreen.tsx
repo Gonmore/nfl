@@ -19,19 +19,23 @@ import { AvatarWithTeamLogo } from '../components/common/AvatarWithTeamLogo';
 import TeamLogo from '../components/TeamLogo';
 import PoweredByFooter from '../components/PoweredByFooter';
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
+import { getCurrentNFLWeek } from '../utils/helpers';
 
 export default function LeagueDetailScreen({ route, navigation }: any) {
   const { user } = useAuth();
-  const { leagueId } = route.params;
+  const { leagueId, showMyScoreOnly, userId } = route.params;
   const [weeklyStats, setWeeklyStats] = useState<any[]>([]);
   const [totalStats, setTotalStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   
+  // Obtener la semana actual dinámicamente
+  const currentWeek = getCurrentNFLWeek();
+  
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [modalUser, setModalUser] = useState('');
-  const [modalWeek, setModalWeek] = useState(5); // Start with week 5 (last completed)
+  const [modalWeek, setModalWeek] = useState(currentWeek); // Inicia con la semana actual
   const [modalDetails, setModalDetails] = useState<any[]>([]);
   const [modalTotalPoints, setModalTotalPoints] = useState(0);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -40,11 +44,18 @@ export default function LeagueDetailScreen({ route, navigation }: any) {
     loadStats();
   }, [leagueId]);
 
+  // Si showMyScoreOnly es true, abrir automáticamente el modal con los picks del usuario
+  useEffect(() => {
+    if (showMyScoreOnly && userId && user?.username && !loading) {
+      handleUserClick(userId, user.username);
+    }
+  }, [showMyScoreOnly, userId, loading]);
+
   const loadStats = async () => {
     setLoading(true);
     try {
-      // Obtener estadísticas hasta la semana 5 (última jugada)
-      const res = await getLeagueStats(leagueId, 5);
+      // Obtener estadísticas hasta la semana actual
+      const res = await getLeagueStats(leagueId, currentWeek);
       setWeeklyStats(res.weekly || []);
       setTotalStats(res.total || []);
     } catch (error) {
@@ -70,9 +81,9 @@ export default function LeagueDetailScreen({ route, navigation }: any) {
 
   const handleUserClick = async (userId: number, userName: string) => {
     setModalUser(userName);
-    setModalWeek(5); // Reset to week 5 when opening modal
+    setModalWeek(currentWeek); // Usar la semana actual al abrir el modal
     setModalOpen(true);
-    await loadModalDetails(userId, 5);
+    await loadModalDetails(userId, currentWeek);
   };
 
   const loadModalDetails = async (userId: number, week: number) => {
@@ -174,7 +185,7 @@ export default function LeagueDetailScreen({ route, navigation }: any) {
                   <View style={styles.tableHeader}>
                     <Text style={[styles.headerCell, styles.posCell]}>POS</Text>
                     <Text style={[styles.headerCell, styles.userCell]}>Usuario</Text>
-                    <Text style={[styles.headerCell, styles.pointsCell]}>GW 5</Text>
+                    <Text style={[styles.headerCell, styles.pointsCell]}>GW {currentWeek}</Text>
                     <Text style={[styles.headerCell, styles.pointsCell]}>Total</Text>
                   </View>
                   

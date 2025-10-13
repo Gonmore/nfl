@@ -198,7 +198,11 @@ export default function DashboardScreen({ navigation }: any) {
     setShowNavigationLoading(true);
     // Pequeño delay para que el modal se cierre antes de navegar
     setTimeout(() => {
-      navigation.navigate('LeagueDetail', { leagueId: selectedLeagueForOptions?.id });
+      navigation.navigate('LeagueDetail', { 
+        leagueId: selectedLeagueForOptions?.id,
+        showMyScoreOnly: true, // Nuevo parámetro para mostrar solo el score del usuario
+        userId: user?.id // ID del usuario actual
+      });
       setShowNavigationLoading(false);
     }, 300);
   };
