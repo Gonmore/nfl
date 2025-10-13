@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { useAuth } from '../contexts/AuthContext';
 import api, { getGames } from '../services/api';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { NFLLoadingSequence } from '../components/NFLLoadingSequence';
 import { AvatarWithTeamLogo } from '../components/common/AvatarWithTeamLogo';
 import DashboardHeader from '../components/DashboardHeader';
 import PoweredByFooter from '../components/PoweredByFooter';
@@ -48,11 +49,22 @@ export default function DashboardScreen({ navigation }: any) {
   const [isDuringGameWeek, setIsDuringGameWeek] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedLeagueForInvite, setSelectedLeagueForInvite] = useState<League | null>(null);
+  const [showNavigationLoading, setShowNavigationLoading] = useState(false);
 
   useEffect(() => {
     loadLeagues();
     loadStandings();
   }, []);
+
+  // Escuchar cuando el usuario vuelve a esta pantalla para ocultar el loading
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Pantalla enfocada, ocultar loading
+      setShowNavigationLoading(false);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const loadLeagues = async () => {
     try {
@@ -158,23 +170,37 @@ export default function DashboardScreen({ navigation }: any) {
 
   const handleViewLeagueStats = () => {
     setShowLeagueOptionsModal(false);
-    navigation.navigate('LeagueDetail', { leagueId: selectedLeagueForOptions?.id });
+    setShowNavigationLoading(true);
+    // Pequeño delay para que el modal se cierre antes de navegar
+    setTimeout(() => {
+      navigation.navigate('LeagueDetail', { leagueId: selectedLeagueForOptions?.id });
+      setShowNavigationLoading(false);
+    }, 300);
   };
 
   const handleMakePicks = () => {
     setShowLeagueOptionsModal(false);
+    setShowNavigationLoading(true);
     const nextWeek = isDuringGameWeek && currentWeek ? currentWeek + 1 : currentWeek;
-    navigation.navigate('Picks', { 
-      leagueId: selectedLeagueForOptions?.id,
-      week: nextWeek,
-      currentWeek: currentWeek 
-    });
+    // Pequeño delay para que el modal se cierre antes de navegar
+    setTimeout(() => {
+      navigation.navigate('Picks', { 
+        leagueId: selectedLeagueForOptions?.id,
+        week: nextWeek,
+        currentWeek: currentWeek 
+      });
+      setShowNavigationLoading(false);
+    }, 300);
   };
 
   const handleViewScore = () => {
     setShowLeagueOptionsModal(false);
-    // Por ahora navegar a LeagueDetail, pero eventualmente podríamos tener una pantalla específica de score
-    navigation.navigate('LeagueDetail', { leagueId: selectedLeagueForOptions?.id });
+    setShowNavigationLoading(true);
+    // Pequeño delay para que el modal se cierre antes de navegar
+    setTimeout(() => {
+      navigation.navigate('LeagueDetail', { leagueId: selectedLeagueForOptions?.id });
+      setShowNavigationLoading(false);
+    }, 300);
   };
 
   if (loading) {
@@ -435,6 +461,9 @@ export default function DashboardScreen({ navigation }: any) {
           </View>
         </View>
       </Modal>
+
+      {/* Loading animado al navegar */}
+      <NFLLoadingSequence visible={showNavigationLoading} />
         </View>
       </View>
     </ImageBackground>
