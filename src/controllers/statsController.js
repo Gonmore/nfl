@@ -3,6 +3,7 @@ const Game = require('../models/Game');
 const Score = require('../models/Score');
 const LeagueMember = require('../models/LeagueMember');
 const User = require('../models/User');
+const AdminPick = require('../models/AdminPick');
 const { Op } = require('sequelize');
 
 const getLeagueStats = async (req, res) => {
@@ -159,6 +160,33 @@ async function calculateScores(leagueId, week) {
   }
 
   console.log(`[calculateScores] Final scores for league ${leagueId}, week ${week}:`, userScores);
+
+  // Aplicar penalizaciones por picks hechos por administradores
+  const adminPicks = await AdminPick.findAll({
+    where: { 
+      leagueId: parseInt(leagueId), 
+      week: parseInt(week) 
+    }
+  });
+
+  console.log(`[calculateScores] Found ${adminPicks.length} admin picks for league ${leagueId}, week ${week}`);
+
+  for (const adminPick of adminPicks) {
+    const userId = adminPick.userId;
+    const penalty = adminPick.penaltyApplied;
+    
+    if (penalty !== 0 && userScores[userId] !== undefined) {
+      console.log(`[calculateScores] Applying penalty of ${penalty} points to user ${userId} (pickCount: ${adminPick.pickCount})`);
+      userScores[userId] += penalty; // penalty es negativo (-3)
+      
+      // Asegurar que no sea negativo el score
+      if (userScores[userId] < 0) {
+        userScores[userId] = 0;
+      }
+    }
+  }
+
+  console.log(`[calculateScores] Final scores after penalties for league ${leagueId}, week ${week}:`, userScores);
 
   // Save scores for each user
   for (const userId in userScores) {

@@ -131,6 +131,22 @@ export async function joinLeague(token, { inviteCode }) {
   });
 }
 
+export async function getLeagueMembers(token, leagueId) {
+  console.log('Calling getLeagueMembers with token:', token ? 'present' : 'null', 'leagueId:', leagueId);
+  return withoutLoading(async () => {
+    const res = await fetch(`${API_URL}/leagues/${leagueId}/members`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    console.log('getLeagueMembers response:', data);
+    return data;
+  });
+}
+
 export async function makePicks(token, leagueId, picks) {
   return withoutLoading(async () => {
     const res = await fetch(`${API_URL}/picks/make`, {
@@ -414,4 +430,34 @@ export async function getAllGamesUntilWeek(token, week) {
     console.log('getAllGamesUntilWeek response:', data);
     return data;
   });
+}
+
+// Admin pick management APIs
+export async function checkAdminPickEligibility(token, userId, leagueId, week) {
+  console.log('Calling checkAdminPickEligibility with:', { userId, leagueId, week });
+  const res = await fetch(`${API_URL}/picks/admin/check-eligibility?userId=${userId}&leagueId=${leagueId}&week=${week}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  const data = await res.json();
+  console.log('checkAdminPickEligibility response:', data);
+  return data;
+}
+
+export async function makePicksForUser(token, userId, leagueId, week, picks) {
+  console.log('Calling makePicksForUser with:', { userId, leagueId, week, picks });
+  const res = await fetch(`${API_URL}/picks/admin/make-for-user`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ userId, leagueId, week, picks })
+  });
+  const data = await res.json();
+  console.log('makePicksForUser response:', data);
+  return data;
 }

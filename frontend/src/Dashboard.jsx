@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinGeneralLeague, getUserPicksDetails, getLeagueStats, updateProfile, getProfile, getUserLeaguesInitialLoad, getStandingsInitialLoad, getGamesInitialLoad, getAllGamesUntilWeek } from './api';
 import { teamLogos } from './teamLogos.js';
 import AddUserWizard from './components/AddUserWizard.jsx';
+import AdminPickManager from './components/AdminPickManager.jsx';
 
 // Lazy load componentes pesados
 const PickForm = lazy(() => import('./PickForm.jsx'));
@@ -79,6 +80,9 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
   // Estados para el wizard de agregar usuario
   const [showAddUserWizard, setShowAddUserWizard] = useState(false);
 
+  // Estado para el Admin Pick Manager
+  const [showAdminPickManager, setShowAdminPickManager] = useState(false);
+
   // Manejar navegación con botón atrás de Android/navegador
   useEffect(() => {
     const handlePopState = (event) => {
@@ -90,6 +94,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
           setShowScoreView(false);
           setShowLiveLeagueView(false);
           setShowAddUserWizard(false);
+          setShowAdminPickManager(false);
           setShowProfileModal(false);
         } else if (event.state.view === 'leagueMenu') {
           // Restaurar menú de liga
@@ -101,12 +106,14 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
           setShowScoreView(false);
           setShowLiveLeagueView(false);
           setShowAddUserWizard(false);
+          setShowAdminPickManager(false);
           setShowProfileModal(false);
         } else if (event.state.view === 'pickForm') {
           setShowGameWeekOptions(false);
           setShowScoreView(false);
           setShowLiveLeagueView(false);
           setShowAddUserWizard(false);
+          setShowAdminPickManager(false);
           setShowProfileModal(false);
           if (event.state.week) setWeek(event.state.week);
         } else if (event.state.view === 'liveLeague') {
@@ -114,6 +121,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
           setShowGameWeekOptions(false);
           setShowScoreView(false);
           setShowAddUserWizard(false);
+          setShowAdminPickManager(false);
           setShowProfileModal(false);
           if (event.state.week) setWeek(event.state.week);
         } else if (event.state.view === 'scoreView') {
@@ -121,6 +129,7 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
           setShowLiveLeagueView(false);
           setShowGameWeekOptions(false);
           setShowAddUserWizard(false);
+          setShowAdminPickManager(false);
           setShowProfileModal(false);
           if (event.state.week) setScoreViewWeek(event.state.week);
         }
@@ -1232,6 +1241,44 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
             </div>
           )}
 
+          {/* Botón Hacer Picks por Usuario (solo para admins) */}
+          {selectedLeague && selectedLeague.isAdmin && week && (
+            <div style={{ marginBottom: windowWidth <= 400 ? '12px' : '16px', textAlign: 'center' }}>
+              <button
+                onClick={() => {
+                  setShowAdminPickManager(true);
+                  setShowLiveLeagueView(false);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: windowWidth <= 400 ? '10px 16px' : '12px 24px',
+                  borderRadius: '12px',
+                  fontSize: windowWidth <= 400 ? '14px' : '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                }}
+              >
+                <span style={{ fontSize: '18px' }}>🏈</span>
+                Hacer Picks por Usuario
+              </button>
+            </div>
+          )}
+
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -2300,6 +2347,32 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
         token={token}
         currentWeek={isDuringGameWeek ? week : (week > 1 ? week - 1 : week)}
         showToast={showToast}
+      />
+    );
+  }
+
+  // Vista del Admin Pick Manager
+  if (showAdminPickManager && selectedLeague && week) {
+    return (
+      <AdminPickManager
+        token={token}
+        league={selectedLeague}
+        week={week}
+        onClose={() => {
+          setShowAdminPickManager(false);
+          setShowLiveLeagueView(true);
+        }}
+        onSuccess={async () => {
+          // Recargar estadísticas de la liga después de guardar picks
+          try {
+            const statsResponse = await getLeagueStats(token, selectedLeague.id, week);
+            if (statsResponse.weekly) {
+              setLeagueWeeklyStats(statsResponse.weekly);
+            }
+          } catch (err) {
+            console.error('Error recargando stats:', err);
+          }
+        }}
       />
     );
   }

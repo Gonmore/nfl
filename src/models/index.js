@@ -8,6 +8,7 @@ const Game = require('./Game');
 const Pick = require('./Pick');
 const Score = require('./Score');
 const InvitationToken = require('./InvitationToken');
+const AdminPick = require('./AdminPick');
 
 // Definir asociaciones
 User.hasMany(LeagueMember, { foreignKey: 'userId' });
@@ -36,4 +37,14 @@ Score.belongsTo(League, { foreignKey: 'leagueId' });
 League.hasMany(InvitationToken, { foreignKey: 'leagueId' });
 InvitationToken.belongsTo(League, { foreignKey: 'leagueId' });
 
-module.exports = { sequelize, User, League, LeagueMember, Game, Pick, Score, InvitationToken };
+// Asociaciones para AdminPick
+User.hasMany(AdminPick, { foreignKey: 'userId', as: 'adminPicksReceived' });
+AdminPick.belongsTo(User, { foreignKey: 'userId', as: 'targetUser' });
+
+User.hasMany(AdminPick, { foreignKey: 'adminId', as: 'adminPicksGiven' });
+AdminPick.belongsTo(User, { foreignKey: 'adminId', as: 'admin' });
+
+League.hasMany(AdminPick, { foreignKey: 'leagueId' });
+AdminPick.belongsTo(League, { foreignKey: 'leagueId' });
+
+module.exports = { sequelize, User, League, LeagueMember, Game, Pick, Score, InvitationToken, AdminPick };
