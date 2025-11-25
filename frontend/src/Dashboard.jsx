@@ -3,6 +3,7 @@ import { getGames, getUserLeagues, createLeague, joinLeague, getStandings, joinG
 import { teamLogos } from './teamLogos.js';
 import AddUserWizard from './components/AddUserWizard.jsx';
 import AdminPickManager from './components/AdminPickManager.jsx';
+import AdminPanel from './components/AdminPanel.jsx';
 
 // Lazy load componentes pesados
 const PickForm = lazy(() => import('./PickForm.jsx'));
@@ -38,6 +39,9 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  
+  // Estado para panel de administración
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   // Función para mostrar notificaciones toast
   const showToast = (message, type = 'success') => {
@@ -460,6 +464,11 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
   const handleGoBack = () => {
     window.history.back();
   };
+
+  // Si se muestra el panel de administración
+  if (showAdminPanel) {
+    return <AdminPanel token={token} onClose={() => setShowAdminPanel(false)} />;
+  }
 
   // Modal de opciones de jornada
   if (showGameWeekOptions && selectedLeague && week === currentWeek) {
@@ -1668,6 +1677,38 @@ export default function Dashboard({ user: userProp, token, onLogout }) {
                     >
                       <span style={{ fontSize: '16px' }}>⏻</span>
                       Cerrar Sesión
+                    </button>
+                    <div style={{
+                      height: '1px',
+                      backgroundColor: '#E2E8F0',
+                      margin: '0 8px'
+                    }}></div>
+                    <button
+                      onClick={() => setShowAdminPanel(true)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#7C3AED',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#F5F3FF';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <span style={{ fontSize: '16px' }}>🔧</span>
+                      Panel de Administración
                     </button>
                   </div>
                 )}
