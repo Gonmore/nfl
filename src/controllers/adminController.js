@@ -43,7 +43,7 @@ const getTables = async (req, res) => {
 const getTableData = async (req, res) => {
   try {
     const { table } = req.params;
-    const { page = 1, limit = 50, orderBy = 'id', order = 'ASC' } = req.query;
+    const { page = 1, limit = 50, orderBy = 'id', order = 'ASC', userId, week } = req.query;
 
     const models = {
       users: User,
@@ -62,7 +62,16 @@ const getTableData = async (req, res) => {
     }
 
     const offset = (page - 1) * limit;
+    
+    // Construir filtros adicionales para picks
+    const where = {};
+    if (table === 'picks') {
+      if (userId) where.userId = parseInt(userId);
+      if (week) where.week = parseInt(week);
+    }
+
     const { count, rows } = await model.findAndCountAll({
+      where,
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [[orderBy, order]]

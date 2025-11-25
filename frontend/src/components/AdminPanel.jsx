@@ -17,6 +17,17 @@ export default function AdminPanel({ token, onClose }) {
   const [sqlQuery, setSqlQuery] = useState('');
   const [queryResults, setQueryResults] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Estados para filtros de picks
+  const [filterUserId, setFilterUserId] = useState('');
+  const [filterWeek, setFilterWeek] = useState('');
+  const [users, setUsers] = useState([]);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateSourceUser, setDuplicateSourceUser] = useState('');
+  const [duplicateTargetUser, setDuplicateTargetUser] = useState('');
+  const [duplicateWeek, setDuplicateWeek] = useState('');
+  const [duplicateLeagueId, setDuplicateLeagueId] = useState('');
+  const [leagues, setLeagues] = useState([]);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -69,6 +80,30 @@ export default function AdminPanel({ token, onClose }) {
     }
   };
 
+  const loadUsers = async () => {
+    try {
+      const response = await fetch(`${API_URL}/admin/tables/users?page=1&limit=1000`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setUsers(data.data || []);
+    } catch (err) {
+      console.error('Error al cargar usuarios:', err);
+    }
+  };
+
+  const loadLeagues = async () => {
+    try {
+      const response = await fetch(`${API_URL}/admin/tables/leagues?page=1&limit=1000`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setLeagues(data.data || []);
+    } catch (err) {
+      console.error('Error al cargar ligas:', err);
+    }
+  };
+
   const loadTableData = async (tableName, page = 1) => {
     setLoading(true);
     try {
@@ -79,8 +114,15 @@ export default function AdminPanel({ token, onClose }) {
       const schemaData = await schemaResponse.json();
       setTableSchema(schemaData.schema);
 
+      // Construir URL con filtros para picks
+      let url = `${API_URL}/admin/tables/${tableName}?page=${page}`;
+      if (tableName === 'picks') {
+        if (filterUserId) url += `&userId=${filterUserId}`;
+        if (filterWeek) url += `&week=${filterWeek}`;
+      }
+
       // Cargar datos
-      const response = await fetch(`${API_URL}/admin/tables/${tableName}?page=${page}`, {
+      const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -89,6 +131,12 @@ export default function AdminPanel({ token, onClose }) {
       setCurrentPage(page);
       setTotalPages(data.totalPages);
       setSelectedTable(tableName);
+      
+      // Cargar usuarios y ligas si es tabla de picks
+      if (tableName === 'picks') {
+        await loadUsers();
+        await loadLeagues();
+      }
     } catch (err) {
       setError('Error al cargar datos de la tabla');
     } finally {
@@ -199,6 +247,88 @@ export default function AdminPanel({ token, onClose }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDuplicatePicks = async () => {
+    if (!duplicateSourceUser || !duplicateTargetUser || !duplicateWeek || !duplicateLeagueId) {
+      setError('Completa todos los campos para duplicar picks');
+      return;
+    }
+
+    if (duplicateSourceUser === duplicateTargetUser) {
+      setError('El usuario origen y destino deben ser diferentes');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Obtener picks del usuario origen
+      const response = await fetch(
+        `${API_URL}/admin/tables/picks?userId=${duplicateSourceUser}&week=${duplicateWeek}&limit=1000`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      const data = await response.json();
+      const sourcePicks = data.data.filter(p => p.leagueId === parseInt(duplicateLeagueId));
+
+      if (sourcePicks.length === 0) {
+        setError(`No se encontraron picks del usuario origen en la semana ${duplicateWeek} para esta liga`);
+        setLoading(false);
+        return;
+      }
+
+      // Crear picks para usuario destino
+      let created = 0;
+      for (const pick of sourcePicks) {
+        const newPick = {
+          userId: parseInt(duplicateTargetUser),
+          leagueId: pick.leagueId,
+          gameId: pick.gameId,
+          week: pick.week,
+          teamPicked: pick.teamPicked,
+          isCorrect: null,
+          points: 0
+        };
+
+        const createResponse = await fetch(`${API_URL}/admin/tables/picks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(newPick)
+        });
+
+        if (createResponse.ok) created++;
+      }
+
+      setSuccess(`${created} picks duplicados exitosamente`);
+      setShowDuplicateModal(false);
+      setDuplicateSourceUser('');
+      setDuplicateTargetUser('');
+      setDuplicateWeek('');
+      setDuplicateLeagueId('');
+      
+      // Recargar tabla si estamos en picks
+      if (selectedTable === 'picks') {
+        loadTableData('picks', currentPage);
+      }
+    } catch (err) {
+      setError('Error al duplicar picks: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
+    loadTableData(selectedTable, 1);
+  };
+
+  const clearFilters = () => {
+    setFilterUserId('');
+    setFilterWeek('');
+    loadTableData(selectedTable, 1);
   };
 
   if (!isAdmin) {
@@ -313,11 +443,66 @@ export default function AdminPanel({ token, onClose }) {
               <button onClick={() => setSelectedTable(null)} style={styles.btnSecondary}>
                 ← Volver
               </button>
+              {selectedTable === 'picks' && (
+                <button onClick={() => setShowDuplicateModal(true)} style={{...styles.btn, background: '#10b981'}}>
+                  📋 Duplicar Picks
+                </button>
+              )}
               <button onClick={openCreateModal} style={styles.btn}>
                 + Crear
               </button>
             </div>
           </div>
+
+          {/* Filtros para tabla de picks */}
+          {selectedTable === 'picks' && (
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: '15px',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h3 style={{ color: '#00d9ff', marginBottom: '15px', fontSize: '16px' }}>🔍 Filtros</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                <div>
+                  <label style={styles.label}>Usuario</label>
+                  <select
+                    value={filterUserId}
+                    onChange={(e) => setFilterUserId(e.target.value)}
+                    style={styles.input}
+                  >
+                    <option value="">Todos los usuarios</option>
+                    {users.map(user => (
+                      <option key={user.id} value={user.id}>
+                        {user.username} ({user.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={styles.label}>Semana</label>
+                  <input
+                    type="number"
+                    value={filterWeek}
+                    onChange={(e) => setFilterWeek(e.target.value)}
+                    placeholder="Ej: 1"
+                    min="1"
+                    max="18"
+                    style={styles.input}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                  <button onClick={applyFilters} style={{...styles.btn, margin: 0}}>
+                    Aplicar
+                  </button>
+                  <button onClick={clearFilters} style={{...styles.btnSecondary, margin: 0}}>
+                    Limpiar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {tableData.length > 0 && (
             <div style={styles.tableWrapper}>
@@ -386,13 +571,43 @@ export default function AdminPanel({ token, onClose }) {
                     <label style={styles.label}>
                       {field.field} {!field.allowNull && '*'}
                     </label>
-                    <input
-                      type="text"
-                      value={formData[field.field] || ''}
-                      onChange={(e) => setFormData({...formData, [field.field]: e.target.value})}
-                      required={!field.allowNull}
-                      style={styles.input}
-                    />
+                    {selectedTable === 'picks' && field.field === 'userId' ? (
+                      <select
+                        value={formData[field.field] || ''}
+                        onChange={(e) => setFormData({...formData, [field.field]: e.target.value})}
+                        required={!field.allowNull}
+                        style={styles.input}
+                      >
+                        <option value="">Seleccionar usuario</option>
+                        {users.map(user => (
+                          <option key={user.id} value={user.id}>
+                            {user.username} ({user.email})
+                          </option>
+                        ))}
+                      </select>
+                    ) : selectedTable === 'picks' && field.field === 'leagueId' ? (
+                      <select
+                        value={formData[field.field] || ''}
+                        onChange={(e) => setFormData({...formData, [field.field]: e.target.value})}
+                        required={!field.allowNull}
+                        style={styles.input}
+                      >
+                        <option value="">Seleccionar liga</option>
+                        {leagues.map(league => (
+                          <option key={league.id} value={league.id}>
+                            {league.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={formData[field.field] || ''}
+                        onChange={(e) => setFormData({...formData, [field.field]: e.target.value})}
+                        required={!field.allowNull}
+                        style={styles.input}
+                      />
+                    )}
                   </div>
                 ))}
               <div style={styles.modalActions}>
@@ -404,6 +619,88 @@ export default function AdminPanel({ token, onClose }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Duplicar Picks */}
+      {showDuplicateModal && (
+        <div style={styles.modal} onClick={() => setShowDuplicateModal(false)}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h2 style={styles.modalTitle}>📋 Duplicar Picks de Usuario</h2>
+            <p style={{ color: '#a0aec0', marginBottom: '20px', fontSize: '14px' }}>
+              Copia todos los picks de un usuario a otro usuario en una semana específica
+            </p>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Usuario Origen *</label>
+              <select
+                value={duplicateSourceUser}
+                onChange={(e) => setDuplicateSourceUser(e.target.value)}
+                style={styles.input}
+              >
+                <option value="">Seleccionar usuario origen</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.username} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Usuario Destino *</label>
+              <select
+                value={duplicateTargetUser}
+                onChange={(e) => setDuplicateTargetUser(e.target.value)}
+                style={styles.input}
+              >
+                <option value="">Seleccionar usuario destino</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.username} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Liga *</label>
+              <select
+                value={duplicateLeagueId}
+                onChange={(e) => setDuplicateLeagueId(e.target.value)}
+                style={styles.input}
+              >
+                <option value="">Seleccionar liga</option>
+                {leagues.map(league => (
+                  <option key={league.id} value={league.id}>
+                    {league.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Semana *</label>
+              <input
+                type="number"
+                value={duplicateWeek}
+                onChange={(e) => setDuplicateWeek(e.target.value)}
+                placeholder="Ej: 1"
+                min="1"
+                max="18"
+                style={styles.input}
+              />
+            </div>
+            <div style={styles.modalActions}>
+              <button 
+                type="button" 
+                onClick={handleDuplicatePicks} 
+                style={{...styles.btn, background: '#10b981'}} 
+                disabled={loading}
+              >
+                {loading ? 'Duplicando...' : 'Duplicar Picks'}
+              </button>
+              <button type="button" onClick={() => setShowDuplicateModal(false)} style={styles.btnSecondary}>
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
